@@ -29,6 +29,9 @@
     
     [MainViewController setNavTitle:@"个人中心"];
     
+    [self initBackBarItem];
+    
+    self.delegate = self;
 //    dispatch_async(dispatch_get_global_queue(0, 0), ^{
 //            [self checkSessidIsValid];
 //        dispatch_async(dispatch_get_main_queue(), ^{
@@ -46,6 +49,14 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
+}
+
+#pragma mark -
+#pragma mark - Custom Action
+- (void) initBackBarItem
+{
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    nav.dataSource = self;
 }
 
 - (void) checkSessidIsValid
@@ -84,9 +95,9 @@
             student.email       = [stuDic objectForKey:@"email"];
             student.gender      = [[stuDic objectForKey:@"gender"] copy];
             student.grade       = [[stuDic objectForKey:@"grade"]  copy];
-            student.icon        = [[stuDic objectForKey:@"icon"] copy];
-            student.latltude    = [stuDic objectForKey:@"latitude"];
-            student.longltude   = [stuDic objectForKey:@"longitude"];
+            student.icon        = [[stuDic objectForKey:@"icon"]   copy];
+            student.latitude    = [stuDic objectForKey:@"latitude"];
+            student.longitude   = [stuDic objectForKey:@"longitude"];
             student.lltime      = [stuDic objectForKey:@"lltime"];
             student.nickName    = [stuDic objectForKey:@"nickname"];
             student.phoneNumber = [stuDic objectForKey:@"phone"];
@@ -117,6 +128,19 @@
                          message:@"获取数据失败!"
                         delegate:[MainViewController getNavigationViewController]
                otherButtonTitles:@"确定",nil];
+    }
+}
+
+#pragma mark -
+#pragma mark - LeveyTabBarControllerDelegate
+- (void)tabBarController:(LeveyTabBarController *)tabBarController didSelectViewController:(UIViewController *)viewController
+{
+    if (tabBarController.selectedIndex == 2)
+    {
+        MainViewController *mainVctr = [[MainViewController alloc]init];
+        
+        CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+        [nav pushViewController:mainVctr animated:YES];
     }
 }
 
@@ -156,14 +180,17 @@
 
 - (void) doBackBtnClicked:(id)sender
 {
-    //返回聊天界面
     CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-    [nav popToRootViewControllerAnimated:NO];
+    [nav popToRootViewControllerAnimated:YES];
     
-    ChatViewController *cVctr = [[ChatViewController alloc]init];
-    cVctr.tObj  = order.teacher;
-    cVctr.order = order;
-    [nav pushViewController:cVctr animated:YES];
-    [cVctr release];
+    NSArray *viewCtrs = [nav viewControllers];
+    for (UIViewController *vctr in viewCtrs)
+    {
+        if ([vctr isKindOfClass:[PersonCenterViewController class]])
+        {
+            PersonCenterViewController *pCvtr = (PersonCenterViewController *) vctr;
+            [pCvtr setSelectedIndex:0];
+        }
+    }
 }
 @end

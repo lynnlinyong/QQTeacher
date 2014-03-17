@@ -154,9 +154,6 @@ static LeveyTabBarController *leveyTabBarController;
 	}
 }
 
-
-
-
 - (void)hidesTabBar:(BOOL)yesOrNO animated:(BOOL)animated
 {
 	if (yesOrNO == YES)
@@ -309,6 +306,7 @@ static LeveyTabBarController *leveyTabBarController;
 {
 	return _selectedIndex;
 }
+
 - (UIViewController *)selectedViewController
 {
     return [_viewControllers objectAtIndex:_selectedIndex];
@@ -361,24 +359,33 @@ static LeveyTabBarController *leveyTabBarController;
     CLog(@"Display View.");
     _selectedIndex = index;
     
-	UIViewController *selectedVC = [self.viewControllers objectAtIndex:index];
-	
-	selectedVC.view.frame = _transitionView.frame;
-	if ([selectedVC.view isDescendantOfView:_transitionView]) 
-	{
-		[_transitionView bringSubviewToFront:selectedVC.view];
-	}
-	else
-	{
-		[_transitionView addSubview:selectedVC.view];
-	}
-    
-    // Notify the delegate, the viewcontroller has been changed.
-    if ([_delegate respondsToSelector:@selector(tabBarController:didSelectViewController::)]) 
+    if (_selectedIndex != 2)
     {
-        [_delegate tabBarController:self didSelectViewController:selectedVC];
+        UIViewController *selectedVC = [self.viewControllers objectAtIndex:index];
+        selectedVC.view.frame = _transitionView.frame;
+        if ([selectedVC.view isDescendantOfView:_transitionView]) 
+        {
+            [_transitionView bringSubviewToFront:selectedVC.view];
+        }
+        else
+        {
+            [_transitionView addSubview:selectedVC.view];
+        }
+        
+        // Notify the delegate, the viewcontroller has been changed.
+        if ([_delegate respondsToSelector:@selector(tabBarController:didSelectViewController:)])
+        {
+            [_delegate tabBarController:self didSelectViewController:selectedVC];
+        }
     }
-
+    else
+    {
+        // Notify the delegate, the viewcontroller has been changed.
+        if ([_delegate respondsToSelector:@selector(tabBarController:didSelectViewController:)])
+        {
+            [_delegate tabBarController:self didSelectViewController:nil];
+        }
+    }
 }
 
 #pragma mark -

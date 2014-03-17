@@ -16,15 +16,17 @@
 @synthesize everyTimesMoney;
 @synthesize totalMoney;
 @synthesize comment;
+@synthesize commentAddTimes;
 @synthesize orderStatus;
 @synthesize orderProvice;
 @synthesize orderCity;
 @synthesize orderDist;
 @synthesize payMoney;
 @synthesize backMoney;
-@synthesize teacher;
+@synthesize student;
 @synthesize addressDataDic;
 @synthesize orderCommentStatus;
+@synthesize orderStudyStartDate;
 
 - (id) init
 {
@@ -35,20 +37,22 @@
         orderAddTimes   = [[NSString alloc]init];
         orderStudyPos   = [[NSString alloc]init];
         orderStudyTimes = [[NSString alloc]init];
+        orderStudyStartDate = [[NSString alloc]init];
         everyTimesMoney = [[NSString alloc]init];
-        totalMoney  = [[NSString alloc]init];
-        comment     = [[NSString alloc]init];
-        orderStatus = NO_CONFIRM;
-        orderProvice= [[NSString alloc]init];
-        orderCity   = [[NSString alloc]init];
-        orderDist   = [[NSString alloc]init];
+        totalMoney      = [[NSString alloc]init];
+        comment         = [[NSString alloc]init];
+        commentAddTimes = [[NSString alloc]init];
+        orderStatus     = NO_CONFIRM;
+        orderProvice    = [[NSString alloc]init];
+        orderCity       = [[NSString alloc]init];
+        orderDist       = [[NSString alloc]init];
         
         payMoney  = [[NSString alloc]init];
         backMoney = [[NSString alloc]init];
         
         addressDataDic = [[NSMutableDictionary alloc]init];
         
-        teacher   = [[Teacher alloc]init];
+        student   = [[Student alloc]init];
         
         orderCommentStatus = NO_COMMENT;
     }
@@ -71,6 +75,8 @@
     [totalMoney      release];
     [comment         release];
     [addressDataDic release];
+    [commentAddTimes release];
+    [orderStudyStartDate release];
     [super dealloc];
 }
 
@@ -93,10 +99,14 @@
         
         order.payMoney        = [payMoney copy];
         order.backMoney       = [backMoney copy];
-        order.teacher         = [teacher copy];
+        order.student         = [student copy];
         
         order.orderCommentStatus = orderCommentStatus;
         order.addressDataDic  = [addressDataDic mutableCopy];
+        
+        order.commentAddTimes = [commentAddTimes copy];
+        
+        order.orderStudyStartDate = [orderStudyStartDate copy];
     }
     
     return order;
@@ -125,9 +135,12 @@
         
         order.addressDataDic  = [addressDataDic mutableCopy];
         
-        order.teacher      = [teacher copy];
+        order.student      = [student copy];
         
         order.orderCommentStatus = orderCommentStatus;
+        order.commentAddTimes = commentAddTimes;
+        
+        order.orderStudyStartDate = orderStudyStartDate;
     }
     
     return order;
@@ -147,6 +160,12 @@
         order.orderAddTimes = @"";
     else
         order.orderAddTimes = orderAddTimes;
+    
+    NSString *orderStudyDate = [[dic objectForKey:@"order_sd"] copy];
+    if (orderStudyDate)
+        order.orderStudyStartDate = orderStudyDate;
+    else
+        order.orderStudyStartDate = @"";
     
     NSString *everyTimeSalary = [[dic objectForKey:@"order_ismfjfu"] copy];
     if (!everyTimeSalary)
@@ -198,11 +217,17 @@
     else
         order.payMoney = payMoney;
     
-    NSDictionary *teacherDic = [dic objectForKey:@"teacher"];
-    if (teacherDic)
-        order.teacher = [Teacher setTeacherProperty:teacherDic];
+    NSDictionary *studentDic = [dic objectForKey:@"student"];
+    if (studentDic)
+        order.student = [Student setPropertyStudent:studentDic];
     else
-        order.teacher = nil;
+        order.student = nil;
+    
+    NSString *commentAddTimes = [dic objectForKey:@"order_pj_addtime"];
+    if (commentAddTimes)
+        order.commentAddTimes = commentAddTimes;
+    else
+        order.commentAddTimes = @"0";
     
     NSString *commentStatus = [dic objectForKey:@"order_pj_stars"];
     if (commentStatus)

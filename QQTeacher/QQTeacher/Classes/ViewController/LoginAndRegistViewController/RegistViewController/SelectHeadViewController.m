@@ -299,7 +299,6 @@
             [MBProgressHUD hideHUDForView:nav.view animated:YES];
             
             //隐藏选择头像popUpView
-            CLog(@"curHeadURL:%@", CurHeadUrl);
             NSDictionary *userDic = [NSDictionary dictionaryWithObjectsAndKeys:CurHeadUrl,@"HeadUrl", nil];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"hiddenHeadViewNotice"
                                                                 object:self

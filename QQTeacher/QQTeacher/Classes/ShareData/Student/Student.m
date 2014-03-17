@@ -14,13 +14,16 @@
 @synthesize nickName;
 @synthesize phoneNumber;
 @synthesize grade;
+@synthesize gradeId;
 @synthesize gender;
 @synthesize lltime;
-@synthesize longltude;
-@synthesize latltude;
+@synthesize longitude;
+@synthesize latitude;
 @synthesize status;
 @synthesize phoneStars;
 @synthesize locStars;
+@synthesize deviceId;
+@synthesize studentId;
 
 - (id) init
 {
@@ -32,13 +35,17 @@
         nickName    = [[NSString alloc]init];
         phoneNumber = [[NSString alloc]init];
         grade       = [[NSString alloc]init];
+        gradeId     = [[NSString alloc]init];
         gender      = [[NSString alloc]init];
         lltime      = [[NSString alloc]init];
-        longltude   = [[NSString alloc]init];
-        latltude    = [[NSString alloc]init];
+        longitude   = [[NSString alloc]init];
+        latitude    = [[NSString alloc]init];
         status      = [[NSString alloc]init];
         phoneStars  = [[NSString alloc]init];
         locStars    = [[NSString alloc]init];
+        
+        deviceId    = [[NSString alloc]init];
+        studentId   = [[NSString alloc]init];
     }
     
     return self;
@@ -51,13 +58,17 @@
     [nickName       release];
     [phoneNumber    release];
     [grade          release];
+    [gradeId        release];
     [gender         release];
     [lltime         release];
-    [longltude      release];
-    [latltude       release];
+    [longitude      release];
+    [latitude       release];
     [status         release];
     [phoneStars     release];
     [locStars       release];
+    
+    [deviceId release];
+    [studentId release];
     [super dealloc];
 }
 
@@ -72,12 +83,15 @@
         sObj.grade       = [grade copy];
         sObj.gender      = [gender copy];
         sObj.lltime      = [lltime copy];
-        sObj.longltude   = [longltude copy];
-        sObj.latltude    = [latltude copy];
+        sObj.longitude   = [longitude copy];
+        sObj.latitude    = [latitude copy];
         sObj.status      = [status copy];
         sObj.phoneStars  = [phoneStars copy];
         sObj.locStars    = [locStars copy];
         sObj.icon        = [icon copy];
+        sObj.gradeId     = [gradeId copy];
+        sObj.deviceId    = [deviceId copy];
+        sObj.studentId   = [studentId copy];
     }
     
     return sObj;
@@ -94,12 +108,16 @@
         sObj.grade       = [grade mutableCopy];
         sObj.gender      = [gender mutableCopy];
         sObj.lltime      = [lltime mutableCopy];
-        sObj.longltude   = [longltude mutableCopy];
-        sObj.latltude    = [latltude mutableCopy];
+        sObj.longitude   = [longitude mutableCopy];
+        sObj.latitude    = [latitude mutableCopy];
         sObj.status      = [status mutableCopy];
         sObj.phoneStars  = [phoneStars mutableCopy];
         sObj.locStars    = [locStars mutableCopy];
         sObj.icon        = [icon copy];
+        
+        sObj.gradeId     = [gradeId copy];
+        sObj.deviceId    = [deviceId copy];
+        sObj.studentId   = [studentId copy];
     }
     
     return sObj;
@@ -119,10 +137,10 @@
                   forKey:@"gender"];
     [aCoder encodeObject:self.lltime
                   forKey:@"lltime"];
-    [aCoder encodeObject:self.longltude
-                  forKey:@"longltude"];
-    [aCoder encodeObject:self.latltude
-                  forKey:@"latltude"];
+    [aCoder encodeObject:self.longitude
+                  forKey:@"longitude"];
+    [aCoder encodeObject:self.latitude
+                  forKey:@"latitude"];
     [aCoder encodeObject:self.status
                   forKey:@"status"];
     [aCoder encodeObject:self.phoneStars
@@ -131,6 +149,12 @@
                   forKey:@"locStars"];
     [aCoder encodeObject:self.icon
                   forKey:@"icon"];
+    [aCoder encodeObject:self.gradeId
+                  forKey:@"gradeId"];
+    [aCoder encodeObject:self.deviceId
+                  forKey:@"deviceId"];
+    [aCoder encodeObject:self.studentId
+                  forKey:@"studentId"];
 }
 
 - (id)initWithCoder:(NSCoder *)aDecoder
@@ -142,17 +166,110 @@
         nickName    = [[aDecoder decodeObjectForKey:@"nickName"] copy];
         phoneNumber = [[aDecoder decodeObjectForKey:@"phoneNumber"] copy];
         grade       = [[aDecoder decodeObjectForKey:@"grade"] copy];
+        gradeId     = [[aDecoder decodeObjectForKey:@"gradeId"] copy];
         gender      = [[aDecoder decodeObjectForKey:@"gender"] copy];
         lltime      = [[aDecoder decodeObjectForKey:@"lltime"] copy];
-        longltude   = [[aDecoder decodeObjectForKey:@"longltude"] copy];
-        latltude    = [[aDecoder decodeObjectForKey:@"latltude"] copy];
+        longitude   = [[aDecoder decodeObjectForKey:@"longitude"] copy];
+        latitude    = [[aDecoder decodeObjectForKey:@"latitude"] copy];
         status      = [[aDecoder decodeObjectForKey:@"status"] copy];
         phoneStars  = [[aDecoder decodeObjectForKey:@"phoneStars"] copy];
         locStars    = [[aDecoder decodeObjectForKey:@"locStars"] copy];
         icon        = [[aDecoder decodeObjectForKey:@"icon"] copy];
+        
+        deviceId    = [[aDecoder decodeObjectForKey:@"deviceId"] copy];
+        studentId   = [[aDecoder decodeObjectForKey:@"studentId"] copy];
     }
     
     return self;
+}
+
+//设置学生属性
++ (Student *) setPropertyStudent:(NSDictionary *) studentDic
+{
+    Student *student = [[[Student alloc]init]autorelease];
+    
+    NSString *gender = [[studentDic objectForKey:@"gender"] copy];
+    if ([gender isEqual:[NSNull null]])
+        student.gender = @"";
+    else
+        student.gender = gender;
+    
+    NSString *phone = [[studentDic objectForKey:@"phone"] copy];
+    if ([phone isEqual:[NSNull null]])
+        student.phoneNumber = @"";
+    else
+        student.phoneNumber = phone;
+    
+    if (!phone)
+    {
+        phone = [[studentDic objectForKey:@"student_phone"] copy];
+        if ([phone isEqual:[NSNull null]])
+            student.phoneNumber = phone;
+        else
+            student.phoneNumber = phone;
+    }
+    
+    NSString *name = [[studentDic objectForKey:@"nickname"] copy];
+    if ([name isEqual:[NSNull null]])
+        student.nickName = @"";
+    else
+        student.nickName = name;
+    
+    if (!name)
+    {
+        name = [[studentDic objectForKey:@"name"] copy];
+        if ([name isEqual:[NSNull null]])
+            student.nickName = @"";
+        else
+            student.nickName = name;
+    }
+    
+    if (!name)
+    {
+        name = [[studentDic objectForKey:@"nick"] copy];
+        if ([name isEqual:[NSNull null]])
+            student.nickName = @"";
+        else
+            student.nickName = name;
+    }
+    
+    NSString *gradeId = [[studentDic objectForKey:@"grade"] copy];
+    if ([gradeId isEqual:[NSNull null]])
+        student.gradeId = @"0";
+    else
+        student.gradeId = gradeId;
+    
+    NSString *gradeText = [[studentDic objectForKey:@"gradeText"] copy];
+    if ([gradeText isEqual:[NSNull null]])
+        student.grade = @"";
+    else
+        student.grade = gradeText;
+    
+    NSString *deviceId = [[studentDic objectForKey:@"deviceId"] copy];
+    if ([deviceId isEqual:[NSNull null]])
+        student.deviceId = @"";
+    else
+        student.deviceId = deviceId;
+    
+    NSString *studentId = [[studentDic objectForKey:@"studentId"] copy];
+    if ([studentId isEqual:[NSNull null]])
+        student.studentId = @"";
+    else
+        student.studentId = studentId;
+    
+    NSString *latitude = [[studentDic objectForKey:@"latitude"] copy];
+    if ([latitude isEqual:[NSNull null]])
+        student.latitude = @"";
+    else
+        student.latitude = latitude;
+    
+    NSString *longitude = [[studentDic objectForKey:@"longitude"] copy];
+    if ([longitude isEqual:[NSNull null]])
+        student.longitude = @"";
+    else
+        student.longitude = longitude;
+    
+    return student;
 }
 
 //根据年级列表,名字查询年级ID
@@ -222,7 +339,7 @@
                                                          forKeys:paramsArr];
         
         NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-        NSString *url = [NSString stringWithFormat:@"%@%@", webAdd, STUDENT];
+        NSString *url = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
         ServerRequest *request = [ServerRequest sharedServerRequest];
         NSData   *resVal = [request requestSyncWith:kServerPostRequest
                                            paramDic:pDic
@@ -335,7 +452,7 @@
         NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                          forKeys:paramsArr];
         NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, STUDENT];
+        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
         ServerRequest *request = [ServerRequest sharedServerRequest];
         NSData *resVal = [request requestSyncWith:kServerPostRequest
                                          paramDic:pDic
@@ -361,7 +478,6 @@
         }
     }
 }
-
 
 //根据性别ID,查询性别
 + (NSString *) searchGenderName:(NSString *) genderId
@@ -408,7 +524,7 @@
         NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                          forKeys:paramsArr];
         NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, STUDENT];
+        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
         ServerRequest *request = [ServerRequest sharedServerRequest];
         NSData   *resVal = [request requestSyncWith:kServerPostRequest
                                            paramDic:pDic

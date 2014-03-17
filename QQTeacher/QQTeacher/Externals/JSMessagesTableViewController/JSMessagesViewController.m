@@ -337,7 +337,7 @@
         switch (type) {
             case JSBubbleMessageTypeIncoming:
             {
-                if ([cell getAvatarStyle] == JSAvatarTxtIncomingImgOutgoing)
+                if ([cell getAvatarStyle] == JSAvatarStyleText)
                 {
                     [cell setAvatarText:[self.dataSource avatarNameForIncomingMessage]];
                 }
@@ -345,15 +345,15 @@
             }
             case JSBubbleMessageTypeOutgoing:
             {
-                if ([cell getAvatarStyle] == JSAvatarTxtIncomingImgOutgoing)
+                if ([cell getAvatarStyle] == JSAvatarStyleText)
                 {
-                    [cell setWebAvatarImage:[self.dataSource avatarImagePathForOutgoingMessage]];
-                    [cell setIdImageViewHidden:[self.dataSource isHaveOrg]];
+                    [cell setAvatarText:[self.dataSource avatarNameForOutgoingMessage]];
                 }
                 break;
             }
         }
     }
+    
     //判断消息类型
     if ([self.dataSource msgTypeForRowAtIndexPath:indexPath] == PUSH_TYPE_TEXT)
     {

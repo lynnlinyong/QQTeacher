@@ -13,11 +13,11 @@
 @end
 
 @implementation ChatViewController
-@synthesize tObj;
+@synthesize student;
 @synthesize messages;
 @synthesize order;
-@synthesize listenBtn;
-@synthesize employBtn;
+//@synthesize listenBtn;
+//@synthesize employBtn;
 @synthesize isFromSearchCondition;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -53,7 +53,7 @@
 {
     [super viewDidAppear:animated];
     
-    [MainViewController setNavTitle:@"和老师沟通"];
+    [MainViewController setNavTitle:@"和学生沟通"];
     
     [self initBackBarItem];
     
@@ -75,19 +75,25 @@
                                                  name:@"dismissComplainNotice"
                                                object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(listenChangedNotice:)
-                                                 name:@"listenChanged"
-                                               object:nil];
+//    [[NSNotificationCenter defaultCenter] addObserver:self
+//                                             selector:@selector(listenChangedNotice:)
+//                                                 name:@"listenChanged"
+//                                               object:nil];
 }
 
 - (void) viewDidDisappear:(BOOL)animated
 {
-    [listenBtn removeFromSuperview];
-    listenBtn = nil;
+//    [listenBtn removeFromSuperview];
+//    listenBtn = nil;
+//    
+//    [employBtn removeFromSuperview];
+//    employBtn = nil;
     
-    [employBtn removeFromSuperview];
-    employBtn = nil;
+    [listenSwitch removeFromSuperview];
+    listenSwitch = nil;
+    
+    [listenLab removeFromSuperview];
+    listenLab = nil;
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
@@ -99,9 +105,11 @@
 
 - (void) dealloc
 {
-    [infoView release];
-    [employInfoView release];
-    [recordAudio release];
+    [listenLab    release];
+    [infoView     release];
+    [listenView   release];
+    [recordAudio  release];
+    [listenSwitch release];
     [super dealloc];
 }
 
@@ -115,94 +123,93 @@
 #pragma mark - Custom Action
 - (void) initInfoPopView
 {
-    if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
-    {
-        if (iPhone5)
-        {
-            //ios7 iphone5
-            CLog(@"It's is iphone5 IOS7");
-            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 44+8,
-                                                                                      300,
-                                                                                      60)
-                                                                isBackView:NO]];
-        }
-        else
-        {
-            CLog(@"It's is iphone4 IOS7");
-            //ios 7 iphone 4
-            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 44+20,
-                                                                                      300,
-                                                                                      60)
-                                                                isBackView:NO]];
-        }
-    }
-    else
-    {
-        if (!iPhone5)
-        {
-            // ios 6 iphone4
-            CLog(@"It's is iphone4 IOS6");
-            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 20,
-                                                                                      300,
-                                                                                      60)
-                                                                isBackView:NO]];
-        }
-        else
-        {
-            //ios 6 iphone5
-            CLog(@"It's is iphone5 IOS6");
-            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 20,
-                                                                                      300,
-                                                                                      60)
-                                                                isBackView:NO]];
-        }
-    }
-    infoView.hidden = NO;
-    infoView.borderType   = BorderTypeSolid;
-    infoView.dashPattern  = 8;
-    infoView.spacePattern = 8;
-    infoView.borderWidth  = 1;
-    infoView.cornerRadius = 5;
-    infoView.alpha = 0.8;
-    infoView.borderColor  = [UIColor orangeColor];
-    infoView.backgroundColor = [UIColor orangeColor];
-    [self.view addSubview:infoView];
-    
-    UITapGestureRecognizer *tapReg = [[UITapGestureRecognizer alloc]initWithTarget:self
-                                                                            action:@selector(doTapGestureReg:)];
-    [infoView addGestureRecognizer:tapReg];
-    
-    UILabel *infoLab = [[UILabel alloc]init];
-    infoLab.textColor = [UIColor whiteColor];
-    infoLab.text = @"请注意:正式上课一般为2小时/次,上课前试听一般为1小时/次,同一学生同一教师试听一般不超过1次";
-    infoLab.backgroundColor = [UIColor clearColor];
-    infoLab.frame = CGRectMake(10,0,
-                               280,
-                               60);
-    infoLab.numberOfLines = 0;
-    infoLab.font = [UIFont systemFontOfSize:14.f];
-    infoLab.lineBreakMode = NSLineBreakByWordWrapping;
-    [infoView addSubview:infoLab];
-    [infoLab release];
-
+//    if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
+//    {
+//        if (iPhone5)
+//        {
+//            //ios7 iphone5
+//            CLog(@"It's is iphone5 IOS7");
+//            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 44+8,
+//                                                                                      300,
+//                                                                                      60)
+//                                                                isBackView:NO]];
+//        }
+//        else
+//        {
+//            CLog(@"It's is iphone4 IOS7");
+//            //ios 7 iphone 4
+//            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 44+20,
+//                                                                                      300,
+//                                                                                      60)
+//                                                                isBackView:NO]];
+//        }
+//    }
+//    else
+//    {
+//        if (!iPhone5)
+//        {
+//            // ios 6 iphone4
+//            CLog(@"It's is iphone4 IOS6");
+//            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 20,
+//                                                                                      300,
+//                                                                                      60)
+//                                                                isBackView:NO]];
+//        }
+//        else
+//        {
+//            //ios 6 iphone5
+//            CLog(@"It's is iphone5 IOS6");
+//            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 20,
+//                                                                                      300,
+//                                                                                      60)
+//                                                                isBackView:NO]];
+//        }
+//    }
+//    infoView.hidden = NO;
+//    infoView.borderType   = BorderTypeSolid;
+//    infoView.dashPattern  = 8;
+//    infoView.spacePattern = 8;
+//    infoView.borderWidth  = 1;
+//    infoView.cornerRadius = 5;
+//    infoView.alpha = 0.8;
+//    infoView.borderColor  = [UIColor orangeColor];
+//    infoView.backgroundColor = [UIColor orangeColor];
+//    [self.view addSubview:infoView];
+//    
+//    UITapGestureRecognizer *tapReg = [[UITapGestureRecognizer alloc]initWithTarget:self
+//                                                                            action:@selector(doTapGestureReg:)];
+//    [infoView addGestureRecognizer:tapReg];
+//    
+//    UILabel *infoLab = [[UILabel alloc]init];
+//    infoLab.textColor = [UIColor whiteColor];
+//    infoLab.text = @"请注意:正式上课一般为2小时/次,上课前试听一般为1小时/次,同一学生同一教师试听一般不超过1次";
+//    infoLab.backgroundColor = [UIColor clearColor];
+//    infoLab.frame = CGRectMake(10,0,
+//                               280,
+//                               60);
+//    infoLab.numberOfLines = 0;
+//    infoLab.font = [UIFont systemFontOfSize:14.f];
+//    infoLab.lineBreakMode = NSLineBreakByWordWrapping;
+//    [infoView addSubview:infoLab];
+//    [infoLab release];
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self
                                                                          action:@selector(doEmployClicked:)];
-    employInfoView = [[UIView alloc]init];
-    employInfoView.hidden = YES;
+    listenView = [[UIView alloc]init];
+    listenView.hidden = NO;
     if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
     {
         if (iPhone5)
         {
             //ios7 iphone5
             CLog(@"It's is iphone5 IOS7");
-            employInfoView.frame  = [UIView fitCGRect:CGRectMake(10, 44, 300, 40)
+            listenView.frame  = [UIView fitCGRect:CGRectMake(10, 44, 300, 40)
                                            isBackView:NO];
         }
         else
         {
             CLog(@"It's is iphone4 IOS7");
             //ios 7 iphone 4
-            employInfoView.frame  = [UIView fitCGRect:CGRectMake(10, 54, 300, 40)
+            listenView.frame  = [UIView fitCGRect:CGRectMake(10, 54, 300, 40)
                                            isBackView:NO];
         }
     }
@@ -212,35 +219,35 @@
         {
             // ios 6 iphone4
             CLog(@"It's is iphone4 IOS6");
-            employInfoView.frame  = [UIView fitCGRect:CGRectMake(10, 0, 300, 40)
+            listenView.frame  = [UIView fitCGRect:CGRectMake(10, 0, 300, 40)
                                            isBackView:NO];
         }
         else
         {
             //ios 6 iphone5
             CLog(@"It's is iphone5 IOS6");
-            employInfoView.frame  = [UIView fitCGRect:CGRectMake(10, 0, 300, 40)
+            listenView.frame  = [UIView fitCGRect:CGRectMake(10, 0, 300, 40)
                                            isBackView:NO];
         }
     }
-    [employInfoView addGestureRecognizer:tap];
-    [self.view addSubview:employInfoView];
+    [listenView addGestureRecognizer:tap];
+    [self.view addSubview:listenView];
     [tap release];
     
     UIImageView *bgView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"cp_chatinfo_bg"]];
     bgView.frame = CGRectMake(0,0, 300, 40);
-    [employInfoView addSubview:bgView];
+    [listenView addSubview:bgView];
     [bgView release];
     
     UILabel *employLab  = [[UILabel alloc]init];
     employLab.textColor = [UIColor whiteColor];
-    employLab.text = @"选择免费试听一次(1小时)之后聘请更安心！";
+    employLab.text = @"打开免费试听按钮,更快和学生达成沟通！";
     employLab.backgroundColor = [UIColor clearColor];
     employLab.frame = CGRectMake(7,10,300,30);
     employLab.numberOfLines = 0;
     employLab.font = [UIFont systemFontOfSize:14.f];
     employLab.lineBreakMode = NSLineBreakByWordWrapping;
-    [employInfoView addSubview:employLab];
+    [listenView addSubview:employLab];
     [employLab release];
 }
 
@@ -251,7 +258,7 @@
 
 - (void) doEmployClicked:(UIGestureRecognizer *) reg
 {
-    employInfoView.hidden = YES;
+    listenView.hidden = YES;
 }
 
 - (void) initBackBarItem
@@ -270,11 +277,11 @@
     NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArray = [NSArray arrayWithObjects:@"action",@"audio",@"sessid", nil];
     NSArray *valuesArray = [NSArray arrayWithObjects:@"amrToMp3", audioURL, ssid, nil];
-    
     NSDictionary *pDic   = [NSDictionary dictionaryWithObjects:valuesArray
                                                      forKeys:paramsArray];
+    CLog(@"PDIC:%@", pDic);
     NSString *webAdd     = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url        = [NSString stringWithFormat:@"%@%@", webAdd, STUDENT];
+    NSString *url        = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
     ServerRequest *request = [ServerRequest sharedServerRequest];
     request.delegate = self;
     NSData *resVal   = [request requestSyncWith:kServerPostRequest
@@ -292,51 +299,137 @@
     self.dataSource = self;
     messages   = [[NSMutableArray alloc]init];
 
-    listenBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [listenBtn setTitle:@"试听"
-               forState:UIControlStateNormal];
-    listenBtn.titleLabel.font = [UIFont systemFontOfSize:14.f];
-    [listenBtn setTitleColor:[UIColor colorWithHexString:@"#ff6600"]
-                    forState:UIControlStateNormal];
-    [listenBtn setBackgroundImage:[UIImage imageNamed:@"cp_shiting_normal_bg"]
-                         forState:UIControlStateNormal];
-    [listenBtn setBackgroundImage:[UIImage imageNamed:@"cp_shiting_hlight_bg"]
-                         forState:UIControlStateNormal];
+//    listenBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+//    [listenBtn setTitle:@"试听"
+//               forState:UIControlStateNormal];
+//    listenBtn.titleLabel.font = [UIFont systemFontOfSize:14.f];
+//    [listenBtn setTitleColor:[UIColor colorWithHexString:@"#ff6600"]
+//                    forState:UIControlStateNormal];
+//    [listenBtn setBackgroundImage:[UIImage imageNamed:@"cp_shiting_normal_bg"]
+//                         forState:UIControlStateNormal];
+//    [listenBtn setBackgroundImage:[UIImage imageNamed:@"cp_shiting_hlight_bg"]
+//                         forState:UIControlStateNormal];
+//    
+//    listenBtn.tag   = 0;
+//    listenBtn.frame = CGRectMake(320-110, 12, 40, 25);
+//    [listenBtn addTarget:self
+//                  action:@selector(doButtonClicked:)
+//        forControlEvents:UIControlEventTouchUpInside];
+//    [self.navigationController.navigationBar addSubview:listenBtn];
+//    
+//    employBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+//    employBtn.hidden = NO;
+//    employBtn.titleLabel.font = [UIFont systemFontOfSize:14.f];
+//    [employBtn setTitle:@"聘请TA"
+//               forState:UIControlStateNormal];
+//    [employBtn setBackgroundImage:[UIImage imageNamed:@"sp_share_btn_normal"]
+//                         forState:UIControlStateNormal];
+//    [employBtn setBackgroundImage:[UIImage imageNamed:@"sp_share_btn_hlight"]
+//                         forState:UIControlStateHighlighted];
+//    employBtn.tag   = 1;
+//    employBtn.frame = CGRectMake(320-65, 12, 60, 25);
+//    [employBtn addTarget:self
+//                  action:@selector(doButtonClicked:)
+//        forControlEvents:UIControlEventTouchUpInside];
+    listenLab = [[UILabel alloc]init];
+    listenLab.text  = @"试听";
+    listenLab.font  = [UIFont systemFontOfSize:14.f];
+    listenLab.frame = CGRectMake(320-110, 9, 40, 25);
+    listenLab.backgroundColor = [UIColor clearColor];
+    [self.navigationController.navigationBar addSubview:listenLab];
     
-    listenBtn.tag   = 0;
-    listenBtn.frame = CGRectMake(320-110, 12, 40, 25);
-    [listenBtn addTarget:self
-                  action:@selector(doButtonClicked:)
-        forControlEvents:UIControlEventTouchUpInside];
-    [self.navigationController.navigationBar addSubview:listenBtn];
+    NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+    Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
     
-    employBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    employBtn.hidden = NO;
-    employBtn.titleLabel.font = [UIFont systemFontOfSize:14.f];
-    [employBtn setTitle:@"聘请TA"
-               forState:UIControlStateNormal];
-    [employBtn setBackgroundImage:[UIImage imageNamed:@"sp_share_btn_normal"]
-                         forState:UIControlStateNormal];
-    [employBtn setBackgroundImage:[UIImage imageNamed:@"sp_share_btn_hlight"]
-                         forState:UIControlStateHighlighted];
-    employBtn.tag   = 1;
-    employBtn.frame = CGRectMake(320-65, 12, 60, 25);
-    [employBtn addTarget:self
-                  action:@selector(doButtonClicked:)
-        forControlEvents:UIControlEventTouchUpInside];
+    listenSwitch = [[UISwitch alloc]init];
+    listenSwitch.on = teacher.listenStar;
+    listenSwitch.frame = CGRectMake(320-listenSwitch.frame.size.width,
+                                    self.navigationController.navigationBar.frame.size.height/2-listenSwitch.frame.size.height/2,
+                                    listenSwitch.frame.size.width, 25);
+    [listenSwitch addTarget:self
+                     action:@selector(doValueChanged:)
+           forControlEvents:UIControlEventValueChanged];
+    [self.navigationController.navigationBar addSubview:listenSwitch];
     
     [self initInfoPopView];
     
-    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-    [nav.navigationBar addSubview:employBtn];
+//    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+//    [nav.navigationBar addSubview:employBtn];
     
-    //是否支持试听、聘用
-    [self isShowListenBtn];
-    if (!order)
-        [self isShowEmployBtn];
-    //直接搜索时,调用显示接口
-    if (isFromSearchCondition)
-        [self isShowEmployBtn];
+//    //是否支持试听、聘用
+//    [self isShowListenBtn];
+//    if (!order)
+//        [self isShowEmployBtn];
+//    //直接搜索时,调用显示接口
+//    if (isFromSearchCondition)
+//        [self isShowEmployBtn];
+}
+
+- (void) doValueChanged:(id)sender
+{
+    NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+    Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
+    
+    teacher.listenStar = listenSwitch.on;
+    
+    //修改试听状态
+    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+    {
+        return;
+    }
+    
+    NSNumber *listenNum;
+    if (teacher.listenStar)
+        listenNum = [NSNumber numberWithInt:1];
+    else
+        listenNum = [NSNumber numberWithInt:0];
+    
+    //更新个人资料
+    NSArray *infosParamsArr = [NSArray arrayWithObjects:@"pre_listening",nil];
+    NSArray *infosValuesArr = [NSArray arrayWithObjects:listenNum,nil];
+    NSDictionary *infosDic  = [NSDictionary dictionaryWithObjects:infosValuesArr
+                                                          forKeys:infosParamsArr];
+    NSString *infosJson = [infosDic JSONFragment];
+    
+    NSString *ssid   = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"infos",@"sessid",nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"upinfos",infosJson, ssid, nil];
+    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+                                                     forKeys:paramsArr];
+    CLog(@"sdfsDic:%@", pDic);
+    
+    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
+    serverReq.delegate   = self;
+    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
+    NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
+    NSData *resVal = [serverReq requestSyncWith:kServerPostRequest
+                       paramDic:pDic
+                         urlStr:url];
+    if (resVal)
+    {
+        CLog(@"upload listen status susscess!");
+        
+        NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:teacher];
+        [[NSUserDefaults standardUserDefaults] setObject:teacherData
+                                                  forKey:TEACHER_INFO];
+        
+        //发送修改试听状态消息
+        NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone",nil];
+        NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_LISTENING_CHANG],teacher.phoneNums, nil];
+        NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
+                                                          forKeys:paramsArr];
+        NSString *jsonMsg   = [pDic JSONFragment];
+        NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+        
+        //发送消息
+        SingleMQTT *session = [SingleMQTT shareInstance];
+        [session.session publishData:data
+                             onTopic:student.deviceId];
+    }
+    else
+    {
+        CLog(@"upload listen status failed!");
+    }
 }
 
 - (void) initPullView
@@ -367,125 +460,125 @@
         CLog(@"item:%@", item);
         NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
         NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"messageId",@"phone",@"sessid", nil];
-        NSArray *valuesArr = [NSArray arrayWithObjects:@"getMessages",[item objectForKey:@"messageId"],tObj.phoneNums,ssid, nil];
+        NSArray *valuesArr = [NSArray arrayWithObjects:@"getMessages",[item objectForKey:@"messageId"],student.phoneNumber,ssid, nil];
         NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                          forKeys:paramsArr];
         
         ServerRequest *request = [ServerRequest sharedServerRequest];
         request.delegate = self;
         NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,STUDENT];
+        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
         [request requestASyncWith:kServerPostRequest
                          paramDic:pDic
                            urlStr:url];
     }
 }
 
-- (void) isShowListenBtn
-{
-    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
-    {
-        return;
-    }
-    
-    NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-    
-    //判断是否显示试听和聘请
-    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"phone",@"sessid", nil];
-    NSArray *valusArr  = [NSArray arrayWithObjects:@"getListening",tObj.phoneNums,ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valusArr
-                                                     forKeys:paramsArr];
-    
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate = self;
-    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url  = [NSString stringWithFormat:@"%@%@/", webAddress,STUDENT];
-    NSData *resVal = [request requestSyncWith:kServerPostRequest
-                                     paramDic:pDic
-                                       urlStr:url];
-    if (resVal)
-    {
-        NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                 encoding:NSUTF8StringEncoding]autorelease];
-        NSDictionary *resDic  = [resStr JSONValue];
-        CLog(@"Listen:%@", resDic);
-        NSString *action = [resDic objectForKey:@"action"];
-        if ([action isEqualToString:@"getListening"])
-        {
-            int isListening = ((NSString *)[resDic objectForKey:@"isListening"]).intValue;
-            if (isListening == 1)
-            {
-                listenBtn.hidden = NO;
-                employInfoView.hidden = NO;
-            }
-            else
-            {
-                listenBtn.hidden = YES;
-                employInfoView.hidden = YES;
-            }
-        }
-    }
-    else
-    {
-        listenBtn.hidden = YES;
-        employInfoView.hidden = YES;
-    }
-}
+//- (void) isShowListenBtn
+//{
+//    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+//    {
+//        return;
+//    }
+//    
+//    NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+//    
+//    //判断是否显示试听和聘请
+//    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"phone",@"sessid", nil];
+//    NSArray *valusArr  = [NSArray arrayWithObjects:@"getListening",student.phoneNumber,ssid, nil];
+//    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valusArr
+//                                                     forKeys:paramsArr];
+//    
+//    ServerRequest *request = [ServerRequest sharedServerRequest];
+//    request.delegate = self;
+//    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
+//    NSString *url  = [NSString stringWithFormat:@"%@%@/", webAddress,TEACHER_INFO];
+//    NSData *resVal = [request requestSyncWith:kServerPostRequest
+//                                     paramDic:pDic
+//                                       urlStr:url];
+//    if (resVal)
+//    {
+//        NSString *resStr = [[[NSString alloc]initWithData:resVal
+//                                                 encoding:NSUTF8StringEncoding]autorelease];
+//        NSDictionary *resDic  = [resStr JSONValue];
+//        CLog(@"Listen:%@", resDic);
+//        NSString *action = [resDic objectForKey:@"action"];
+//        if ([action isEqualToString:@"getListening"])
+//        {
+//            int isListening = ((NSString *)[resDic objectForKey:@"isListening"]).intValue;
+//            if (isListening == 1)
+//            {
+////                listenBtn.hidden = NO;
+//                listenView.hidden = NO;
+//            }
+//            else
+//            {
+////                listenBtn.hidden = YES;
+//                listenView.hidden = YES;
+//            }
+//        }
+//    }
+//    else
+//    {
+////        listenBtn.hidden = YES;
+//        listenView.hidden = YES;
+//    }
+//}
 
-- (void) isShowEmployBtn
-{
-    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
-    {
-        return;
-    }
-    
-    NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-    
-    //判断是否显示试听和聘请
-    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"phone",@"sessid", nil];
-    NSArray *valusArr  = [NSArray arrayWithObjects:@"getHire",tObj.phoneNums,ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valusArr
-                                                     forKeys:paramsArr];
-    
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate = self;
-    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url  = [NSString stringWithFormat:@"%@%@/", webAddress,STUDENT];
-    NSData *resVal = [request requestSyncWith:kServerPostRequest
-                                     paramDic:pDic
-                                       urlStr:url];
-    if (resVal)
-    {
-        NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                 encoding:NSUTF8StringEncoding]autorelease];
-        CLog(@"Employ:%@", resStr);
-        NSDictionary *resDic  = [resStr JSONValue];
-        NSString *action = [resDic objectForKey:@"action"];
-        if ([action isEqualToString:@"getHire"])
-        {
-            int isHire = ((NSNumber *)[resDic objectForKey:@"isHire"]).intValue;
-            if (isHire == 0)
-            {
-                employBtn.hidden = YES;
-            }
-            else
-            {
-                employBtn.hidden = NO;
-            }
-        }
-    }
-    else
-    {
-        employBtn.hidden = YES;
-    }
-    
-    //聘请按钮隐藏试听按钮后移动
-    if (employBtn.hidden)
-        listenBtn.frame = CGRectMake(employBtn.frame.origin.x,
-                                     employBtn.frame.origin.y,
-                                     listenBtn.frame.size.width,
-                                     listenBtn.frame.size.height);
-}
+//- (void) isShowEmployBtn
+//{
+//    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+//    {
+//        return;
+//    }
+//    
+//    NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+//    
+//    //判断是否显示试听和聘请
+//    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"phone",@"sessid", nil];
+//    NSArray *valusArr  = [NSArray arrayWithObjects:@"getHire",student.phoneNumber,ssid, nil];
+//    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valusArr
+//                                                     forKeys:paramsArr];
+//    
+//    ServerRequest *request = [ServerRequest sharedServerRequest];
+//    request.delegate = self;
+//    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
+//    NSString *url  = [NSString stringWithFormat:@"%@%@/", webAddress,TEACHER_INFO];
+//    NSData *resVal = [request requestSyncWith:kServerPostRequest
+//                                     paramDic:pDic
+//                                       urlStr:url];
+//    if (resVal)
+//    {
+//        NSString *resStr = [[[NSString alloc]initWithData:resVal
+//                                                 encoding:NSUTF8StringEncoding]autorelease];
+//        CLog(@"Employ:%@", resStr);
+//        NSDictionary *resDic  = [resStr JSONValue];
+//        NSString *action = [resDic objectForKey:@"action"];
+//        if ([action isEqualToString:@"getHire"])
+//        {
+//            int isHire = ((NSNumber *)[resDic objectForKey:@"isHire"]).intValue;
+//            if (isHire == 0)
+//            {
+//                employBtn.hidden = YES;
+//            }
+//            else
+//            {
+//                employBtn.hidden = NO;
+//            }
+//        }
+//    }
+//    else
+//    {
+//        employBtn.hidden = YES;
+//    }
+//    
+//    //聘请按钮隐藏试听按钮后移动
+//    if (employBtn.hidden)
+//        listenBtn.frame = CGRectMake(employBtn.frame.origin.x,
+//                                     employBtn.frame.origin.y,
+//                                     listenBtn.frame.size.width,
+//                                     listenBtn.frame.size.height);
+//}
 
 - (void) getChatRecords
 {
@@ -498,13 +591,13 @@
     
     NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"messageId",@"phone",@"sessid", nil];
-    NSArray *valuesArr = [NSArray arrayWithObjects:@"getMessages",@"0",tObj.phoneNums, ssid, nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"getMessages",@"0",student.phoneNumber, ssid, nil];
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     ServerRequest *request = [ServerRequest sharedServerRequest];
     request.delegate = self;
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@", webAdd, STUDENT];
+    NSString *url = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
     [request requestASyncWith:kServerPostRequest
                      paramDic:pDic
                        urlStr:url];
@@ -583,7 +676,7 @@
                                                      forKeys:paramsArr];
     
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,STUDENT];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
     
     //上传录音文件
     ServerRequest *request = [ServerRequest sharedServerRequest];
@@ -602,14 +695,14 @@
             path = [resDic objectForKey:@"filepath"];
             CLog(@"filePath:%@", path);
             
-            NSData *stuData  = [[NSUserDefaults standardUserDefaults] valueForKey:STUDENT];
-            Student *student = [NSKeyedUnarchiver unarchiveObjectWithData:stuData];
+            NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+            Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
             
             NSDate *dateNow  = [NSDate date];
             NSString *timeSp = [NSString stringWithFormat:@"%ld", (long)[dateNow timeIntervalSince1970]];
             
             NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"sound",@"stime",@"time",@"taPhone",@"deviceId",nil];
-            NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_AUDIO],student.phoneNumber,student.nickName,path,[NSNumber numberWithInt:voiceTimes],timeSp,tObj.phoneNums,[SingleMQTT getCurrentDevTopic], nil];
+            NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_AUDIO],teacher.phoneNums,teacher.name,path,[NSNumber numberWithInt:voiceTimes],timeSp,student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
             NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
                                                               forKeys:paramsArr];
             //发送消息
@@ -617,7 +710,7 @@
             NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
             SingleMQTT *session = [SingleMQTT shareInstance];
             [session.session publishData:data
-                                 onTopic:tObj.deviceId];
+                                 onTopic:student.deviceId];
             //消息上传服务器
             [self uploadMessageToServer:jsonMsg];
             
@@ -711,13 +804,13 @@
         {
             NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
             NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"phone",@"sessid", nil];
-            NSArray *valueArr  = [NSArray arrayWithObjects:@"setListening",tObj.phoneNums,ssid,nil];
+            NSArray *valueArr  = [NSArray arrayWithObjects:@"setListening",student.phoneNumber,ssid,nil];
             NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valueArr
                                                              forKeys:paramsArr];
             ServerRequest *request = [ServerRequest sharedServerRequest];
             request.delegate       = self;
             NSString *webAddress   = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-            NSString *url  = [NSString stringWithFormat:@"%@%@/", webAddress,STUDENT];
+            NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER_INFO];
             [request requestASyncWith:kServerPostRequest
                              paramDic:pDic
                                urlStr:url];
@@ -739,10 +832,10 @@
             else
             {
                 //新建订单
-                 CustomNavigationViewController *nav     = (CustomNavigationViewController *)[MainViewController getNavigationViewController];
-                 SearchConditionViewController *scVctr = [[SearchConditionViewController alloc]init];
-                 scVctr.tObj = tObj;
-                 [nav pushViewController:scVctr animated:YES];
+//                 CustomNavigationViewController *nav     = (CustomNavigationViewController *)[MainViewController getNavigationViewController];
+//                 SearchConditionViewController *scVctr = [[SearchConditionViewController alloc]init];
+//                 scVctr.tObj = tObj;
+//                 [nav pushViewController:scVctr animated:YES];
             }
             break;
         }
@@ -771,7 +864,7 @@
     NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"phone",
                           @"sendTime",@"sessid", nil];
-    NSArray *valuesArr = [NSArray arrayWithObjects:@"updateMessageZT",tObj.phoneNums,
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"updateMessageZT",student.phoneNumber,
                           timeSp,ssid,nil];
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
@@ -779,7 +872,7 @@
     ServerRequest *request = [ServerRequest sharedServerRequest];
     request.delegate     = self;
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url  = [NSString stringWithFormat:@"%@%@/", webAddress,STUDENT];
+    NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
     NSData *resVal = [request requestSyncWith:kServerPostRequest
                                      paramDic:pDic
                                        urlStr:url];
@@ -819,14 +912,14 @@
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"message",
                                                    @"phone",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"submitMessage",msg,
-                                                   tObj.phoneNums,ssid,nil];
+                                                   student.phoneNumber,ssid,nil];
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     
     ServerRequest *request = [ServerRequest sharedServerRequest];
     request.delegate       = self;
     NSString *webAddress   = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url  = [NSString stringWithFormat:@"%@%@/", webAddress,STUDENT];
+    NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
     NSData *resVal = [request requestSyncWith:kServerPostRequest
                                      paramDic:pDic
                                        urlStr:url];
@@ -857,13 +950,13 @@
 #pragma mark - Notice
 - (void) showTeacherDetailNotice:(NSNotification *) notice
 {
-    AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-    CustomNavigationViewController *nav     = (CustomNavigationViewController *)app.window.rootViewController;
-    TeacherDetailViewController *tdVctr = [[TeacherDetailViewController alloc]init];
-    tdVctr.tObj = tObj;
-    [nav pushViewController:tdVctr
-                   animated:YES];
-    [tdVctr release];
+//    AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+//    CustomNavigationViewController *nav     = (CustomNavigationViewController *)app.window.rootViewController;
+//    TeacherDetailViewController *tdVctr = [[TeacherDetailViewController alloc]init];
+//    tdVctr.tObj = tObj;
+//    [nav pushViewController:tdVctr
+//                   animated:YES];
+//    [tdVctr release];
 }
 
 - (void) dismissComplainNotice:(NSNotification *) notice
@@ -876,11 +969,11 @@
     [self getChatRecords];
 }
 
-- (void) listenChangedNotice:(NSNotification *) notice
-{
-    //刷新试听接口
-    [self isShowListenBtn];
-}
+//- (void) listenChangedNotice:(NSNotification *) notice
+//{
+//    //刷新试听接口
+//    [self isShowListenBtn];
+//}
 
 #pragma mark -
 #pragma mark Data Source Loading / Reloading Methods
@@ -944,7 +1037,7 @@
         case 0:       //投诉
         {
             ComplainViewController *cVctr = [[ComplainViewController alloc]init];
-            cVctr.tObj = tObj;
+            cVctr.student = student;
             [self presentPopupViewController:cVctr
                                animationType:MJPopupViewAnimationFade];
             break;
@@ -952,7 +1045,7 @@
         case 1:       //电话
         {
             //检测老师端是否允许接听电话
-            [self checkTeacherPhone];
+            [self checkStudentPhone];
             break;
         }
         case 2:       //声音
@@ -965,7 +1058,7 @@
     }
 }
 
-- (void) checkTeacherPhone
+- (void) checkStudentPhone
 {
     if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
     {
@@ -973,14 +1066,14 @@
     }
     
     NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"teacher_phone",@"sessid", nil];
-    NSArray *valuesArr = [NSArray arrayWithObjects:@"callPhone",tObj.phoneNums, ssid, nil];
+    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"student_phone",@"sessid", nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"callPhone",student.phoneNumber, ssid, nil];
     
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,STUDENT];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
     ServerRequest *request = [ServerRequest sharedServerRequest];
     request.delegate = self;
     NSData *resVal = [request requestSyncWith:kServerPostRequest
@@ -995,7 +1088,7 @@
         if (errorid.integerValue==0)
         {
             //拨打电话
-            NSString *phone = [NSString stringWithFormat:@"tel://%@", tObj.phoneNums];
+            NSString *phone = [NSString stringWithFormat:@"tel://%@", student.phoneNumber];
             [[UIApplication sharedApplication] openURL:[NSURL URLWithString:phone]];
         }
         else
@@ -1012,14 +1105,14 @@
 
 - (void)sendPressed:(UIButton *)sender withText:(NSString *)text
 {
-    NSData *stuData  = [[NSUserDefaults standardUserDefaults] valueForKey:STUDENT];
-    Student *student = [NSKeyedUnarchiver unarchiveObjectWithData:stuData];
+    NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+    Teacher *teacher     = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
     
     NSDate *dateNow  = [NSDate date];
     NSString *timeSp = [NSString stringWithFormat:@"%ld", (long)[dateNow timeIntervalSince1970]];
     
     NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"icon",@"text",@"time",@"taPhone",@"deviceId",nil];
-    NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_TEXT],student.phoneNumber,student.nickName,@"",text,timeSp,tObj.phoneNums,[SingleMQTT getCurrentDevTopic], nil];
+    NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_TEXT],teacher.phoneNums,teacher.name,teacher.headUrl,text,timeSp,student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
     NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
                                                       forKeys:paramsArr];
     
@@ -1028,7 +1121,7 @@
     NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
     SingleMQTT *session = [SingleMQTT shareInstance];
     [session.session publishData:data
-                         onTopic:tObj.deviceId];
+                         onTopic:student.deviceId];
 
     //消息上传服务器
     [self uploadMessageToServer:jsonMsg];
@@ -1043,7 +1136,7 @@
 {
     if (self.messages.count>0)
     {
-        int index = self.messages.count-1-indexPath.row;
+        long index = self.messages.count-1-indexPath.row;
         NSDictionary *item = [messages objectAtIndex:index];
         NSString *soundPath= [[item objectForKey:@"sound"] retain];
         if (soundPath)
@@ -1067,7 +1160,7 @@
 //                [request startAsynchronous];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     //更新UI
-                    NSDictionary *dic = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:indexPath.row],@"TAG", nil];
+                    NSDictionary *dic = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithLong:indexPath.row],@"TAG", nil];
                     
                     //停止动画
                     [[NSNotificationCenter defaultCenter] postNotificationName:@"stopVoiceAnimation"
@@ -1090,18 +1183,18 @@
 {
     if (self.messages.count>0)
     {
-        NSData *stuData  = [[NSUserDefaults standardUserDefaults] valueForKey:STUDENT];
-        Student *student = [NSKeyedUnarchiver unarchiveObjectWithData:stuData];
-        int index = self.messages.count-1-indexPath.row;
-        NSDictionary *item = [messages objectAtIndex:index];
+        NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+        Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
+        
+        NSDictionary *item = [messages objectAtIndex:self.messages.count-indexPath.row-1];
         NSString *phone    = [item objectForKey:@"phone"];
-        if ([student.phoneNumber isEqualToString:phone])
+        if ([teacher.phoneNums isEqualToString:phone])
         {
-            return JSBubbleMessageTypeIncoming;
+            return JSBubbleMessageTypeOutgoing;
         }
         else
         {
-            return JSBubbleMessageTypeOutgoing;
+            return JSBubbleMessageTypeIncoming;
         }
     }
     return JSBubbleMessageTypeOutgoing;
@@ -1124,12 +1217,12 @@
 
 - (JSAvatarStyle)avatarStyle
 {
-    return JSAvatarTxtIncomingImgOutgoing;
+    return JSAvatarStyleText;
 }
 
 - (JSAvatarStyle) outgoingAvatarStyle
 {
-    return JSAvatarStyleSquare;
+    return JSAvatarStyleText;
 }
 
 - (JSAvatarStyle) incomingAvatarStyle
@@ -1142,8 +1235,8 @@
 {
     if (self.messages.count>0)
     {
-//        int index = self.messages.count-1-indexPath.row;
-        NSDictionary *dic = [self.messages objectAtIndex:indexPath.row];
+        long index = self.messages.count-1-indexPath.row;
+        NSDictionary *dic = [self.messages objectAtIndex:index];
         if ([dic objectForKey:@"text"])
         {
             CLog(@"The Message is Text");
@@ -1151,7 +1244,7 @@
         }
         else if ([dic objectForKey:@"sound"])
         {
-            CLog(@"The Message is Image");
+            CLog(@"The Message is Sound");
             return PUSH_TYPE_AUDIO;
         }
     }
@@ -1163,8 +1256,10 @@
 {
     if (self.messages.count>0)
     {
-        int index = self.messages.count-1-indexPath.row;
-        NSDictionary *dic = [self.messages objectAtIndex:index];
+        
+        NSDictionary *dic = [self.messages objectAtIndex:self.messages.count-indexPath.row-1];
+        CLog(@"Dic:%@", dic);
+        CLog(@"text:%@", [dic objectForKey:@"text"]);
         return [dic objectForKey:@"text"];
     }
     
@@ -1187,24 +1282,30 @@
 //}
 //
 
-- (NSString *)avatarImagePathForOutgoingMessage
-{
-    return tObj.headUrl;
-}
+//- (NSString *)avatarImagePathForOutgoingMessage
+//{
+//    return tObj.headUrl;
+//}
 
-- (BOOL) isHaveOrg
-{
-    return tObj.isId;
-}
+//- (BOOL) isHaveOrg
+//{
+//    return tObj.isId;
+//}
 
 //- (UIImage *)avatarImageForOutgoingMessage
 //{
 //    return [UIImage imageNamed:@"demo-avatar-jobs"];
 //}
 
-- (NSString *)avatarNameForIncomingMessage
+- (NSString *) avatarNameForOutgoingMessage
 {
     return @"我";
+}
+
+- (NSString *)avatarNameForIncomingMessage
+{
+    CLog(@"studentName:%@", student.nickName);
+    return student.nickName;
 }
 
 #pragma mark -
@@ -1313,8 +1414,7 @@
                 for (int i=0; i<array.count; i++)
                 {
                     NSDictionary *item = [array objectAtIndex:i];
-                    [messages insertObject:item
-                                   atIndex:self.messages.count];
+                    [messages addObject:item];
                 }
             }
             

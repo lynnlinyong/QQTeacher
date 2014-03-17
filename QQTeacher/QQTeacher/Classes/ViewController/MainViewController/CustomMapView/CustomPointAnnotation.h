@@ -11,5 +11,5 @@
 @interface CustomPointAnnotation : MAPointAnnotation
 @property (nonatomic, assign) int tag;
 @property (nonatomic, copy)   Site *siteObj;
-@property (nonatomic, copy)   Teacher *teacherObj;
+@property (nonatomic, copy)   Student *student;
 @end

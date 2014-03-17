@@ -213,7 +213,7 @@
     UIButton *btn = sender;
     NSDictionary *subDic = [subArr objectAtIndex:index];
     NSDictionary *userDic = [NSDictionary dictionaryWithObjectsAndKeys:subDic,@"subDic",
-                             [NSNumber numberWithInt:btn.tag],@"TAG", nil];
+                             [NSNumber numberWithLong:btn.tag],@"TAG", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"setSubjectNotice"
                                                         object:nil
                                                       userInfo:userDic];

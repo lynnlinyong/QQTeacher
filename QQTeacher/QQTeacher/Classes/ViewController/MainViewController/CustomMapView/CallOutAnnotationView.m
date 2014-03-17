@@ -37,18 +37,8 @@
         self.backgroundColor = [UIColor clearColor];
         self.canShowCallout = NO;
         
-        CalloutMapAnnotation *ann = annotation;
-        if (ann.teacherObj.isId)
-        {
-            self.centerOffset = CGPointMake(0, -88);   //58
-            self.frame = CGRectMake(0, 0, 200, 140);   //120
-        }
-        else
-        {
-            self.centerOffset = CGPointMake(0, -78);   //58
-            self.frame = CGRectMake(0, 0, 200, 120);   //120
-        }
-        
+        self.centerOffset = CGPointMake(0, -60);   //58
+        self.frame = CGRectMake(0, 0, 120, 70);   //120
         contentView     =      [[UIView alloc] initWithFrame:CGRectMake(5,
                                                                         5,
                                                                         self.frame.size.width-15,

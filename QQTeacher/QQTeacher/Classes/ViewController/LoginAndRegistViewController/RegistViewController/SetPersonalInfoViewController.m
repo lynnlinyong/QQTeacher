@@ -13,6 +13,7 @@
 @end
 
 @implementation SetPersonalInfoViewController
+@synthesize contentInfo;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -82,8 +83,7 @@
     
     self.contentView = [[UITextView alloc]init];
     self.contentView.delegate    = self;
-    self.contentView.text = @"140字以内个人简介";
-    //    self.contentView.borderStyle = UITextBorderStyleLine;
+    self.contentView.text = contentInfo;
     self.contentView.frame = CGRectMake(10,
                                         30,
                                         self.view.frame.size.width-25, 110);
@@ -98,7 +98,7 @@
     [bottomImgView release];
     
     UIImage *okBtnImg = [UIImage imageNamed:@"dialog_ok_normal_btn"];
-    okBtn   = [UIButton buttonWithType:UIButtonTypeCustom];
+    okBtn       = [UIButton buttonWithType:UIButtonTypeCustom];
     okBtn.tag   = 0;
     [okBtn setTitleColor:[UIColor blackColor]
                 forState:UIControlStateNormal];
@@ -146,9 +146,9 @@
     [self repickView:self.view];
     
     UIButton *btn      = sender;
-    NSNumber *tagNum   = [NSNumber numberWithInt:btn.tag];
+    NSNumber *tagNum   = [NSNumber numberWithLong:btn.tag];
     NSDictionary *pDic = [NSDictionary dictionaryWithObjectsAndKeys:tagNum,@"TAG",
-                          self.contentView.text,@"personalInfo",nil];
+                                                                    self.contentView.text,@"personalInfo",nil];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:@"setPersonalInfoNotice"
                                                         object:nil

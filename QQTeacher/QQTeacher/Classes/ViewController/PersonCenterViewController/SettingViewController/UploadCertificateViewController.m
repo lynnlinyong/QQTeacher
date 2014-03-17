@@ -15,6 +15,7 @@
 @end
 
 @implementation UploadCertificateViewController
+@synthesize certyUrlArray;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -49,7 +50,6 @@
 {
     [indexLab release];
     [scrollView release];
-    [certyImgArray release];
     [certyImgPathArray release];
     [super dealloc];
 }
@@ -58,12 +58,12 @@
 #pragma mark - Custom Action
 - (void) showCertificate
 {
-    if (certyImgArray.count == 0)
+    if (certyImgPathArray.count == 0)
     {
         NSArray *imgViewArray = scrollView.subviews;
         for (UIView *imgView in imgViewArray)
         {
-            if ([imgView isKindOfClass:[UIImageView class]])
+            if ([imgView isKindOfClass:[TTImageView class]])
             {
                 [imgView removeFromSuperview];
                 imgView = nil;
@@ -71,24 +71,27 @@
         }
     }
     
-    for (int i=0; i<certyImgArray.count; i++)
+    for (int i=0; i<certyImgPathArray.count; i++)
     {
         scrollView.contentSize = CGSizeMake(320*(i+1), 320);
         
-        UIImage *image = [certyImgArray objectAtIndex:i];
-        UIImageView *imgView = [[UIImageView alloc]init];
-        imgView.image = image;
-        CLog(@"size:%f,%f", image.size.width, image.size.height);
-        imgView.frame = CGRectMake(320*i+160-image.size.width/4,
-                                   scrollView.frame.size.height-image.size.height/2,
+        NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, [certyImgPathArray objectAtIndex:i]];
+        
+        TTImageView *imgView = [[TTImageView alloc]init];
+        imgView.delegate = self;
+        imgView.defaultImage = [UIImage imageNamed:@"s_boy"];
+        imgView.URL = url;
+        imgView.frame = CGRectMake(320*i+160-320/2,
+                                   scrollView.frame.size.height-320,
                                    320, 320);
         [scrollView addSubview:imgView];
         [imgView release];
     }
     
-    indexLab.text = [NSString stringWithFormat:@"%lu/%lu", (unsigned long)certyImgArray.count,(unsigned long)certyImgArray.count];
+    indexLab.text = [NSString stringWithFormat:@"%d/%d", certyImgPathArray.count,certyImgPathArray.count];
     
-    [scrollView scrollRectToVisible:CGRectMake(0, 0, 320*certyImgArray.count, 320) animated:YES];
+    [scrollView scrollRectToVisible:CGRectMake(0, 0, 320*certyImgPathArray.count, 320) animated:YES];
 }
 
 - (void) initUI
@@ -113,7 +116,6 @@
        forControlEvents:UIControlEventTouchUpInside];
     self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc]initWithCustomView:cmpBtn];
     
-    
     indexLab = [[UILabel alloc]init];
     indexLab.backgroundColor = [UIColor clearColor];
     indexLab.font = [UIFont systemFontOfSize:14.f];
@@ -124,9 +126,11 @@
                            isBackView:NO];
     [self.view addSubview:indexLab];
     
-    
-    certyImgArray = [[NSMutableArray alloc]init];
+//    certyImgArray     = [[NSMutableArray alloc]init];
     certyImgPathArray = [[NSMutableArray alloc]init];
+    
+    if (![certyUrlArray isEqual:[NSNull null]])
+        certyImgPathArray = [certyUrlArray mutableCopy];
     
     scrollView = [[UIScrollView alloc]init];
     scrollView.delegate = self;
@@ -134,11 +138,14 @@
     scrollView.frame = CGRectMake(0, 40, 320, 320);
     [self.view addSubview:scrollView];
     
+    [self showCertificate];
+    
     //底部操作按钮
     UIButton *cameraBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
     cameraBtn.tag = 1;
     [cameraBtn setTitle:@"照相" forState:UIControlStateNormal];
-    cameraBtn.frame = [UIView fitCGRect:CGRectMake(100, 480-44-50, 40, 30) isBackView:NO];
+    cameraBtn.frame = [UIView fitCGRect:CGRectMake(100, 480-44-50, 40, 30)
+                             isBackView:NO];
     [cameraBtn addTarget:self
                   action:@selector(doButtonClicked:)
         forControlEvents:UIControlEventTouchUpInside];
@@ -171,7 +178,7 @@
     CGFloat pageWidth = self.view.frame.size.width;
     int page = floor((sView.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
     
-    indexLab.text = [NSString stringWithFormat:@"%d/%lu", page+1,(unsigned long)certyImgArray.count];
+    indexLab.text = [NSString stringWithFormat:@"%d/%lu", page+1,(unsigned long)certyImgPathArray.count];
 }
 
 #pragma mark - 
@@ -183,7 +190,8 @@
     {
         case 0:      //完成
         {
-            NSDictionary *userDic = [NSDictionary dictionaryWithObjectsAndKeys:certyImgPathArray,@"CertyUrlArray", nil];
+            NSDictionary *userDic = [NSDictionary dictionaryWithObjectsAndKeys:certyImgPathArray,
+                                                                               @"CertyUrlArray", nil];
             [[NSNotificationCenter defaultCenter] postNotificationName:@"setCertitionNotice"
                                                                 object:self
                                                               userInfo:userDic];
@@ -237,9 +245,8 @@
         {
             CGFloat pageWidth = self.view.frame.size.width;
             int page = floor((scrollView.contentOffset.x - pageWidth / 2) / pageWidth) + 1;
-            [certyImgArray removeObjectAtIndex:page];
+            [certyImgPathArray removeObjectAtIndex:page];
             [self showCertificate];
-            
             break;
         }
         default:
@@ -300,7 +307,7 @@
             if (errorid.intValue==0)
             {
                 curHeadUrl = [resDic objectForKey:@"filepath"];
-                curHeadUrl = [NSString stringWithFormat:@"%@%@", webAdd, curHeadUrl];
+//                curHeadUrl = [NSString stringWithFormat:@"%@%@", webAdd, curHeadUrl];
             }
             else
             {
@@ -330,10 +337,6 @@
 {
     __block NSString *CurHeadUrl = nil;
     
-    //添加证书
-    [certyImgArray addObject:editedImage];
-    [self showCertificate];
-    
     //保存头像到本地
     NSString *path = [self savePhotosToLocal:editedImage];
     
@@ -349,6 +352,9 @@
             //隐藏刷新等待
             [MBProgressHUD hideHUDForView:nav.view animated:YES];
             [certyImgPathArray addObject:CurHeadUrl];
+            
+            //显示证书
+            [self showCertificate];
         });
     });
     

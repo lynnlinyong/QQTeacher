@@ -104,7 +104,7 @@ typedef enum _tagMsgType
     PUSH_TYPE_ORDER_CONFIRM,
     PUSH_TYPE_ORDER_EDIT_SUCCESS,
     PUSH_TYPE_ORDER_CONFIRM_SUCCESS,
-    PUSH_TYPE_SYSTEM_MSG,             //系统消息
+    PUSH_TYPE_PUSHCC,                 //助教消息
     PUSH_TYPE_LISTENING_CHANG,
     PUSH_TYPE_OFFLINE_MSG=9999,       //异地登录
 }MsgType;

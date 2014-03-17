@@ -12,6 +12,6 @@
 @property (nonatomic, assign) CLLocationDegrees latitude;
 @property (nonatomic, assign) CLLocationDegrees longitude;
 @property (nonatomic, copy) Site *site;
-@property (copy, nonatomic) Teacher *teacherObj; 
+@property (copy, nonatomic) Student *student;
 - (id)initWithLatitude:(CLLocationDegrees)lat andLongitude:(CLLocationDegrees)lon;
 @end

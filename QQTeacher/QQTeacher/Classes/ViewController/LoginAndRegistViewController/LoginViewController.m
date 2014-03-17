@@ -27,6 +27,9 @@
 {
     [super viewDidLoad];
     
+    //获得帮助电话
+    [self getHelpPhone];
+    
     [self initUI];
 }
 
@@ -71,6 +74,31 @@
 
 #pragma mark -
 #pragma mark - Custom Action
+- (void) getHelpPhone
+{
+    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+    {
+        return;
+    }
+    
+    NSString *helpPhone = [[NSUserDefaults standardUserDefaults] objectForKey:HELP_PHONE];
+    if (!helpPhone)
+    {
+        NSString *idString  = [SingleMQTT getCurrentDevTopic];
+        NSArray *paramsArr  = [NSArray arrayWithObjects:@"action",@"deviceId", nil];
+        NSArray *valusArr   = [NSArray arrayWithObjects:@"getCSPhone",idString,nil];
+        NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valusArr
+                                                          forKeys:paramsArr];
+        ServerRequest *serverReq = [ServerRequest sharedServerRequest];
+        serverReq.delegate = self;
+        NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
+        NSString *url = [NSString stringWithFormat:@"%@%@/", webAddress,TEACHER];
+        [serverReq requestASyncWith:kServerPostRequest
+                           paramDic:pDic
+                             urlStr:url];
+    }
+}
+
 - (void) initUI
 {
     //初始化返回按钮
@@ -544,7 +572,14 @@
         if (ssid)
         {
             NSString *action = [resDic objectForKey:@"action"];
-            if ([action isEqualToString:@"login"])
+            if ([action isEqualToString:@"getCSPhone"])
+            {
+                NSString *helpPhone = [resDic objectForKey:@"message"];
+                CLog(@"helpPhone:%@", helpPhone);
+                [[NSUserDefaults standardUserDefaults] setObject:helpPhone
+                                                          forKey:HELP_PHONE];
+            }
+            else if ([action isEqualToString:@"login"])
             {
                 [[NSUserDefaults standardUserDefaults] setObject:ssid
                                                           forKey:SSID];
@@ -587,12 +622,74 @@
                                                             forKey:LOGINE_SUCCESS];
                     
                     //跳转个人中心
-                    [self.navigationController popToRootViewControllerAnimated:YES];
                     
-//                    PersonCenterViewController *pcVctr = [[PersonCenterViewController alloc]init];
-//                    [self.navigationController pushViewController:pcVctr
-//                                                         animated:YES];
-//                    [pcVctr release];
+                    MyTeacherViewController *mVctr = [[MyTeacherViewController alloc]init];
+                    UINavigationController *navMvctr = [[UINavigationController alloc]initWithRootViewController:mVctr];
+                    
+                    LatlyViewController *lVctr = [[LatlyViewController alloc]init];
+                    UINavigationController *navLVctr = [[UINavigationController alloc]initWithRootViewController:lVctr];
+                    
+                    SearchTeacherViewController *sVctr = [[SearchTeacherViewController alloc]init];
+                    UINavigationController *navSVctr = [[UINavigationController alloc]initWithRootViewController:sVctr];
+                    
+                    ShareViewController *shareVctr = [[ShareViewController alloc]initWithNibName:nil
+                                                                                          bundle:nil];
+                    UINavigationController *navShareVctr = [[UINavigationController alloc]initWithRootViewController:shareVctr];
+                    
+                    SettingViewController *setVctr = [[SettingViewController alloc]initWithNibName:nil
+                                                                                            bundle:nil];
+                    UINavigationController *navSetVctr = [[UINavigationController alloc]initWithRootViewController:setVctr];
+                    
+                    NSMutableDictionary *imgDic = [NSMutableDictionary dictionaryWithCapacity:3];
+                    [imgDic setObject:[UIImage imageNamed:@"s_1_1"]
+                               forKey:@"Default"];
+                    [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
+                               forKey:@"Highlighted"];
+                    [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
+                               forKey:@"Seleted"];
+                    NSMutableDictionary *imgDic2 = [NSMutableDictionary dictionaryWithCapacity:3];
+                    [imgDic2 setObject:[UIImage imageNamed:@"s_2_1"]
+                                forKey:@"Default"];
+                    [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
+                                forKey:@"Highlighted"];
+                    [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
+                                forKey:@"Seleted"];
+                    NSMutableDictionary *imgDic3 = [NSMutableDictionary dictionaryWithCapacity:3];
+                    [imgDic3 setObject:[UIImage imageNamed:@"s_3_1"]
+                                forKey:@"Default"];
+                    [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
+                                forKey:@"Highlighted"];
+                    [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
+                                forKey:@"Seleted"];
+                    NSMutableDictionary *imgDic4 = [NSMutableDictionary dictionaryWithCapacity:3];
+                    [imgDic4 setObject:[UIImage imageNamed:@"s_4_1"]
+                                forKey:@"Default"];
+                    [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
+                                forKey:@"Highlighted"];
+                    [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
+                                forKey:@"Seleted"];
+                    NSMutableDictionary *imgDic5 = [NSMutableDictionary dictionaryWithCapacity:3];
+                    [imgDic5 setObject:[UIImage imageNamed:@"s_5_1"]
+                                forKey:@"Default"];
+                    [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
+                                forKey:@"Highlighted"];
+                    [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
+                                forKey:@"Seleted"];
+                    
+                    NSMutableArray *ctrlArr = [NSMutableArray arrayWithObjects:navMvctr,navLVctr,navSVctr,
+                                                                               navShareVctr,navSetVctr,nil];
+                    NSArray *imgArr = [NSArray arrayWithObjects:imgDic,imgDic3,imgDic2,
+                                                                imgDic4,imgDic5,nil];
+                    PersonCenterViewController *pcVctr    = [[PersonCenterViewController alloc]
+                                                                         initWithViewControllers:ctrlArr imageArray:imgArr];
+                    CustomNavigationViewController *nav   = [[CustomNavigationViewController alloc]initWithRootViewController:pcVctr];
+                    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+                    appDelegate.window.rootViewController = nav;
+                    [pcVctr release];
+                    
+                    MainViewController *mainVctr     = [[MainViewController alloc]init];
+                    [nav pushViewController:mainVctr animated:NO];
+                    [mainVctr release];
                 }
             }
             else if ([action isEqualToString:@"register"])   //系统查询到没有该用户则相当于注册成功

@@ -9,7 +9,7 @@
 #import "CustomPointAnnotation.h"
 
 @implementation CustomPointAnnotation
-@synthesize teacherObj;
+@synthesize student;
 @synthesize tag;
 @synthesize siteObj;
 

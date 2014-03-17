@@ -15,28 +15,38 @@
     NSString  *nickName;
     NSString  *phoneNumber;
     NSString  *grade;
+    NSString  *gradeId;
     NSString  *gender;
     NSString  *lltime;
-    NSString  *longltude;
-    NSString  *latltude;
+    NSString  *longitude;
+    NSString  *latitude;
     NSString  *status;
     NSString  *icon;
     NSString  *phoneStars;
     NSString  *locStars;
+    
+    NSString  *deviceId;
+    NSString  *studentId;
 }
 
+@property (nonatomic, retain)  NSString  *studentId;
+@property (nonatomic, retain)  NSString  *deviceId;
 @property (nonatomic, retain)  NSString  *icon;
 @property (nonatomic, retain)  NSString  *email;
 @property (nonatomic, retain)  NSString  *nickName;
 @property (nonatomic, retain)  NSString  *phoneNumber;
 @property (nonatomic, retain)  NSString  *grade;
+@property (nonatomic, retain)  NSString  *gradeId;
 @property (nonatomic, retain)  NSString  *gender;
 @property (nonatomic, retain)  NSString  *lltime;
-@property (nonatomic, retain)  NSString  *longltude;
-@property (nonatomic, retain)  NSString  *latltude;
+@property (nonatomic, retain)  NSString  *longitude;
+@property (nonatomic, retain)  NSString  *latitude;
 @property (nonatomic, retain)  NSString  *status;
 @property (nonatomic, retain)  NSString  *phoneStars;
 @property (nonatomic, retain)  NSString  *locStars;
+
+//设置学生属性
++ (Student *) setPropertyStudent:(NSDictionary *) studentDic;
 
 //根据性别ID,查询性别
 + (NSString *) searchGenderName:(NSString *) genderId;

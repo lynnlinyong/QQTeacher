@@ -18,7 +18,8 @@
 {
     UILabel *indexLab;
     UIScrollView     *scrollView;
-    NSMutableArray   *certyImgArray;
     NSMutableArray   *certyImgPathArray;
 }
+
+@property (nonatomic, copy) NSMutableArray *certyUrlArray;
 @end

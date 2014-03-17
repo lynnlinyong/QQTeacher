@@ -18,9 +18,9 @@
     if (self) {
         headBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         headBtn.frame     =  CGRectMake(5, 15, 50, 50);
-        [headBtn addTarget:self
-                    action:@selector(tapGestureRecongnizer:)
-          forControlEvents:UIControlEventTouchUpInside];
+//        [headBtn addTarget:self
+//                    action:@selector(tapGestureRecongnizer:)
+//          forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:headBtn];
         
         UIImage *idImg = [UIImage imageNamed:@"mp_rz"];
@@ -94,14 +94,14 @@
         [headBtn setImage:[UIImage circleImage:[UIImage imageNamed:@"s_boy"]
                                      withParam:0 withColor:[UIColor whiteColor]]
                  forState:UIControlStateNormal];
-        infoLab.text  = [NSString stringWithFormat:@"男   %@",[dic objectForKey:@"subjectText"]];
+        infoLab.text  = [NSString stringWithFormat:@"男   %@",[dic objectForKey:@"gradeText"]];
     }
     else
     {
         [headBtn setImage:[UIImage circleImage:[UIImage imageNamed:@"s_girl"]
                                      withParam:0 withColor:[UIColor whiteColor]]
                  forState:UIControlStateNormal];
-        infoLab.text  = [NSString stringWithFormat:@"女   %@",[dic objectForKey:@"subjectText"]];
+        infoLab.text  = [NSString stringWithFormat:@"女   %@",[dic objectForKey:@"gradeText"]];
     }
     msgLab.text   = [dic objectForKey:@"message"];
     timeLab.text  = [dic objectForKey:@"time"];
@@ -115,47 +115,47 @@
             idImageView.hidden = YES;
     }
     
-    TTImageView *headImgView = [[[TTImageView alloc]init]autorelease];
-    headImgView.delegate = self;
-    NSString *webAdd  = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    headImgView.URL   = [NSString stringWithFormat:@"%@%@",webAdd,[dic objectForKey:@"icon"]];
+//    TTImageView *headImgView = [[[TTImageView alloc]init]autorelease];
+//    headImgView.delegate = self;
+//    NSString *webAdd  = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+//    headImgView.URL   = [NSString stringWithFormat:@"%@%@",webAdd,[dic objectForKey:@"icon"]];
 }
 
 #pragma mark -
 #pragma mark - TTImageViewDelegate
-- (void)imageView:(TTImageView*)imageView didLoadImage:(UIImage*)image
-{
-    int sex = ((NSString *)[msgDic objectForKey:@"gender"]).intValue;
-    if (sex == 1)
-    {
-        [headBtn setImage:[UIImage circleImage:image
-                                     withParam:0
-                                     withColor:[UIColor greenColor]]
-                 forState:UIControlStateNormal];
-    }
-    else
-    {
-        [headBtn setImage:[UIImage circleImage:image
-                                     withParam:0
-                                     withColor:[UIColor orangeColor]]
-                 forState:UIControlStateNormal];
-    }
-}
+//- (void)imageView:(TTImageView*)imageView didLoadImage:(UIImage*)image
+//{
+//    int sex = ((NSString *)[msgDic objectForKey:@"gender"]).intValue;
+//    if (sex == 1)
+//    {
+//        [headBtn setImage:[UIImage circleImage:image
+//                                     withParam:0
+//                                     withColor:[UIColor greenColor]]
+//                 forState:UIControlStateNormal];
+//    }
+//    else
+//    {
+//        [headBtn setImage:[UIImage circleImage:image
+//                                     withParam:0
+//                                     withColor:[UIColor orangeColor]]
+//                 forState:UIControlStateNormal];
+//    }
+//}
+//
+//- (void)imageView:(TTImageView*)imageView didFailLoadWithError:(NSError*)error
+//{
+//    
+//}
 
-- (void)imageView:(TTImageView*)imageView didFailLoadWithError:(NSError*)error
-{
-    
-}
-
-- (void) tapGestureRecongnizer:(id)sender
-{
-    UIButton *btn = sender;
-    if (delegate)
-    {
-        if ([delegate respondsToSelector:@selector(view:clickedIndex:)])
-        {
-            [delegate view:self clickedIndex:btn.tag];
-        }
-    }
-}
+//- (void) tapGestureRecongnizer:(id)sender
+//{
+//    UIButton *btn = sender;
+//    if (delegate)
+//    {
+//        if ([delegate respondsToSelector:@selector(view:clickedIndex:)])
+//        {
+//            [delegate view:self clickedIndex:btn.tag];
+//        }
+//    }
+//}
 @end

@@ -98,19 +98,19 @@
 
 - (float)heightForRow:(NSUInteger)row
 {
-    if (row != 0)   //代表订单Cell
-    {
-        NSDictionary *orderDic = [self.ordersArr objectAtIndex:row-1];
-        Order *order  = [Order setOrderProperty:orderDic];
-        
-        NSDictionary *teacherDic = [teacherOrderDic objectForKey:@"teacher"];
-        order.teacher = [self packageTeacher:teacherDic];
-    
-        if (order.orderStatus==FINISH)
-        {
-            return 65;
-        }
-    }
+//    if (row != 0)   //代表订单Cell
+//    {
+//        NSDictionary *orderDic = [self.ordersArr objectAtIndex:row-1];
+//        Order *order  = [Order setOrderProperty:orderDic];
+//        
+//        NSDictionary *studentDic = [teacherOrderDic objectForKey:@"student"];
+//        order.student = [Student setPropertyStudent:studentDic];
+//    
+////        if (order.orderStatus==FINISH)
+////        {
+////            return 65;
+////        }
+//    }
     
     if (!iPhone5)
         return 115;
@@ -123,22 +123,22 @@
     static NSString *idString    = @"idString";
     if (row == 0)   //代表老师
     {        
-        NSDictionary *teacherDic = [teacherOrderDic objectForKey:@"teacher"];
+        NSDictionary *studentDic = [teacherOrderDic objectForKey:@"student"];
         
         //获得最近订单
         Order *order   = nil;
-        Teacher *tObj  = [self packageTeacher:teacherDic];
+        Student *student = [Student setPropertyStudent:studentDic];
         if (ordersArr.count>0)
         {
             order  = [Order setOrderProperty:teacherOrderDic];
-            order.teacher = [tObj copy];
+            order.student = [student copy];
         }
         else
         {
             order = [[Order alloc]init];
-            order.teacher = tObj;
+            order.student = student;
         }
-        
+        CLog(@"sdfjsdfjisdfjsi:student:%@", student.nickName);
         MyTeacherCell *cell = [[[MyTeacherCell alloc]initWithStyle:UITableViewCellStyleDefault
                                                    reuseIdentifier:idString]autorelease];
         cell.order    = order;
@@ -149,15 +149,15 @@
         NSDictionary *orderDic = [self.ordersArr objectAtIndex:row-1];
         Order *order  = [Order setOrderProperty:orderDic];
     
-        NSDictionary *teacherDic = [teacherOrderDic objectForKey:@"teacher"];
-        order.teacher = [self packageTeacher:teacherDic];
+        NSDictionary *studentDic = [teacherOrderDic objectForKey:@"student"];
+        order.student = [Student setPropertyStudent:studentDic];
 
         TeacherOrderCell *cell = [[[TeacherOrderCell alloc]initWithStyle:UITableViewCellStyleDefault
                                                          reuseIdentifier:idString
                                                               withParent:self.tableView]autorelease];
         cell.delegate       = self;
         cell.order          = order;
-        cell.commView.idStr = [order.orderId retain];
+//        cell.commView.idStr = [order.orderId retain];
         
         return cell;
     }
@@ -175,44 +175,27 @@
 
 #pragma mark -
 #pragma mark - TeacherOrderCellDelegate
-- (void) cell:(TeacherOrderCell *)cell buttonTag:(int)tag
+- (void) cell:(TeacherOrderCell *)cell buttonTag:(NSInteger)tag
 {
-    CustomNavigationViewController *nav = (CustomNavigationViewController *)[MainViewController getNavigationViewController];
-    switch (tag)
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    
+    //根据订单状态,结单还是确认
+    switch (cell.order.orderStatus)
     {
-        case 0:      //免费辅教
+        case NO_CONFIRM:     //未确认,去确认
         {
-            FreeBookViewController *fbVctr = [[FreeBookViewController alloc]init];
-            fbVctr.orderId = cell.order.orderId;
-            [nav pushViewController:fbVctr animated:YES];
-            [fbVctr release];
+            OrderConfirmViewController *orderConfirmVctr = [[OrderConfirmViewController alloc]init];
+            orderConfirmVctr.order = cell.order;
+            [nav presentPopupViewController:orderConfirmVctr animationType:MJPopupViewAnimationFade];
             break;
         }
-        case 1:      //评价
+        case CONFIRMED:
+        case NO_FINISH:      //未结单,去结单
         {
-            float offsetX = 0;
-            if (cell.order.orderStatus != NO_CONFIRM)
-                offsetX = 20;
-            cell.commView.frame  = CGRectMake(offsetX, cell.frame.origin.y+cell.commentBtn.frame.origin.y-70, 170, 70);
-            [cell.commView setMeHidden:NO];
-            [self.tableView bringSubviewToFront:cell.commView];
-            break;
-        }
-        case 2:      //修改订单
-        {
-            UpdateOrderViewController *uoVctr = [[UpdateOrderViewController alloc]init];
-            uoVctr.isEmploy = NO;
-            uoVctr.order    = [cell.order copy];
-            [nav pushViewController:uoVctr animated:YES];
-            [uoVctr release];
-            break;
-        }
-        case 3:      //结算审批
-        {
-            OrderFinishViewController *ofVctr = [[OrderFinishViewController alloc]init];
-            ofVctr.order = cell.order;
-            [nav pushViewController:ofVctr animated:YES];
-            [ofVctr release];
+            OrderFinishViewController *orderFinishVctr = [[OrderFinishViewController alloc]init];
+            orderFinishVctr.order = cell.order;
+            [nav pushViewController:orderFinishVctr animated:YES];
+            [orderFinishVctr release];
             break;
         }
         default:

@@ -62,6 +62,8 @@
                                           isBackView:YES];
         }
     }
+    
+    [self getOrderStudents];
 }
 
 - (void) viewDidDisappear:(BOOL)animated
@@ -90,7 +92,6 @@
     
     //获得订单列表
     self.retractableControllers = [[NSMutableArray alloc]init];
-//    [self getOrderTeachers];
     
     self.tableView.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
     self.view.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
@@ -103,6 +104,11 @@
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(doCommentOrderNotice:)
                                                  name:@"commentOrderNotice"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(doOrderConfirmNotice:)
+                                                 name:@"setOrderConfirmNotice"
                                                object:nil];
 }
 
@@ -122,7 +128,7 @@
 {
     [bgImgView release];
     _refreshHeaderView = nil;
-    [teacherArray release];
+    [studentArray release];
     [super dealloc];
 }
 
@@ -131,7 +137,74 @@
 #pragma mark - Notice
 - (void) dismissComplainNotice:(NSNotification *) notice
 {
-    CustomNavigationViewController *nav = (CustomNavigationViewController *)[MainViewController getNavigationViewController];
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+}
+
+- (void) doOrderConfirmNotice:(NSNotification *) notice
+{
+    NSNumber *tag = [notice.userInfo objectForKey:@"TAG"];
+    Order *order  = [notice.userInfo objectForKey:@"ORDER"];
+    
+    if (tag.intValue == 0)
+    {
+        //订单确认
+        NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+        NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"orderid",@"sessid", nil];
+        NSArray *valuesArr = [NSArray arrayWithObjects:@"orderConfirm",order.orderId,ssid, nil];
+        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+                                                         forKeys:paramsArr];
+        CLog(@"sdfshdfushdfu:%@", pDic);
+        NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+        NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+        ServerRequest *request = [ServerRequest sharedServerRequest];
+        request.delegate       = self;
+        NSData *resVal = [request requestSyncWith:kServerPostRequest
+                                         paramDic:pDic
+                                           urlStr:url];
+        NSString *resStr = [[[NSString alloc]initWithData:resVal
+                                                 encoding:NSUTF8StringEncoding]autorelease];
+        NSDictionary *resDic   = [resStr JSONFragmentValue];
+        CLog(@"resDic:%@", resDic);
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
+        {
+            NSString *action = [resDic objectForKey:@"action"];
+            if ([action isEqualToString:@"orderConfirm"])
+            {
+                CLog(@"OrderConfirm Susscess!");
+                
+                NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+                Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
+                
+                //发出确认消息
+                NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"icon",
+                                                                @"orderid",@"taPhone",@"deviceId",nil];
+                NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_CONFIRM_SUCCESS],teacher.phoneNums,teacher.name,teacher.headUrl,order.orderId,order.student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
+                NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
+                                                                  forKeys:paramsArr];
+                
+                //发送消息
+                NSString *jsonMsg   = [pDic JSONFragment];
+                NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+                SingleMQTT *session = [SingleMQTT shareInstance];
+                [session.session publishData:data
+                                     onTopic:order.student.deviceId];
+            }
+        }
+        else
+        {
+            CLog(@"OrderConfirm Failed!");
+            NSString *errorMsg = [resDic objectForKey:@"message"];
+            [self showAlertWithTitle:@"提示"
+                                 tag:0
+                             message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
+                            delegate:self
+                   otherButtonTitles:@"确定",nil];
+        }
+    }
+    
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
     [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
 }
 
@@ -179,9 +252,10 @@
 - (void) reloadUI
 {
     [self.retractableControllers removeAllObjects];
-    for (NSDictionary *item in teacherArray)
+    for (NSDictionary *item in studentArray)
     {
         TeacherOrderSectionController *sVctr = [[TeacherOrderSectionController alloc] initWithViewController:self];
+        
         sVctr.teacherOrderDic = [item copy];
         sVctr.ordersArr       = [item objectForKey:@"orders"];
         [self.retractableControllers addObject:sVctr];
@@ -190,7 +264,7 @@
     [self.tableView reloadData];
 }
 
-- (void) getOrderTeachers
+- (void) getOrderStudents
 {
     if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
     {
@@ -212,7 +286,7 @@
     ServerRequest *serverReq = [ServerRequest sharedServerRequest];
     serverReq.delegate   = self;
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@/", webAddress,STUDENT];
+    NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
     [serverReq requestASyncWith:kServerPostRequest
                        paramDic:pDic
                          urlStr:url];
@@ -225,7 +299,7 @@
     return self.retractableControllers.count;
 }
 
-- (float) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+- (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
 //    if (!iPhone5)
 //    {
@@ -253,7 +327,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     GCRetractableSectionController* sectionController = [self.retractableControllers objectAtIndex:section];
-    int count = sectionController.numberOfRow;
+    NSInteger count = sectionController.numberOfRow;
     if (count>0)
         bgImgView.hidden = YES;
     else
@@ -271,8 +345,7 @@
     {
         cell = (MyTeacherCell *)[sectionController cellForRow:indexPath.row];
         cell.delegate = self;
-        cell.backgroundView = [[UIImageView alloc]initWithImage:[UIImage
-                                                                 imageNamed:@"mtp_tcell_bg"]];
+        cell.backgroundView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"mtp_tcell_bg"]];
         
         return cell;
     }
@@ -302,7 +375,7 @@
     
     
     //刷新订单数据
-    [self getOrderTeachers];
+    [self getOrderStudents];
 }
 
 - (void)doneLoadingTableViewData
@@ -384,18 +457,14 @@
     CustomNavigationViewController *nav = (CustomNavigationViewController *)[MainViewController getNavigationViewController];
     switch (index)
     {
-        case 0:     //教师详情
+        case 0:
         {
-            TeacherDetailViewController *tdVctr = [[TeacherDetailViewController alloc]init];
-            tdVctr.tObj = cell.order.teacher;
-            [nav pushViewController:tdVctr animated:YES];
-            [tdVctr release];
             break;
         }
         case 1:     //沟通
         {
             ChatViewController *cVctr = [[ChatViewController alloc]init];
-            cVctr.tObj    = cell.order.teacher;
+            cVctr.student    = cell.order.student;
             [nav pushViewController:cVctr animated:YES];
             [cVctr release];
             break;
@@ -403,112 +472,11 @@
         case 2:     //投诉
         {
             CustomNavigationViewController *nav = (CustomNavigationViewController *)[MainViewController getNavigationViewController];
+            
             ComplainViewController *cpVctr = [[ComplainViewController alloc]init];
-            cpVctr.tObj = cell.order.teacher;
+            cpVctr.student = cell.order.student;
             [nav presentPopupViewController:cpVctr
                                animationType:MJPopupViewAnimationFade];
-            break;
-        }
-        case 3:     //推荐给同学
-        {
-            NSDictionary *shareDic = [[NSUserDefaults standardUserDefaults] objectForKey:@"ShareContent"];
-            NSDictionary *contactsDic = [shareDic objectForKey:@"contacts"];
-            NSString *content = @"";
-            if (contactsDic)
-            {
-                if ([contactsDic objectForKey:@"teacher"])
-                    content = [contactsDic objectForKey:@"teacher"];
-            }
-            else
-            {
-                //下载
-                if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
-                {
-                    return;
-                }
-                
-                NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-                NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"sessid", nil];
-                NSArray *valuesArr = [NSArray arrayWithObjects:@"getShareSet",ssid, nil];
-                NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                                 forKeys:paramsArr];
-                
-                NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-                NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, STUDENT];
-                ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-                NSData *resVal     = [serverReq requestSyncWith:kServerPostRequest
-                                                       paramDic:pDic
-                                                         urlStr:url];
-                NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                         encoding:NSUTF8StringEncoding]autorelease];
-                NSDictionary *resDic  = [resStr JSONValue];
-                NSString *eerid = [[resDic objectForKey:@"errorid"] copy];
-                if (resDic)
-                {
-                    if (eerid.intValue==0)
-                    {
-                        [[NSUserDefaults standardUserDefaults] setObject:resDic
-                                                                  forKey:@"ShareContent"];
-                        shareDic    = [[NSUserDefaults standardUserDefaults] objectForKey:@"ShareContent"];
-                        contactsDic = [shareDic objectForKey:@"contacts"];
-                        if (contactsDic)
-                        {
-                            if ([contactsDic objectForKey:@"teacher"])
-                                content = [contactsDic objectForKey:@"teacher"];
-                        }
-
-                    }
-                    else
-                    {
-                        NSString *errorMsg = [resDic objectForKey:@"message"];
-                        [self showAlertWithTitle:@"提示"
-                                             tag:4
-                                         message:[NSString stringWithFormat:@"错误码%@,%@",eerid,errorMsg]
-                                        delegate:self
-                               otherButtonTitles:@"确定",nil];
-                    }
-                }
-                else
-                {
-                    [self showAlertWithTitle:@"提示"
-                                         tag:3
-                                     message:@"获取数据失败!"
-                                    delegate:self
-                           otherButtonTitles:@"确定",nil];
-                }
-                
-            }
-            
-            //替换content内容
-            NSString *subContent  = [content stringByReplacingOccurrencesOfString:@"sub" withString:cell.order.teacher.pf];
-            NSString *nameContent = [subContent stringByReplacingOccurrencesOfString:@"name" withString:cell.order.teacher.name];
-            NSString *codeContent = [nameContent stringByReplacingOccurrencesOfString:@"searchCode" withString:cell.order.teacher.searchCode];
-            NSString *sex;
-            if (cell.order.teacher.sex==1)
-                sex = @"他";
-            else
-                sex = @"她";
-            
-            NSString *sexContent = [codeContent stringByReplacingOccurrencesOfString:@"ta"
-                                                                          withString:sex];
-            //调用短信
-            if( [MFMessageComposeViewController canSendText] )
-            {
-                MFMessageComposeViewController * controller = [[MFMessageComposeViewController alloc]init];
-                controller.body = sexContent;
-                controller.messageComposeDelegate = self;
-                [nav presentModalViewController:controller animated:YES];
-            }
-            else
-            {
-                [self showAlertWithTitle:@"提示"
-                                     tag:0
-                                 message:@"设备没有短信功能"
-                                delegate:self
-                       otherButtonTitles:@"确定", nil];
-            }
-
-            
             break;
         }
         default:
@@ -563,18 +531,10 @@
         NSString *action = [resDic objectForKey:@"action"];
         if ([action isEqualToString:@"getOrders"])
         {
-            teacherArray = [[resDic objectForKey:@"teachers"] copy];
+            studentArray = [[resDic objectForKey:@"students"] copy];
             
             //初始化UI
             [self reloadUI];
-        }
-        else if ([action isEqualToString:@"setEvaluate"])
-        {
-            [self showAlertWithTitle:@"提示"
-                                 tag:0
-                             message:@"评价成功!"
-                            delegate:self
-                   otherButtonTitles:@"确定",nil];
         }
     }
     else

@@ -161,12 +161,12 @@ static NoticePopView *popInstance = nil;
         case NOTICE_MSG:   //消息
         {
             //跳转到聊天窗口
-            Teacher *tObj = [Teacher setTeacherProperty:contentDic];
-            ChatViewController *cVctr = [[ChatViewController alloc]init];
-            cVctr.tObj = tObj;
-            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-            [nav pushViewController:cVctr animated:YES];
-            [cVctr release];
+//            Teacher *tObj = [Teacher setTeacherProperty:contentDic];
+//            ChatViewController *cVctr = [[ChatViewController alloc]init];
+//            cVctr.tObj = tObj;
+//            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+//            [nav pushViewController:cVctr animated:YES];
+//            [cVctr release];
             break;
         }
         default:

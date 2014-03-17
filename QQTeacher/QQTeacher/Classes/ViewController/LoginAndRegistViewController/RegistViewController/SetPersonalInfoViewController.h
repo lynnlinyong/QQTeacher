@@ -13,4 +13,6 @@
     UIButton *okBtn;
     int      originY;
 }
+
+@property (nonatomic, retain) NSString *contentInfo;
 @end

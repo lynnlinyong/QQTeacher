@@ -13,7 +13,7 @@
 @end
 
 @implementation ComplainViewController
-@synthesize tObj;
+@synthesize student;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -144,17 +144,17 @@
 
 #pragma mark -
 #pragma mark - UITableViewDelegate and UITableViewDataScource
-- (int) numberOfSectionsInTableView:(UITableView *)tableView
+- (NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
     return 1;
 }
 
-- (int) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+- (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     return 5;
 }
 
-- (float) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+- (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     switch (indexPath.row)
     {
@@ -318,14 +318,14 @@
             
             NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
             
-            NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"teacher_phone",@"tsType",@"tsText",@"sessid", nil];
-            NSArray *valuesArr = [NSArray arrayWithObjects:@"submitTs",tObj.phoneNums,titleRadioTitle,contentView.text,ssid, nil];
-            CLog(@"valuesArr");
+            NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"student_phone",@"tsType",@"tsText",@"sessid", nil];
+            NSArray *valuesArr = [NSArray arrayWithObjects:@"submitTs",student.phoneNumber,titleRadioTitle,contentView.text,ssid, nil];
+            CLog(@"valuesArr:%@", valuesArr);
             NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                              forKeys:paramsArr];
             
             NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-            NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,STUDENT];
+            NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
             
             ServerRequest *request = [ServerRequest sharedServerRequest];
             request.delegate = self;

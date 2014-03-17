@@ -21,6 +21,7 @@
 		BA03623C18D0DDF900AE5C07 /* yd4@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BA03622E18D0DDF900AE5C07 /* yd4@2x.png */; };
 		BA03624218D0E25200AE5C07 /* AMapSearchKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA03624018D0E25200AE5C07 /* AMapSearchKit.framework */; };
 		BA03624318D0E25200AE5C07 /* MAMapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA03624118D0E25200AE5C07 /* MAMapKit.framework */; };
+		BA34916818D6943200F0C533 /* OrderConfirmViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA34916718D6943200F0C533 /* OrderConfirmViewController.m */; };
 		BA50D6D518D1346000CCE95C /* SetTimePeriodViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA50D6D418D1346000CCE95C /* SetTimePeriodViewController.m */; };
 		BA50D6D718D1524800CCE95C /* stp_checked.png in Resources */ = {isa = PBXBuildFile; fileRef = BA50D6D618D1524800CCE95C /* stp_checked.png */; };
 		BA8EC25118D0C4D600D1AA12 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA8EC25018D0C4D600D1AA12 /* Foundation.framework */; };
@@ -246,8 +247,6 @@
 		BA8EC65D18D0C5E300D1AA12 /* c-2-1.png in Resources */ = {isa = PBXBuildFile; fileRef = BA8EC46218D0C5E200D1AA12 /* c-2-1.png */; };
 		BA8EC65E18D0C5E300D1AA12 /* cf_bg1.png in Resources */ = {isa = PBXBuildFile; fileRef = BA8EC46318D0C5E200D1AA12 /* cf_bg1.png */; };
 		BA8EC65F18D0C5E300D1AA12 /* flag_bg.png in Resources */ = {isa = PBXBuildFile; fileRef = BA8EC46418D0C5E200D1AA12 /* flag_bg.png */; };
-		BA8EC66018D0C5E300D1AA12 /* itop.png in Resources */ = {isa = PBXBuildFile; fileRef = BA8EC46518D0C5E200D1AA12 /* itop.png */; };
-		BA8EC66118D0C5E300D1AA12 /* mm_edit_normal.9.png in Resources */ = {isa = PBXBuildFile; fileRef = BA8EC46618D0C5E200D1AA12 /* mm_edit_normal.9.png */; };
 		BA8EC66218D0C5E300D1AA12 /* sfx_message_text_new.wav in Resources */ = {isa = PBXBuildFile; fileRef = BA8EC46818D0C5E200D1AA12 /* sfx_message_text_new.wav */; };
 		BA8EC66318D0C5E300D1AA12 /* sfx_record_start.wav in Resources */ = {isa = PBXBuildFile; fileRef = BA8EC46918D0C5E200D1AA12 /* sfx_record_start.wav */; };
 		BA8EC66418D0C5E300D1AA12 /* dialog_bottom.png in Resources */ = {isa = PBXBuildFile; fileRef = BA8EC46C18D0C5E200D1AA12 /* dialog_bottom.png */; };
@@ -520,6 +519,7 @@
 		BAC73F4018D11B3600B97CC6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BAC73F3B18D11B3600B97CC6 /* InfoPlist.strings */; };
 		BAC73F4118D11B3600B97CC6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BAC73F3E18D11B3600B97CC6 /* InfoPlist.strings */; };
 		BAD36AEB18D2BA51007EA380 /* UploadCertificateViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BAD36AEA18D2BA51007EA380 /* UploadCertificateViewController.m */; };
+		BAE5B0CB18D76A22007D86EB /* location_x.png in Resources */ = {isa = PBXBuildFile; fileRef = BAE5B0CA18D76A22007D86EB /* location_x.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -540,6 +540,8 @@
 		BA03623F18D0DF4200AE5C07 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "QQTeacher/Resources/Views/SplashView/Default-568h@2x.png"; sourceTree = "<group>"; };
 		BA03624018D0E25200AE5C07 /* AMapSearchKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AMapSearchKit.framework; sourceTree = "<group>"; };
 		BA03624118D0E25200AE5C07 /* MAMapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = MAMapKit.framework; sourceTree = "<group>"; };
+		BA34916618D6943200F0C533 /* OrderConfirmViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OrderConfirmViewController.h; sourceTree = "<group>"; };
+		BA34916718D6943200F0C533 /* OrderConfirmViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OrderConfirmViewController.m; sourceTree = "<group>"; };
 		BA50D6D318D1346000CCE95C /* SetTimePeriodViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SetTimePeriodViewController.h; sourceTree = "<group>"; };
 		BA50D6D418D1346000CCE95C /* SetTimePeriodViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SetTimePeriodViewController.m; sourceTree = "<group>"; };
 		BA50D6D618D1524800CCE95C /* stp_checked.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stp_checked.png; sourceTree = "<group>"; };
@@ -936,8 +938,6 @@
 		BA8EC46218D0C5E200D1AA12 /* c-2-1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "c-2-1.png"; sourceTree = "<group>"; };
 		BA8EC46318D0C5E200D1AA12 /* cf_bg1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = cf_bg1.png; sourceTree = "<group>"; };
 		BA8EC46418D0C5E200D1AA12 /* flag_bg.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = flag_bg.png; sourceTree = "<group>"; };
-		BA8EC46518D0C5E200D1AA12 /* itop.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = itop.png; sourceTree = "<group>"; };
-		BA8EC46618D0C5E200D1AA12 /* mm_edit_normal.9.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mm_edit_normal.9.png; sourceTree = "<group>"; };
 		BA8EC46818D0C5E200D1AA12 /* sfx_message_text_new.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_message_text_new.wav; sourceTree = "<group>"; };
 		BA8EC46918D0C5E200D1AA12 /* sfx_record_start.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sfx_record_start.wav; sourceTree = "<group>"; };
 		BA8EC46C18D0C5E200D1AA12 /* dialog_bottom.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = dialog_bottom.png; sourceTree = "<group>"; };
@@ -1219,6 +1219,7 @@
 		BAC73F3F18D11B3600B97CC6 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = InfoPlist.strings; sourceTree = "<group>"; };
 		BAD36AE918D2BA51007EA380 /* UploadCertificateViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UploadCertificateViewController.h; sourceTree = "<group>"; };
 		BAD36AEA18D2BA51007EA380 /* UploadCertificateViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UploadCertificateViewController.m; sourceTree = "<group>"; };
+		BAE5B0CA18D76A22007D86EB /* location_x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = location_x.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1529,6 +1530,8 @@
 				BA8EC2D018D0C5E100D1AA12 /* TeacherOrderCell.m */,
 				BA8EC2D118D0C5E100D1AA12 /* TeacherOrderSectionController.h */,
 				BA8EC2D218D0C5E100D1AA12 /* TeacherOrderSectionController.m */,
+				BA34916618D6943200F0C533 /* OrderConfirmViewController.h */,
+				BA34916718D6943200F0C533 /* OrderConfirmViewController.m */,
 			);
 			path = TeacherOrderViewController;
 			sourceTree = "<group>";
@@ -2402,12 +2405,11 @@
 		BA8EC46018D0C5E200D1AA12 /* TestImages */ = {
 			isa = PBXGroup;
 			children = (
+				BAE5B0CA18D76A22007D86EB /* location_x.png */,
 				BA8EC46118D0C5E200D1AA12 /* arrow.png */,
 				BA8EC46218D0C5E200D1AA12 /* c-2-1.png */,
 				BA8EC46318D0C5E200D1AA12 /* cf_bg1.png */,
 				BA8EC46418D0C5E200D1AA12 /* flag_bg.png */,
-				BA8EC46518D0C5E200D1AA12 /* itop.png */,
-				BA8EC46618D0C5E200D1AA12 /* mm_edit_normal.9.png */,
 			);
 			path = TestImages;
 			sourceTree = "<group>";
@@ -3024,7 +3026,6 @@
 				BA8EC67218D0C5E300D1AA12 /* hight_btn.png in Resources */,
 				BA8EC64F18D0C5E300D1AA12 /* bubbleSomeone@2x.png in Resources */,
 				BA03623B18D0DDF900AE5C07 /* yd4.png in Resources */,
-				BA8EC66118D0C5E300D1AA12 /* mm_edit_normal.9.png in Resources */,
 				BA8EC6EE18D0C5E300D1AA12 /* spp_order_status_bg@2x.png in Resources */,
 				BA8EC73618D0C5E300D1AA12 /* sd_sel_pos_bg.png in Resources */,
 				BA8EC6DA18D0C5E300D1AA12 /* mt_finish_nomal_btn@2x.png in Resources */,
@@ -3076,6 +3077,7 @@
 				BA8EC6A718D0C5E300D1AA12 /* cp_input_btn.png in Resources */,
 				BA8EC5EF18D0C5E300D1AA12 /* bubble-default-incoming-selected.png in Resources */,
 				BA8EC6AC18D0C5E300D1AA12 /* cp_phone_hlight_btn@2x.png in Resources */,
+				BAE5B0CB18D76A22007D86EB /* location_x.png in Resources */,
 				BA8EC71718D0C5E300D1AA12 /* sp_wincon_btn.png in Resources */,
 				BA8EC6A018D0C5E300D1AA12 /* cp_chatinfo_bg@2x.png in Resources */,
 				BA8EC74718D0C5E300D1AA12 /* flag.png in Resources */,
@@ -3222,7 +3224,6 @@
 				BA8EC65D18D0C5E300D1AA12 /* c-2-1.png in Resources */,
 				BA8EC74A18D0C5E300D1AA12 /* pot.png in Resources */,
 				BA8EC6F218D0C5E300D1AA12 /* s_1_1@2x.png in Resources */,
-				BA8EC66018D0C5E300D1AA12 /* itop.png in Resources */,
 				BA8EC73018D0C5E300D1AA12 /* sd_input_btn.png in Resources */,
 				BA8EC26318D0C4D600D1AA12 /* Images.xcassets in Resources */,
 				BA8EC6BA18D0C5E300D1AA12 /* skin_aio_ptt_action_r_3.png in Resources */,
@@ -3347,6 +3348,7 @@
 				BA8EC5E918D0C5E300D1AA12 /* JSMessageInputView.m in Sources */,
 				BA8EC5C518D0C5E300D1AA12 /* amrFileCodec.m in Sources */,
 				BA8EC5C418D0C5E300D1AA12 /* HZLocation.m in Sources */,
+				BA34916818D6943200F0C533 /* OrderConfirmViewController.m in Sources */,
 				BA8EC62518D0C5E300D1AA12 /* SBJSON.m in Sources */,
 				BA8EC5CE18D0C5E300D1AA12 /* ASIHTTPRequest.m in Sources */,
 				BA8EC59718D0C5E300D1AA12 /* MyTeacherViewController.m in Sources */,

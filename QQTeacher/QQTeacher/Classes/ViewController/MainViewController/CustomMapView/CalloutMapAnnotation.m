@@ -11,7 +11,7 @@
 @implementation CalloutMapAnnotation
 @synthesize latitude = _latitude;
 @synthesize longitude = _longitude;
-@synthesize teacherObj;
+@synthesize student;
 @synthesize site;
 
 - (id)initWithLatitude:(CLLocationDegrees)lat

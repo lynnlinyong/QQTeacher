@@ -684,15 +684,15 @@
 
 - (void) initTeachersAnnotation
 {
-    for (Teacher *teacherObj in teacherArray)
-    {
-        CustomPointAnnotation *ann = [[[CustomPointAnnotation alloc] init]autorelease];
-        ann.coordinate = CLLocationCoordinate2DMake(teacherObj.latitude.floatValue,
-                                                    teacherObj.longitude.floatValue);
-
-        ann.teacherObj = teacherObj;
-        [self.mapView addAnnotation:ann];
-    }
+//    for (Teacher *teacherObj in teacherArray)
+//    {
+//        CustomPointAnnotation *ann = [[[CustomPointAnnotation alloc] init]autorelease];
+//        ann.coordinate = CLLocationCoordinate2DMake(teacherObj.latitude.floatValue,
+//                                                    teacherObj.longitude.floatValue);
+//
+//        ann.teacherObj = teacherObj;
+//        [self.mapView addAnnotation:ann];
+//    }
 }
 
 #pragma mark -
@@ -781,12 +781,12 @@
     view.hidden = YES;
     
     //跳转到聊天界面
-    ChatViewController *cVctr = [[ChatViewController alloc]init];
-    cVctr.tObj  = tObj;
-    cVctr.order = order;
-    [self.navigationController pushViewController:cVctr
-                                         animated:YES];
-    [cVctr release];
+//    ChatViewController *cVctr = [[ChatViewController alloc]init];
+//    cVctr.tObj  = tObj;
+//    cVctr.order = order;
+//    [self.navigationController pushViewController:cVctr
+//                                         animated:YES];
+//    [cVctr release];
 }
 
 #pragma mark -
@@ -981,8 +981,10 @@
         {
             //发送订单成功信息
             NSString *orderId  = [[resDic objectForKey:@"orderid"] copy];
+            
             NSData *stuData    = [[NSUserDefaults standardUserDefaults] objectForKey:STUDENT];
             Student *student   = [NSKeyedUnarchiver unarchiveObjectWithData:stuData];
+            
             NSArray *paramsArr = [NSArray arrayWithObjects:@"type",@"deviceId",@"status",@"phone",@"nickname",@"keyId",@"taPhone", nil];
             NSArray *valuesArr = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_CONFIRM],[SingleMQTT getCurrentDevTopic],@"success",student.phoneNumber,
                                                            student.nickName,orderId,tObj.phoneNums, nil];
@@ -1002,7 +1004,7 @@
              *跳转到聊天窗口
              */
             order = [Order setOrderProperty:[resDic objectForKey:@"order"]];
-            order.teacher = tObj;
+//            order.teacher = tObj;
             
             //显示跳转图层
             NSNumber *maxWaitTime = [[NSUserDefaults standardUserDefaults] objectForKey:PUSHMAXTIME];

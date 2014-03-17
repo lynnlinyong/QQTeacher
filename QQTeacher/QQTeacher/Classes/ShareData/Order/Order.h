@@ -24,16 +24,18 @@ typedef enum _tagOrderCommentStatus
     BAD_COMMET
 }OrderCommentStatus;
 
-@class Teacher;
+@class Student;
 @interface Order : NSObject<NSCopying,NSMutableCopying>
 {
     NSString  *orderId;            //订单号
     NSString  *orderAddTimes;      //订单创建时间
+    NSString  *orderStudyStartDate;//授课时间
     NSString  *orderStudyPos;      //授课地址
     NSString  *orderStudyTimes;    //授课时间
     NSString  *everyTimesMoney;    //课酬标准
     NSString  *totalMoney;         //总金额
     NSString  *comment;            //评价
+    NSString  *commentAddTimes;    //评价时间
     OrderStatus orderStatus;       //订单状态
     OrderCommentStatus orderCommentStatus;  //订单评论状态
     
@@ -46,18 +48,21 @@ typedef enum _tagOrderCommentStatus
     
     NSMutableDictionary *addressDataDic;    //订单详细地址
     
-    Teacher   *teacher;            //订单的老师
+    Student   *student;            //订单的老师
 }
-@property (nonatomic, copy)   Teacher   *teacher;
+
+@property (nonatomic, copy)   Student   *student;
 @property (nonatomic, assign) NSString  *payMoney;
 @property (nonatomic, assign) NSString  *backMoney;
 @property (nonatomic, retain) NSString  *orderId;
 @property (nonatomic, retain) NSString  *orderAddTimes;
+@property (nonatomic, retain) NSString  *orderStudyStartDate;
 @property (nonatomic, retain) NSString  *orderStudyPos;
 @property (nonatomic, retain) NSString  *orderStudyTimes;
 @property (nonatomic, retain) NSString  *everyTimesMoney;
 @property (nonatomic, retain) NSString  *totalMoney;
 @property (nonatomic, retain) NSString  *comment;
+@property (nonatomic, retain) NSString  *commentAddTimes;
 @property (nonatomic, assign) OrderStatus orderStatus;
 @property (nonatomic, assign) OrderCommentStatus orderCommentStatus;
 @property (nonatomic, retain) NSString  *orderProvice;

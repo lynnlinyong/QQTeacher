@@ -1190,8 +1190,8 @@
             }
             
             //获取订单
-            curOrder = [Order setOrderProperty:[resDic objectForKey:@"order"]];
-            curOrder.teacher = tObj;
+//            curOrder = [Order setOrderProperty:[resDic objectForKey:@"order"]];
+//            curOrder.teacher = tObj;
             
             //封装订单信息
             NSArray *paramsArr = [NSArray arrayWithObjects:@"order_sd",@"order_kcbz",@"order_jyfdnum",
@@ -1223,34 +1223,34 @@
             NSData *stuData    = [[NSUserDefaults standardUserDefaults] valueForKey:STUDENT];
             Student *student   = [NSKeyedUnarchiver unarchiveObjectWithData:stuData];
             
-            //发送聘请消息
-            NSArray *paramsArr = [NSArray arrayWithObjects:@"type",@"phone",@"nickname",@"orderid",@"taPhone",@"deviceId", nil];
-            NSArray *valuesArr = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_EDIT],student.phoneNumber,
-                                  curOrder.teacher.name,curOrder.orderId,curOrder.teacher.phoneNums,
-                                  [SingleMQTT getCurrentDevTopic], nil];
-            CLog(@"valArr:%@", valuesArr);
-            NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                             forKeys:paramsArr];
-            //发送消息
-            NSString *json = [pDic JSONFragment];
-            CLog(@"update Order Msg:%@,%@", json, curOrder.teacher.deviceId);
-            NSData *data   = [json dataUsingEncoding:NSUTF8StringEncoding];
-            SingleMQTT *session = [SingleMQTT shareInstance];
-            
-            [session.session publishData:data
-                                 onTopic:curOrder.teacher.deviceId];
+//            //发送聘请消息
+//            NSArray *paramsArr = [NSArray arrayWithObjects:@"type",@"phone",@"nickname",@"orderid",@"taPhone",@"deviceId", nil];
+//            NSArray *valuesArr = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_EDIT],student.phoneNumber,
+//                                  curOrder.teacher.name,curOrder.orderId,curOrder.teacher.phoneNums,
+//                                  [SingleMQTT getCurrentDevTopic], nil];
+//            CLog(@"valArr:%@", valuesArr);
+//            NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+//                                                             forKeys:paramsArr];
+//            //发送消息
+//            NSString *json = [pDic JSONFragment];
+//            CLog(@"update Order Msg:%@,%@", json, curOrder.teacher.deviceId);
+//            NSData *data   = [json dataUsingEncoding:NSUTF8StringEncoding];
+//            SingleMQTT *session = [SingleMQTT shareInstance];
+//            
+//            [session.session publishData:data
+//                                 onTopic:curOrder.teacher.deviceId];
             
             CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
             [MBProgressHUD hideHUDForView:nav.view animated:YES];
             
             //跳转到沟通页
-            ChatViewController *cVctr = [[ChatViewController alloc]init];
-            cVctr.tObj  = tObj;
-            cVctr.order = curOrder;
-            cVctr.order.teacher = tObj;
-            cVctr.isFromSearchCondition = YES;
-            [nav pushViewController:cVctr animated:YES];
-            [cVctr release];
+//            ChatViewController *cVctr = [[ChatViewController alloc]init];
+//            cVctr.tObj  = tObj;
+//            cVctr.order = curOrder;
+//            cVctr.order.teacher = tObj;
+//            cVctr.isFromSearchCondition = YES;
+//            [nav pushViewController:cVctr animated:YES];
+//            [cVctr release];
         }
     }
     else

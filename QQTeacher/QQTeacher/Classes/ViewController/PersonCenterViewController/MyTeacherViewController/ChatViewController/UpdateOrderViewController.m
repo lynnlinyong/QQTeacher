@@ -153,47 +153,45 @@
     
     upTab.backgroundColor     = [UIColor colorWithHexString:@"E1E0DE"];
     self.view.backgroundColor = [UIColor colorWithHexString:@"E1E0DE"];
-    
-    CLog(@"order Teacher:%@", order.teacher.name);
 }
 
 - (void) sendUpdateOrderMsg
 {
-    NSData *stuData    = [[NSUserDefaults standardUserDefaults] valueForKey:STUDENT];
-    Student *student   = [NSKeyedUnarchiver unarchiveObjectWithData:stuData];
+    NSData *teacherData = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+    Teacher *teacher    = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
     
     //聘请时修改订单,还是修改订单按钮点击
     if (!isEmploy)
     {
         NSArray *paramsArr = [NSArray arrayWithObjects:@"type",@"phone",@"nickname",@"orderid",@"taPhone",@"deviceId", nil];
         NSArray *valuesArr = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_CONFIRM],
-                              student.phoneNumber,order.teacher.name,order.orderId,order.teacher.phoneNums,[SingleMQTT getCurrentDevTopic], nil];
+                              teacher.phoneNums,order.student.nickName,order.orderId,order.student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
         NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                          forKeys:paramsArr];
         //发送消息
         NSString *json = [pDic JSONFragment];
-        CLog(@"update Order Msg:%@,%@", json, order.teacher.deviceId);
+        CLog(@"update Order Msg:%@,%@", json, order.student.deviceId);
         NSData *data   = [json dataUsingEncoding:NSUTF8StringEncoding];
         SingleMQTT *session = [SingleMQTT shareInstance];
         
         [session.session publishData:data
-                             onTopic:order.teacher.deviceId];
+                             onTopic:order.student.deviceId];
     }
     else
     {
         NSArray *paramsArr = [NSArray arrayWithObjects:@"type",@"phone",@"nickname",@"orderid",@"taPhone",@"deviceId", nil];
-        NSArray *valuesArr = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_EDIT],student.phoneNumber,order.teacher.name,order.orderId,order.teacher.phoneNums,[SingleMQTT getCurrentDevTopic], nil];
+        NSArray *valuesArr = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_EDIT],teacher.phoneNums,order.student.nickName,order.orderId,order.student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
         CLog(@"valArr:%@", valuesArr);
         NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                          forKeys:paramsArr];
         //发送消息
         NSString *json = [pDic JSONFragment];
-        CLog(@"update Order Msg:%@,%@", json, order.teacher.deviceId);
+        CLog(@"update Order Msg:%@,%@", json, order.student.deviceId);
         NSData *data   = [json dataUsingEncoding:NSUTF8StringEncoding];
         SingleMQTT *session = [SingleMQTT shareInstance];
         
         [session.session publishData:data
-                             onTopic:order.teacher.deviceId];
+                             onTopic:order.student.deviceId];
     }
 }
 

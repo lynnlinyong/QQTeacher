@@ -15,8 +15,8 @@
                                                         JSMessagesViewDelegate,
                                                         JSMessagesViewDataSource,CustomNavigationDataSource>
 {
-    UIButton   *listenBtn;
-    UIButton   *employBtn;
+//    UIButton   *listenBtn;
+//    UIButton   *employBtn;
     
     EGORefreshTableHeaderView *_refreshHeaderView;
 	BOOL _reloading;
@@ -24,14 +24,17 @@
     RecordAudio *recordAudio;
     
     LBorderView *infoView;
-    UIView      *employInfoView;
+    
+    UILabel     *listenLab;
+    UIView      *listenView;
+    UISwitch    *listenSwitch;
     BOOL isNewData;
 }
 @property (nonatomic, assign) BOOL     isFromSearchCondition;
 @property (nonatomic, copy)   Order    *order;
-@property (nonatomic, copy)   Teacher  *tObj;
-@property (nonatomic, retain) UIButton *listenBtn;
-@property (nonatomic, retain) UIButton *employBtn;
+@property (nonatomic, copy)   Student  *student;
+//@property (nonatomic, retain) UIButton *listenBtn;
+//@property (nonatomic, retain) UIButton *employBtn;
 @property (retain, nonatomic) NSMutableArray   *messages;
 
 - (void)reloadTableViewDataSource;

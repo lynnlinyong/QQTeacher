@@ -9,16 +9,23 @@
 #import <UIKit/UIKit.h>
 
 @interface OrderFinishViewController : UIViewController<
+                                                    UITextFieldDelegate,
+                                                    UIGridViewDelegate,
                                                     MBProgressHUDDelegate,
                                                     UITableViewDelegate,
                                                     UITableViewDataSource,
                                                     ServerRequestDelegate>
 {
-    UITableView *finishOrderTab;
-    UILabel     *payLab;
-    UILabel     *backMoneyLab;
+    UIGridView    *finishOrderTab;
+    UILabel       *payLab;
+    UILabel       *backMoneyLab;
     
     MBProgressHUD *HUD;
+    
+    UITextField   *payFld;
+    
+    CGFloat       offset;
+    UIButton *okBtn;
 }
 
 @property (nonatomic, copy) Order *order;

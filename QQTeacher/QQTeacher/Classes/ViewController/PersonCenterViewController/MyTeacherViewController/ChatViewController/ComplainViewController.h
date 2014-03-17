@@ -20,5 +20,5 @@
     UITextField  *contentView;
 }
 
-@property (nonatomic, retain) Teacher *tObj;
+@property (nonatomic, copy) Student *student;
 @end

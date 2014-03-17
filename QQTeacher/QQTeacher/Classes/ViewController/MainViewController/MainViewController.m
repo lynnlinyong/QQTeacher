@@ -31,7 +31,7 @@
     [super viewDidAppear:animated];
     
     //设置Title
-    [MainViewController setNavTitle:@"轻轻家教"];
+    [MainViewController setNavTitle:@"个人中心"];
     
     [self initBackBarItem];
 }
@@ -42,7 +42,7 @@
     
     isLocation   = NO;
     
-    teacherArray = [[NSMutableArray alloc]init];
+    studentArray = [[NSMutableArray alloc]init];
     
     //初始化地图API
     [self initMapKey];
@@ -52,12 +52,6 @@
     
     //获取终端设置属性
     [self setTerminalMapProperty];
-    
-    //获得帮助电话
-    [self getHelpPhone];
-
-//    //版本检测
-//    [self checkNewVersion];
 }
 
 - (void) viewDidDisappear:(BOOL)animated
@@ -76,7 +70,7 @@
 - (void) viewDidUnload
 {
     [annArray removeAllObjects];
-    [teacherArray removeAllObjects];
+    [studentArray removeAllObjects];
     self.mapView.delegate = nil;
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
@@ -87,7 +81,7 @@
 {
     [search release];
     [annArray release];
-    [teacherArray release];
+    [studentArray release];
     [mapView release];
     [super dealloc];
 }
@@ -173,83 +167,6 @@
     [mapView setZoomLevel:zooms];
     mapView.showsUserLocation = YES;
     [self.view addSubview:self.mapView];
-    
-    UIImage *navImg   = [UIImage imageNamed:@"main_nav_normal_btn"];
-    UIButton *navBtn  = [UIButton buttonWithType:UIButtonTypeCustom];
-    [navBtn setImage:navImg
-            forState:UIControlStateNormal];
-    [navBtn setImage:[UIImage imageNamed:@"main_nav_hlight_btn"]
-            forState:UIControlStateHighlighted];
-    navBtn.frame = [UIView fitCGRect:CGRectMake(0, 0,
-                                                navImg.size.width,
-                                                navImg.size.height)
-                           isBackView:NO];
-    [navBtn addTarget:self
-                action:@selector(doGotoBtnClicked:)
-      forControlEvents:UIControlEventTouchUpInside];
-    self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc]initWithCustomView:navBtn];
-    
-    UIImage *image = [UIImage imageNamed:@"main_st_normal_btn"];
-    UIButton *searchTeacherBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    [searchTeacherBtn setImage:image
-                      forState:UIControlStateNormal];
-    [searchTeacherBtn setImage:[UIImage imageNamed:@"main_st_hlight_btn"]
-                      forState:UIControlStateHighlighted];
-
-    if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
-    {
-        if (iPhone5)
-        {
-            //ios7 iphone5
-            CLog(@"It's is iphone5 IOS7");
-            searchTeacherBtn.frame = [UIView fitCGRect:CGRectMake(20, 480-44-image.size.height,
-                                                                  image.size.width, image.size.height)
-                                            isBackView:NO];
-        }
-        else
-        {
-            CLog(@"It's is iphone4 IOS7");
-            //ios 7 iphone 4
-            searchTeacherBtn.frame = [UIView fitCGRect:CGRectMake(20, 480-44-image.size.height,
-                                                                  image.size.width, image.size.height)
-                                            isBackView:NO];
-        }
-    }
-    else
-    {
-        if (!iPhone5)
-        {
-            // ios 6 iphone4
-            CLog(@"It's is iphone4 IOS6");
-            searchTeacherBtn.frame = [UIView fitCGRect:CGRectMake(20, 480-54-image.size.height,
-                                                                  image.size.width, image.size.height)
-                                            isBackView:NO];
-            
-        }
-        else
-        {
-            //ios 6 iphone5
-            CLog(@"It's is iphone5 IOS6");
-            searchTeacherBtn.frame = [UIView fitCGRect:CGRectMake(20, 480-44-image.size.height,
-                                                                  image.size.width, image.size.height)
-                                            isBackView:NO];
-        }
-    }
-    [searchTeacherBtn addTarget:self
-                         action:@selector(doSearchBtnClicked:)
-               forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:searchTeacherBtn];
-    
-    //注册确定下载新版本消息
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(gotoDownLoad:)
-                                                 name:@"gotoDownLoad"
-                                               object:nil];
-    //注册取消下载新版本消息
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(cancelDownLoad:)
-                                                 name:@"cancelDownLoad"
-                                               object:nil];
 }
 
 - (void) setTerminalMapProperty
@@ -268,7 +185,7 @@
                                                          forKeys:paramsArr];
         
         NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-        NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, STUDENT];
+        NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
         ServerRequest *serverReq = [ServerRequest sharedServerRequest];
         NSData *resVal     = [serverReq requestSyncWith:kServerPostRequest
                                                paramDic:pDic
@@ -294,7 +211,7 @@
             meAnn.coordinate = self.mapView.centerCoordinate;
             
             //搜索附近老师
-            [self searchNearTeacher];
+            [self searchNearStudent];
         }
         else
         {
@@ -329,7 +246,7 @@
         titleLab.textColor       = [UIColor colorWithHexString:@"#009f66"];
         titleLab.backgroundColor = [UIColor clearColor];
         titleLab.textAlignment = UITextAlignmentCenter;
-        titleLab.text = @"轻轻家教";
+        titleLab.text = title;
         [nav.navigationBar addSubview:titleLab];
         [titleLab release];
     }
@@ -366,7 +283,6 @@
             NSString *resStr = [[[NSString alloc]initWithData:resVal
                                                      encoding:NSUTF8StringEncoding]autorelease];
             NSDictionary *resDic  = [resStr JSONValue];
-            CLog(@"resDic:%@", resDic);
             if (resDic)
             {
                 NSString *webAddress  = [resDic objectForKey:@"web"];
@@ -418,31 +334,6 @@
     return port;
 }
 
-- (void) getHelpPhone
-{
-    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
-    {
-        return;
-    }
-    
-    NSString *helpPhone = [[NSUserDefaults standardUserDefaults] objectForKey:HELP_PHONE];
-    if (!helpPhone)
-    {
-        NSString *idString  = [SingleMQTT getCurrentDevTopic];
-        NSArray *paramsArr  = [NSArray arrayWithObjects:@"action",@"deviceId", nil];
-        NSArray *valusArr   = [NSArray arrayWithObjects:@"getCSPhone",idString,nil];
-        NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valusArr
-                                                         forKeys:paramsArr];
-        ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-        serverReq.delegate = self;
-        NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-        NSString *url = [NSString stringWithFormat:@"%@%@/", webAddress,STUDENT];
-        [serverReq requestASyncWith:kServerPostRequest
-                           paramDic:pDic
-                             urlStr:url];
-    }
-}
-
 - (void) uploadPosToServer:(NSString *) posName
 {
     if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
@@ -465,7 +356,7 @@
         NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                          forKeys:paramsArr];
         NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-        NSString *url = [NSString stringWithFormat:@"%@%@", webAdd, STUDENT];
+        NSString *url = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
         ServerRequest *request = [ServerRequest sharedServerRequest];
         request.delegate = self;
         [request requestASyncWith:kServerPostRequest
@@ -485,7 +376,7 @@
     [search AMapReGoecodeSearch:regeoRequest];
 }
 
-- (void) searchNearTeacher
+- (void) searchNearStudent
 {
     if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
     {
@@ -498,17 +389,14 @@
     NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     if (!ssid)
         ssid = @"";
-    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"latitude",@"longitude",
-                          @"page",@"subjectId",@"selectXBIndex",
-                          @"kcbzIndex",@"zoom",@"sessid", nil];
-    NSArray *valuesArr = [NSArray arrayWithObjects:@"findNearbyTeacher",la,log,
-                          @"1",@"0",@"0",
-                          @"0",[NSNumber numberWithFloat:self.mapView.zoomLevel],ssid, nil];
+    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"latitude",@"longitude", @"zoom",@"sessid", nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"findNearbyStudent",la,log,
+                                                   [NSNumber numberWithFloat:self.mapView.zoomLevel],ssid, nil];
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,STUDENT];
+    NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
     
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
         ServerRequest *request = [ServerRequest sharedServerRequest];
@@ -537,147 +425,17 @@
 - (void) initTeachersAnnotation
 {
     NSMutableArray *annArrs = [[NSMutableArray alloc]init];
-    for (Teacher *teacherObj in teacherArray)
+    for (Student *student in studentArray)
     {
         CustomPointAnnotation *ann = [[[CustomPointAnnotation alloc] init]autorelease];
-        ann.coordinate = CLLocationCoordinate2DMake(teacherObj.latitude.floatValue, teacherObj.longitude.floatValue);
-        ann.teacherObj = teacherObj;
+        ann.coordinate = CLLocationCoordinate2DMake(student.latitude.floatValue, student.longitude.floatValue);
+        ann.student = student;
         [annArrs addObject:ann];
     }
     [self.mapView addAnnotations:annArrs];
     
     [annArrs release];
-    [teacherArray removeAllObjects];
-}
-
-- (BOOL) isLogin
-{
-    BOOL login = [[NSUserDefaults standardUserDefaults] boolForKey:LOGINE_SUCCESS];
-    if (login)
-    {
-        return YES;
-    }
-    
-    return NO;
-}
-
-- (void) checkNewVersion
-{
-    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
-    {
-        return;
-    }
-    
-    NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url  = [NSString stringWithFormat:@"%@/%@", webAdd,STUDENT];
-    NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-    if (ssid)
-    {
-        NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"sessid",nil];
-        NSArray *valuesArr = [NSArray arrayWithObjects:@"versionCheck",ssid,nil];
-        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                         forKeys:paramsArr];
-        ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-        serverReq.delegate = self;
-        [serverReq requestASyncWith:kServerPostRequest
-                           paramDic:pDic
-                             urlStr:url];
-    }
-}
-
-- (void) doGotoBtnClicked:(id)sender
-{
-    //判断是否登录
-    if (![self isLogin])
-    {
-        LoginViewController *loginVctr = [[LoginViewController alloc]init];
-        [self.navigationController pushViewController:loginVctr animated:YES];
-        [loginVctr release];
-    }
-    else
-    {
-        MyTeacherViewController *mVctr = [[MyTeacherViewController alloc]init];
-        UINavigationController *navMvctr = [[UINavigationController alloc]initWithRootViewController:mVctr];
-        
-        LatlyViewController *lVctr = [[LatlyViewController alloc]init];
-        UINavigationController *navLVctr = [[UINavigationController alloc]initWithRootViewController:lVctr];
-        
-        SearchTeacherViewController *sVctr = [[SearchTeacherViewController alloc]init];
-        UINavigationController *navSVctr = [[UINavigationController alloc]initWithRootViewController:sVctr];
-        
-        ShareViewController *shareVctr = [[ShareViewController alloc]initWithNibName:nil
-                                                                              bundle:nil];
-        UINavigationController *navShareVctr = [[UINavigationController alloc]initWithRootViewController:shareVctr];
-        
-        SettingViewController *setVctr = [[SettingViewController alloc]initWithNibName:nil
-                                                                                bundle:nil];
-        UINavigationController *navSetVctr = [[UINavigationController alloc]initWithRootViewController:setVctr];
-        
-        
-        NSMutableDictionary *imgDic = [NSMutableDictionary dictionaryWithCapacity:3];
-        [imgDic setObject:[UIImage imageNamed:@"s_1_1"]
-                   forKey:@"Default"];
-        [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
-                   forKey:@"Highlighted"];
-        [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
-                   forKey:@"Seleted"];
-        NSMutableDictionary *imgDic2 = [NSMutableDictionary dictionaryWithCapacity:3];
-        [imgDic2 setObject:[UIImage imageNamed:@"s_2_1"]
-                    forKey:@"Default"];
-        [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
-                    forKey:@"Highlighted"];
-        [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
-                    forKey:@"Seleted"];
-        NSMutableDictionary *imgDic3 = [NSMutableDictionary dictionaryWithCapacity:3];
-        [imgDic3 setObject:[UIImage imageNamed:@"s_3_1"]
-                    forKey:@"Default"];
-        [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
-                    forKey:@"Highlighted"];
-        [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
-                    forKey:@"Seleted"];
-        NSMutableDictionary *imgDic4 = [NSMutableDictionary dictionaryWithCapacity:3];
-        [imgDic4 setObject:[UIImage imageNamed:@"s_4_1"]
-                    forKey:@"Default"];
-        [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
-                    forKey:@"Highlighted"];
-        [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
-                    forKey:@"Seleted"];
-        NSMutableDictionary *imgDic5 = [NSMutableDictionary dictionaryWithCapacity:3];
-        [imgDic5 setObject:[UIImage imageNamed:@"s_5_1"]
-                    forKey:@"Default"];
-        [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
-                    forKey:@"Highlighted"];
-        [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
-                    forKey:@"Seleted"];
-        NSMutableArray *ctrlArr = [NSMutableArray arrayWithObjects:navMvctr,navLVctr,navSVctr,navShareVctr,navSetVctr,nil];
-        
-        NSArray *imgArr = [NSArray arrayWithObjects:imgDic,imgDic3,imgDic2,
-                           imgDic4,imgDic5,nil];
-        
-        PersonCenterViewController *pcVctr = [[PersonCenterViewController alloc]
-                                              initWithViewControllers:ctrlArr
-                                         imageArray:imgArr];
-        [self.navigationController pushViewController:pcVctr
-                                             animated:YES];
-        [pcVctr release];
-    }
-}
-
-- (void) doSearchBtnClicked:(id)sender
-{
-    if (![self isLogin])
-    {
-        LoginViewController *loginVctr = [[LoginViewController alloc]init];
-        [self.navigationController pushViewController:loginVctr animated:YES];
-        [loginVctr release];
-    }
-    else
-    {
-        SearchConditionViewController *scVctr = [[SearchConditionViewController alloc]init];        
-        [self.navigationController pushViewController:scVctr
-                                             animated:YES];
-        [scVctr release];
-    }
+    [studentArray removeAllObjects];
 }
 
 #pragma mark -
@@ -714,46 +472,14 @@
     if (errorid.intValue == 0)
     {
         NSString *action = [resDic objectForKey:@"action"];
-        if ([action isEqualToString:@"getCSPhone"])
+        if ([action isEqualToString:@"findNearbyStudent"])
         {
-            NSString *helpPhone = [resDic objectForKey:@"message"];
-            CLog(@"helpPhone:%@", helpPhone);
-            [[NSUserDefaults standardUserDefaults] setObject:helpPhone
-                                                      forKey:HELP_PHONE];
-        }
-        else if ([action isEqualToString:@"versionCheck"])
-        {
-            //对比版本号
-            NSString *newVersion = [resDic objectForKey:@"version"];
-            
-            //当前版本
-            NSDictionary *infoDict = [[NSBundle mainBundle] infoDictionary];
-            NSString *oldVersion   = [infoDict objectForKey:@"CFBundleVersion"];
-            CLog(@"oldVersion:%@, newVersion:%@", oldVersion, newVersion);
-            if (newVersion.integerValue > oldVersion.integerValue)
-            {
-                //获得最新app下载地址
-                appurl = [[resDic objectForKey:@"appurl"] retain];
-
-                //提示下载
-                DownloadInfoViewController *diVctr = [[DownloadInfoViewController alloc]init];
-                [self presentPopupViewController:diVctr
-                                   animationType:MJPopupViewAnimationFade];
-            }
-            
-            NSDictionary *versionDic = [NSDictionary dictionaryWithObjectsAndKeys:newVersion,@"Version",
-                                             appurl,@"AppURL", nil];
-            [[NSUserDefaults standardUserDefaults] setObject:versionDic
-                                                      forKey:APP_VERSION];
-        }
-        else if ([action isEqualToString:@"findNearbyTeacher"])
-        {
-            NSArray *items = [resDic objectForKey:@"teachers"];
+            NSArray *items = [resDic objectForKey:@"students"];
             for (NSDictionary *item in items)
             {
                 //设置老师属性
-                Teacher *tObj = [Teacher setTeacherProperty:item];
-                [teacherArray addObject:tObj];
+                Student *student = [Student setPropertyStudent:item];
+                [studentArray addObject:student];
             }
             
             //添加老师地图标注
@@ -801,20 +527,6 @@
 }
 
 #pragma mark -
-#pragma mark - Notice
-- (void) gotoDownLoad:(NSNotification *) notice
-{    
-    //跳转去下载
-    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:appurl]];
-   [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
-}
-
-- (void) cancelDownLoad:(NSNotification *) notice
-{
-    [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
-}
-
-#pragma mark -
 #pragma mark - MAMapViewDelegate
 - (void) mapView:(MAMapView *)mapView didUpdateUserLocation:(MAUserLocation *)userLocation updatingLocation:(BOOL)updatingLocation
 {
@@ -851,7 +563,7 @@
         [self searchReGeocode:userLocation.coordinate];
     
         //搜索附近老师
-        [self searchNearTeacher];
+        [self searchNearStudent];
     }
 }
 
@@ -874,7 +586,7 @@
     meAnn.coordinate = self.mapView.centerCoordinate;
     
     //搜索附近老师
-    [self searchNearTeacher];
+    [self searchNearStudent];
 }
 
 - (void) mapView:(MAMapView *)mapView regionDidChangeAnimated:(BOOL)animated
@@ -904,15 +616,15 @@
         //重新设置地图的缩放级别
         if ((self.mapView.zoomLevel>=cityZooms) && (self.mapView.zoomLevel<=distZooms) && cityFilter<offsetKilometers)
         {
-            [self searchNearTeacher];
+            [self searchNearStudent];
         }
         else if ((self.mapView.zoomLevel>distZooms)&&(self.mapView.zoomLevel<=streatZooms) && (distFilter<offsetKilometers))
         {
-            [self searchNearTeacher];
+            [self searchNearStudent];
         }
         else if ((self.mapView.zoomLevel>streatZooms) && (streatFilter<offsetKilometers))
         {
-            [self searchNearTeacher];
+            [self searchNearStudent];
         }
     }
     originPoint = [[CLLocation alloc]initWithLatitude:self.mapView.centerCoordinate.latitude
@@ -947,8 +659,7 @@
                 annView = [[TTCustomAnnotationView alloc] initWithAnnotation:annotation
                                                              reuseIdentifier:pointReuseIndetifier];
             }
-            if (cpAnn.teacherObj.isId)
-                annView.image = [UIImage imageNamed:@"mp_location_v"];
+
             return annView;
         }
     }
@@ -964,16 +675,15 @@
         if (!outAnnView) {
             outAnnView = [[[CallOutAnnotationView alloc] initWithAnnotation:annotation
                                                             reuseIdentifier:@"calloutview"] autorelease];
-            
-            Teacher *tObj = [ann.teacherObj copy];
+            Student *student = [ann.student copy];
             TeacherPropertyView *tpView = [[[TeacherPropertyView alloc]initWithFrame:CGRectMake(0,
                                                                                                 0,
                                                                                                outAnnView.contentView.frame.size.width,
                                                                                                outAnnView.contentView.frame.size.height)]autorelease];
-            tpView.tObj = [tObj copy];
+            tpView.student  = student;
             tpView.delegate = self;
             [outAnnView.contentView addSubview:tpView];
-            [tObj release];
+            [student release];
         }
         
         return outAnnView;  
@@ -1004,7 +714,7 @@
         //创建搭载自定义calloutview的annotation
         CLog(@"Old:%f,%f", view.annotation.coordinate.latitude,view.annotation.coordinate.longitude)
         _calloutMapAnnotation = [[CalloutMapAnnotation alloc] initWithLatitude:view.annotation.coordinate.latitude andLongitude:view.annotation.coordinate.longitude];
-        _calloutMapAnnotation.teacherObj = annn.teacherObj;
+        _calloutMapAnnotation.student = annn.student;
         
         [self.mapView addAnnotation:_calloutMapAnnotation];
         [self.mapView setCenterCoordinate:view.annotation.coordinate

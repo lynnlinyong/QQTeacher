@@ -24,6 +24,8 @@
                                                          (UIRemoteNotificationTypeAlert |
                                                           UIRemoteNotificationTypeBadge |
                                                           UIRemoteNotificationTypeSound)];
+    //ios5设置NavBar背景图片
+    [self isIos5ToUpdateNav];
     
     self.window = [[[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]] autorelease];
     UIViewController *pVctr = nil;
@@ -31,20 +33,97 @@
     {
         SplashViewController *spVctr = [[[SplashViewController alloc]init]autorelease];
         pVctr = spVctr;
+        
+        self.window.rootViewController = pVctr;
+        self.window.backgroundColor    = [[UIColor whiteColor] retain];
+        [self.window makeKeyAndVisible];
     }
     else
     {
-        MainViewController *mVctr     = [[[MainViewController alloc]init]autorelease];
-        CustomNavigationViewController *nVctr = [[[CustomNavigationViewController alloc]initWithRootViewController:mVctr]autorelease];
-        pVctr = nVctr;
+        BOOL isLogin = [[NSUserDefaults standardUserDefaults] boolForKey:LOGINE_SUCCESS];
+        if (isLogin)
+        {
+            MainViewController *mainVctr     = [[MainViewController alloc]init];
+            
+            //跳转个人中心
+            MyTeacherViewController *mVctr = [[MyTeacherViewController alloc]init];
+            UINavigationController *navMvctr = [[UINavigationController alloc]initWithRootViewController:mVctr];
+            
+            LatlyViewController *lVctr = [[LatlyViewController alloc]init];
+            UINavigationController *navLVctr = [[UINavigationController alloc]initWithRootViewController:lVctr];
+            
+            SearchTeacherViewController *sVctr = [[SearchTeacherViewController alloc]init];
+            UINavigationController *navSVctr = [[UINavigationController alloc]initWithRootViewController:sVctr];
+            
+            ShareViewController *shareVctr   = [[ShareViewController alloc]initWithNibName:nil
+                                                                                    bundle:nil];
+            UINavigationController *navShareVctr = [[UINavigationController alloc]initWithRootViewController:shareVctr];
+            
+            SettingViewController *setVctr = [[SettingViewController alloc]initWithNibName:nil
+                                                                                    bundle:nil];
+            UINavigationController *navSetVctr = [[UINavigationController alloc]initWithRootViewController:setVctr];
+            
+            NSMutableDictionary *imgDic = [NSMutableDictionary dictionaryWithCapacity:3];
+            [imgDic setObject:[UIImage imageNamed:@"s_1_1"]
+                       forKey:@"Default"];
+            [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
+                       forKey:@"Highlighted"];
+            [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
+                       forKey:@"Seleted"];
+            NSMutableDictionary *imgDic2 = [NSMutableDictionary dictionaryWithCapacity:3];
+            [imgDic2 setObject:[UIImage imageNamed:@"s_2_1"]
+                        forKey:@"Default"];
+            [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
+                        forKey:@"Highlighted"];
+            [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
+                        forKey:@"Seleted"];
+            NSMutableDictionary *imgDic3 = [NSMutableDictionary dictionaryWithCapacity:3];
+            [imgDic3 setObject:[UIImage imageNamed:@"s_3_1"]
+                        forKey:@"Default"];
+            [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
+                        forKey:@"Highlighted"];
+            [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
+                        forKey:@"Seleted"];
+            NSMutableDictionary *imgDic4 = [NSMutableDictionary dictionaryWithCapacity:3];
+            [imgDic4 setObject:[UIImage imageNamed:@"s_4_1"]
+                        forKey:@"Default"];
+            [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
+                        forKey:@"Highlighted"];
+            [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
+                        forKey:@"Seleted"];
+            NSMutableDictionary *imgDic5 = [NSMutableDictionary dictionaryWithCapacity:3];
+            [imgDic5 setObject:[UIImage imageNamed:@"s_5_1"]
+                        forKey:@"Default"];
+            [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
+                        forKey:@"Highlighted"];
+            [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
+                        forKey:@"Seleted"];
+            
+            NSMutableArray *ctrlArr = [NSMutableArray arrayWithObjects:navMvctr,navLVctr,navSVctr,
+                                                                       navShareVctr,navSetVctr,nil];
+            NSArray *imgArr = [NSArray arrayWithObjects:imgDic,imgDic3,imgDic2,
+                                                       imgDic4,imgDic5,nil];
+            
+            PersonCenterViewController *pcVctr = [[PersonCenterViewController alloc]
+                                                  initWithViewControllers:ctrlArr
+                                                  imageArray:imgArr];
+            
+            CustomNavigationViewController *nav = [[CustomNavigationViewController alloc]initWithRootViewController:pcVctr];
+            self.window.rootViewController = nav;
+            self.window.backgroundColor = [[UIColor whiteColor] retain];
+            [self.window makeKeyAndVisible];
+            [nav pushViewController:mainVctr animated:YES];
+        }
+        else
+        {
+            LoginViewController *login = [[LoginViewController alloc]init];
+            CustomNavigationViewController *nav = [[CustomNavigationViewController alloc]initWithRootViewController:login];
+            self.window.rootViewController = nav;
+            self.window.backgroundColor = [[UIColor whiteColor] retain];
+            [self.window makeKeyAndVisible];
+        }
     }
     
-    //ios5设置NavBar背景图片
-    [self isIos5ToUpdateNav];
-    
-    self.window.rootViewController = pVctr;
-    self.window.backgroundColor = [[UIColor whiteColor] retain];
-    [self.window makeKeyAndVisible];
     return YES;
 }
 
@@ -148,7 +227,7 @@
                                                              forKeys:paramsArray];
         ServerRequest *request = [ServerRequest sharedServerRequest];
         request.delegate = self;
-        NSString *url = [NSString stringWithFormat:@"%@%@", webAdd,STUDENT];
+        NSString *url = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
         [request requestASyncWith:kServerPostRequest
                          paramDic:pDic
                            urlStr:url];
@@ -173,7 +252,7 @@
         
         ServerRequest *request = [ServerRequest sharedServerRequest];
         NSString *webAddress   = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-        NSString *url  = [NSString stringWithFormat:@"%@%@/", webAddress,TEACHER];
+        NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
         NSData *resVal = [request requestSyncWith:kServerPostRequest
                                          paramDic:pDic
                                            urlStr:url];
@@ -275,8 +354,10 @@
 
 + (void) popToMainViewController
 {
-    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-    [nav popToRootViewControllerAnimated:YES];
+    LoginViewController *login = [[LoginViewController alloc]init];
+    CustomNavigationViewController *nav = [[CustomNavigationViewController alloc]initWithRootViewController:login];
+    AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    app.window.rootViewController = nav;
 }
 
 + (BOOL) isInView:(NSString *) vctrName
@@ -302,49 +383,49 @@
     {
         case PUSH_TYPE_APPLY:       //接收到老师抢单信息
         {
-            //添加到联系人,订单.等待老师确认。
-            Teacher *tObj  = [[Teacher alloc]init];
-            tObj.deviceId  = [msgDic objectForKey:@"deviceId"];
-            tObj.sex       = ((NSNumber *) [msgDic objectForKey:@"gender"]).intValue;
-            tObj.headUrl   = [msgDic objectForKey:@"icon"];
-            tObj.idNums    = [msgDic objectForKey:@"idnumber"];
-            tObj.info      = [msgDic objectForKey:@"info"];
-            tObj.name      = [msgDic objectForKey:@"nickname"];
-            tObj.phoneNums = [msgDic objectForKey:@"phone"];
-            tObj.comment   = ((NSNumber *) [msgDic objectForKey:@"stars"]).intValue;
-            tObj.studentCount = ((NSNumber *) [msgDic objectForKey:@"students"]).intValue;
-            tObj.pf = [msgDic objectForKey:@"subjectText"];
-            
-            //获得是否已经抢单
-            BOOL isConfirm = [[NSUserDefaults standardUserDefaults] boolForKey:IS_ORDER_CONFIRM];
-            if (!isConfirm)
-            {
-                NSDictionary *infoDic = [[NSDictionary alloc]initWithObjectsAndKeys:tObj,@"OrderTeacher",nil];
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"OrderConfirm"
-                                                                    object:nil
-                                                                  userInfo:infoDic];
-            }
-            else
-            {
-                //发送订单失败信息
-                NSString *orderId  = [[msgDic objectForKey:@"keyId"] copy];
-                NSData *stuData    = [[NSUserDefaults standardUserDefaults] objectForKey:STUDENT];
-                Student *student   = [NSKeyedUnarchiver unarchiveObjectWithData:stuData];
-                NSArray *paramsArr = [NSArray arrayWithObjects:@"type",@"status",@"phone",
-                                      @"nickname",@"keyId",@"taPhone", nil];
-                NSArray *valuesArr = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_CONFIRM],@"failure",
-                                      student.phoneNumber,
-                                      student.nickName,orderId,tObj.phoneNums, nil];
-                NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                                 forKeys:paramsArr];
-                NSString *jsonDic  = [pDic JSONFragment];
-                NSData *data = [jsonDic dataUsingEncoding:NSUTF8StringEncoding];
-                
-                //发送抢单失败消息
-                SingleMQTT *session = [SingleMQTT shareInstance];
-                [session.session publishData:data
-                                     onTopic:tObj.deviceId];
-            }
+//            //添加到联系人,订单.等待老师确认。
+//            Teacher *tObj  = [[Teacher alloc]init];
+//            tObj.deviceId  = [msgDic objectForKey:@"deviceId"];
+//            tObj.sex       = ((NSNumber *) [msgDic objectForKey:@"gender"]).intValue;
+//            tObj.headUrl   = [msgDic objectForKey:@"icon"];
+//            tObj.idNums    = [msgDic objectForKey:@"idnumber"];
+//            tObj.info      = [msgDic objectForKey:@"info"];
+//            tObj.name      = [msgDic objectForKey:@"nickname"];
+//            tObj.phoneNums = [msgDic objectForKey:@"phone"];
+//            tObj.comment   = ((NSNumber *) [msgDic objectForKey:@"stars"]).intValue;
+//            tObj.studentCount = ((NSNumber *) [msgDic objectForKey:@"students"]).intValue;
+//            tObj.pf = [msgDic objectForKey:@"subjectText"];
+//            
+//            //获得是否已经抢单
+//            BOOL isConfirm = [[NSUserDefaults standardUserDefaults] boolForKey:IS_ORDER_CONFIRM];
+//            if (!isConfirm)
+//            {
+//                NSDictionary *infoDic = [[NSDictionary alloc]initWithObjectsAndKeys:tObj,@"OrderTeacher",nil];
+//                [[NSNotificationCenter defaultCenter] postNotificationName:@"OrderConfirm"
+//                                                                    object:nil
+//                                                                  userInfo:infoDic];
+//            }
+//            else
+//            {
+//                //发送订单失败信息
+//                NSString *orderId  = [[msgDic objectForKey:@"keyId"] copy];
+//                NSData *stuData    = [[NSUserDefaults standardUserDefaults] objectForKey:STUDENT];
+//                Student *student   = [NSKeyedUnarchiver unarchiveObjectWithData:stuData];
+//                NSArray *paramsArr = [NSArray arrayWithObjects:@"type",@"status",@"phone",
+//                                      @"nickname",@"keyId",@"taPhone", nil];
+//                NSArray *valuesArr = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_CONFIRM],@"failure",
+//                                      student.phoneNumber,
+//                                      student.nickName,orderId,tObj.phoneNums, nil];
+//                NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+//                                                                 forKeys:paramsArr];
+//                NSString *jsonDic  = [pDic JSONFragment];
+//                NSData *data = [jsonDic dataUsingEncoding:NSUTF8StringEncoding];
+//                
+//                //发送抢单失败消息
+//                SingleMQTT *session = [SingleMQTT shareInstance];
+//                [session.session publishData:data
+//                                     onTopic:tObj.deviceId];
+//            }
             break;
         }
         case PUSH_TYPE_CONFIRM:     //确认老师的确认消息
@@ -441,38 +522,44 @@
         }
         case PUSH_TYPE_ORDER_EDIT_SUCCESS:
         {
-            CustomNavigationViewController *nav = (CustomNavigationViewController *) [MainViewController getNavigationViewController];
-            [nav showAlertWithTitle:@"恭喜您"
-                                tag:0
-                            message:@"老师已经接受了您的聘请!"
-                           delegate:self
-                  otherButtonTitles:@"知道了",nil];
+//            CustomNavigationViewController *nav = (CustomNavigationViewController *) [MainViewController getNavigationViewController];
+//            [nav showAlertWithTitle:@"恭喜您"
+//                                tag:0
+//                            message:@"老师已经接受了您的聘请!"
+//                           delegate:self
+//                  otherButtonTitles:@"知道了",nil];
             break;
         }
         case PUSH_TYPE_ORDER_CONFIRM_SUCCESS:  //订单修改确认
         {
-            CustomNavigationViewController *nav = (CustomNavigationViewController *) [MainViewController getNavigationViewController];
-            [nav showAlertWithTitle:@"提示"
-                                tag:0
-                            message:@"老师已经确认了您的订单修改!"
-                           delegate:self
-                  otherButtonTitles:@"知道了",nil];
+//            CustomNavigationViewController *nav = (CustomNavigationViewController *) [MainViewController getNavigationViewController];
+//            [nav showAlertWithTitle:@"提示"
+//                                tag:0
+//                            message:@"老师已经确认了您的订单修改!"
+//                           delegate:self
+//                  otherButtonTitles:@"知道了",nil];
             break;
         }
-        case PUSH_TYPE_SYSTEM_MSG:
+        case PUSH_TYPE_PUSHCC:                //助教消息
         {
+            NoticeWallViewController *noticeWall = [[NoticeWallViewController alloc]init];
+            noticeWall.title   = [msgDic objectForKey:@"title"];
+            noticeWall.content = [msgDic objectForKey:@"message"];
+            CustomNavigationViewController *nav  = [MainViewController getNavigationViewController];
+            [nav presentPopupViewController:noticeWall
+                              animationType:MJPopupViewAnimationFade];
             break;
         }
         case PUSH_TYPE_LISTENING_CHANG:       //试听改变
         {
-            //判断当前是否在聊天窗口
-            if ([AppDelegate isInView:@"ChatViewController"])
-            {
-                //发送教师端试听改变Notice
-                [[NSNotificationCenter defaultCenter] postNotificationName:@"listenChanged"
-                                                                    object:nil
-                                                                  userInfo:msgDic];
-            }
+//            //判断当前是否在聊天窗口
+//            if ([AppDelegate isInView:@"ChatViewController"])
+//            {
+//                //发送教师端试听改变Notice
+//                [[NSNotificationCenter defaultCenter] postNotificationName:@"listenChanged"
+//                                                                    object:nil
+//                                                                  userInfo:msgDic];
+//            }
             break;
         }
         case PUSH_TYPE_OFFLINE_MSG:           //异地登录,消息下线
@@ -481,23 +568,18 @@
             [[NSUserDefaults standardUserDefaults] setBool:NO
                                                     forKey:LOGINE_SUCCESS];
             
-            //弹回主界面
-            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-            for (UIViewController *ctr in nav.viewControllers)
-            {
-                if ([ctr isKindOfClass:[MainViewController class]])
-                {
-                    [nav popToViewController:ctr animated:YES];
-                    break;
-                }
-            }
+            //显示登录页面
+            AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+            LoginViewController *loginVctr = [[LoginViewController alloc]init];
+            CustomNavigationViewController *nav = [[CustomNavigationViewController alloc]initWithRootViewController:loginVctr];
+            appDelegate.window.rootViewController = nav;
             
             //提示用户
             UIAlertView *alertView = [[UIAlertView alloc]initWithTitle:@"提示"
                                                                message:@"您已经在另一台设备上登录!"
                                                               delegate:self
                                                      cancelButtonTitle:nil
-                                                     otherButtonTitles:@"确定", nil];
+                                                     otherButtonTitles:@"知道了", nil];
             [alertView show];
             [alertView release];
             break;

@@ -10,7 +10,7 @@
 
 @class TeacherOrderCell;
 @protocol TeacherOrderCellDelegate <NSObject>
-- (void) cell:(TeacherOrderCell *) cell buttonTag:(int) tag;
+- (void) cell:(TeacherOrderCell *) cell buttonTag:(NSInteger) tag;
 @end
 
 @class CommentView;
@@ -18,21 +18,26 @@
 {
     UILabel  *studyPosLab;
     UILabel  *orderDateLab;
-    UILabel  *orderInfoLab;
-    UILabel  *noConfirmLab;
+    UILabel  *orderStudyTimeLab;
+    UILabel  *orderSalaryLab;
+    UILabel  *orderTotalMoneyLab;
+    UILabel  *orderPayMoneyLab;
+    UILabel  *orderCommentLab;
+    UIImageView *commentImgView;
+//    UILabel  *noConfirmLab;
     UILabel  *finishLab;
     
-    UIButton *freeBtn;
-    UIButton *finishBtn;
-    UIButton *updateBtn;
+    UIButton *ctrBtn;
+//    UIButton *finishBtn;
+//    UIButton *updateBtn;
     
-    NSMutableArray  *buttonArray;
+//    NSMutableArray  *buttonArray;
     UIView *parentView;
     UIImageView *bgLabImageView;
 }
-@property (nonatomic, retain) CommentView *commView;
+//@property (nonatomic, retain) CommentView *commView;
 @property (nonatomic, copy)   Order *order;
-@property (nonatomic, retain) UIButton *commentBtn;
+//@property (nonatomic, retain) UIButton *commentBtn;
 @property (nonatomic, assign) id<TeacherOrderCellDelegate> delegate;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier withParent:(UIView *) pView;

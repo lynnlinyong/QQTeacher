@@ -16,7 +16,7 @@
                                                     EGORefreshTableHeaderDelegate,
                                                     MFMessageComposeViewControllerDelegate>
 {
-    NSMutableArray      *teacherArray;
+    NSMutableArray      *studentArray;
     
     EGORefreshTableHeaderView *_refreshHeaderView;
 	BOOL _reloading;

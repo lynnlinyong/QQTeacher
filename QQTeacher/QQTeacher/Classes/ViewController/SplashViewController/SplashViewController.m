@@ -166,10 +166,87 @@
     CGFloat offset = scrollView.contentOffset.x-(uiPctr.numberOfPages-1)*pageWidth;
     if ((page == 1) && (offset > 20))
     {
-        MainViewController *mainVctr = [[MainViewController alloc]init];
-        CustomNavigationViewController *nav = [[[CustomNavigationViewController alloc]initWithRootViewController:mainVctr]autorelease];
-        AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-        app.window.rootViewController = nav;
+        BOOL isLogin = [[NSUserDefaults standardUserDefaults] boolForKey:LOGINE_SUCCESS];
+        if (isLogin)
+        {
+            MainViewController *mainVctr     = [[MainViewController alloc]init];
+            
+            //跳转个人中心
+            MyTeacherViewController *mVctr = [[MyTeacherViewController alloc]init];
+            UINavigationController *navMvctr = [[UINavigationController alloc]initWithRootViewController:mVctr];
+            
+            LatlyViewController *lVctr = [[LatlyViewController alloc]init];
+            UINavigationController *navLVctr = [[UINavigationController alloc]initWithRootViewController:lVctr];
+            
+            SearchTeacherViewController *sVctr = [[SearchTeacherViewController alloc]init];
+            UINavigationController *navSVctr = [[UINavigationController alloc]initWithRootViewController:sVctr];
+            
+            ShareViewController *shareVctr   = [[ShareViewController alloc]initWithNibName:nil
+                                                                                    bundle:nil];
+            UINavigationController *navShareVctr = [[UINavigationController alloc]initWithRootViewController:shareVctr];
+            
+            SettingViewController *setVctr = [[SettingViewController alloc]initWithNibName:nil
+                                                                                    bundle:nil];
+            UINavigationController *navSetVctr = [[UINavigationController alloc]initWithRootViewController:setVctr];
+            
+            NSMutableDictionary *imgDic = [NSMutableDictionary dictionaryWithCapacity:3];
+            [imgDic setObject:[UIImage imageNamed:@"s_1_1"]
+                       forKey:@"Default"];
+            [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
+                       forKey:@"Highlighted"];
+            [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
+                       forKey:@"Seleted"];
+            NSMutableDictionary *imgDic2 = [NSMutableDictionary dictionaryWithCapacity:3];
+            [imgDic2 setObject:[UIImage imageNamed:@"s_2_1"]
+                        forKey:@"Default"];
+            [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
+                        forKey:@"Highlighted"];
+            [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
+                        forKey:@"Seleted"];
+            NSMutableDictionary *imgDic3 = [NSMutableDictionary dictionaryWithCapacity:3];
+            [imgDic3 setObject:[UIImage imageNamed:@"s_3_1"]
+                        forKey:@"Default"];
+            [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
+                        forKey:@"Highlighted"];
+            [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
+                        forKey:@"Seleted"];
+            NSMutableDictionary *imgDic4 = [NSMutableDictionary dictionaryWithCapacity:3];
+            [imgDic4 setObject:[UIImage imageNamed:@"s_4_1"]
+                        forKey:@"Default"];
+            [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
+                        forKey:@"Highlighted"];
+            [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
+                        forKey:@"Seleted"];
+            NSMutableDictionary *imgDic5 = [NSMutableDictionary dictionaryWithCapacity:3];
+            [imgDic5 setObject:[UIImage imageNamed:@"s_5_1"]
+                        forKey:@"Default"];
+            [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
+                        forKey:@"Highlighted"];
+            [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
+                        forKey:@"Seleted"];
+            
+            NSMutableArray *ctrlArr = [NSMutableArray arrayWithObjects:navMvctr,navLVctr,navSVctr,
+                                       navShareVctr,navSetVctr,nil];
+            NSArray *imgArr = [NSArray arrayWithObjects:imgDic,imgDic3,imgDic2,
+                               imgDic4,imgDic5,nil];
+            
+            PersonCenterViewController *pcVctr = [[PersonCenterViewController alloc]
+                                                  initWithViewControllers:ctrlArr
+                                                  imageArray:imgArr];
+            
+            CustomNavigationViewController *nav = [[CustomNavigationViewController alloc]initWithRootViewController:pcVctr];
+            AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+            app.window.rootViewController = nav;
+            
+            [nav pushViewController:mainVctr animated:NO];
+        }
+        else
+        {
+            LoginViewController *login = [[LoginViewController alloc]init];
+            CustomNavigationViewController *nav = [[CustomNavigationViewController alloc]initWithRootViewController:login];
+            AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+            app.window.rootViewController = nav;
+        }
     }
 }
 @end

@@ -20,12 +20,13 @@
 @interface MyTeacherCell : UITableViewCell<TTImageViewDelegate>
 {
     UIButton            *headBtn;
+    UILabel *nameLab;
     UILabel             *introduceLab;
     UIButton            *commBtn;
     UIButton            *compBtn;
-    UIButton            *recommBtn;
-    UIStartsImageView   *starImageView;
-    UIImageView *idImageView;
+//    UIButton            *recommBtn;
+//    UIStartsImageView   *starImageView;
+//    UIImageView *idImageView;
 }
 
 @property (nonatomic, copy) Order    *order;

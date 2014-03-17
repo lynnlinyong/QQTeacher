@@ -35,7 +35,7 @@
     [self initUI];
     
     //获得新消息
-//    [self getMessageNewNumber];
+    [self getMessageNewNumber];
 }
 
 - (void) viewDidAppear:(BOOL)animated
@@ -182,7 +182,7 @@
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url  = [NSString stringWithFormat:@"%@%@/", webAddress,STUDENT];
+    NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
     ServerRequest *serverReq = [ServerRequest sharedServerRequest];
     serverReq.delegate = self;
     [serverReq requestASyncWith:kServerPostRequest
@@ -190,20 +190,21 @@
                          urlStr:url];
 }
 
-- (void) deleteTeacherFormChat:(NSString *) teacherId
+- (void) deleteStudentFormChat:(NSString *) studentId
 {
-    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+    if (![AppDelegate isConnectionAvailable:YES
+                                withGesture:NO])
     {
         return;
     }
     
     NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"teacherId",@"sessid", nil];
-    NSArray *valuesArr = [NSArray arrayWithObjects:@"deleteNewMember",teacherId,ssid, nil];
+    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"studentId",@"sessid", nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"deleteNewMember",studentId,ssid, nil];
     NSDictionary *dic  = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@", webAdd,STUDENT];
+    NSString *url = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
     ServerRequest *request = [ServerRequest sharedServerRequest];
     request.delegate = self;
     [request requestASyncWith:kServerPostRequest
@@ -262,14 +263,14 @@
 
 #pragma mark -
 #pragma mark - UITableViewDelegate and UITableViewDatasource
-- (int) numberOfSectionsInTableView:(UITableView *)tableView
+- (NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
     return 1;
 }
 
-- (int) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+- (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    int count = msgArray.count;
+    long count = msgArray.count;
     if (count>0)
         bgImgView.hidden = YES;
     else
@@ -278,7 +279,7 @@
     return msgArray.count+1;
 }
 
-- (float) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+- (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.row == 0)
     {
@@ -351,8 +352,8 @@
         if (msgArray.count>0)
         {
             [cell setBackgroundView:[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"lt_list_bg"]]];
-            NSDictionary *teacherDic = [msgArray objectAtIndex:indexPath.row-1];
-            cell.msgDic = teacherDic;
+            NSDictionary *studentDic = [msgArray objectAtIndex:indexPath.row-1];
+            cell.msgDic = studentDic;
         }
         
         return cell;
@@ -372,21 +373,15 @@
     }
     else
     {
-        NSDictionary *teacherDic = [msgArray objectAtIndex:indexPath.row-1];
-        Teacher *tObj = [[Teacher alloc]init];
-        tObj.deviceId = [[teacherDic objectForKey:@"deviceId"] copy];
-        tObj.sex = ((NSNumber *)[teacherDic objectForKey:@"gender"]).intValue;
-        NSString *webAdd = [[NSUserDefaults standardUserDefaults]objectForKey:WEBADDRESS];
-        tObj.headUrl = [NSString stringWithFormat:@"%@%@",webAdd,[teacherDic objectForKey:@"icon"]];
-        tObj.name      = [[teacherDic objectForKey:@"nickname"] copy];
-        tObj.phoneNums = [[teacherDic objectForKey:@"phone"] copy];
-        tObj.pf = [[teacherDic objectForKey:@"subjectText"] copy];
-
+        NSDictionary *studentDic = [msgArray objectAtIndex:indexPath.row-1];
+        Student *student = [Student setPropertyStudent:studentDic];
+        CLog(@"student.deviceId:%@", student.deviceId);
+        
         ChatViewController *cVctr = [[ChatViewController alloc]init];
-        cVctr.tObj = tObj;
-        [nav pushViewController:cVctr animated:YES];
+        cVctr.student = student;
+        [nav pushViewController:cVctr
+                       animated:YES];
         [cVctr release];
-        [tObj  release];
     }
     
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
@@ -405,7 +400,7 @@
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         
         NSDictionary *dic = [msgArray objectAtIndex:indexPath.row-1];
-        [self deleteTeacherFormChat:[(NSString *)[dic objectForKey:@"teacherId"] copy]];
+        [self deleteStudentFormChat:[(NSString *)[dic objectForKey:@"studentId"] copy]];
         [msgArray removeObjectAtIndex:indexPath.row-1];
         
         // Delete the row from the data source.
@@ -484,8 +479,8 @@
         {
             sysDic   = [[resDic objectForKey:@"sys_message"] copy];
             
-            //添加老师沟通消息
-            NSArray *msgs = [[resDic objectForKey:@"teachers"] copy];
+            //添加学生沟通消息
+            NSArray *msgs = [[resDic objectForKey:@"students"] copy];
             for (id item in msgs)
             {
                 [msgArray addObject:item];

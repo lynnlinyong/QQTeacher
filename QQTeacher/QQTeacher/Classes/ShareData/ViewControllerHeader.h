@@ -140,5 +140,6 @@
 #import "SetPersonalInfoViewController.h"
 #import "SetTimePeriodViewController.h"
 #import "UploadCertificateViewController.h"
+#import "OrderConfirmViewController.h"
 
 #endif

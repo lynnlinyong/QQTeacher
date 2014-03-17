@@ -66,7 +66,6 @@
 
 #pragma mark -
 #pragma mark - Custom Action
-
 - (void) initUI
 {
     systemMsgArray = [[NSMutableArray alloc]init];
@@ -91,7 +90,7 @@
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url  = [NSString stringWithFormat:@"%@%@/", webAddress,STUDENT];
+    NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
     ServerRequest *serverReq = [ServerRequest sharedServerRequest];
     serverReq.delegate = self;
     [serverReq requestASyncWith:kServerPostRequest
@@ -112,7 +111,7 @@
     NSDictionary *dic  = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@", webAdd,STUDENT];
+    NSString *url = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
     ServerRequest *request = [ServerRequest sharedServerRequest];
     request.delegate = self;
     [request requestASyncWith:kServerPostRequest

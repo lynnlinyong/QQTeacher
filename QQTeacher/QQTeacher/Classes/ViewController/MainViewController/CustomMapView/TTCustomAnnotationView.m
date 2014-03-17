@@ -28,7 +28,7 @@
         self.backgroundColor   = [UIColor clearColor];
         
         //大头针的图片
-        self.image = [UIImage imageNamed:@"itop.png"];
+        self.image = [UIImage imageNamed:@"location_x.png"];
     }
     
     return self;

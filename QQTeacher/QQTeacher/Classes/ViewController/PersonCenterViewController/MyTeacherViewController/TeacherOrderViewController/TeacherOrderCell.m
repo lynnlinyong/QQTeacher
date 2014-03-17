@@ -11,20 +11,26 @@
 @implementation TeacherOrderCell
 @synthesize order;
 @synthesize delegate;
-@synthesize commentBtn;
-@synthesize commView;
+//@synthesize commentBtn;
+//@synthesize commView;
 
 - (void) dealloc
 {
-    [commView       release];
-    [studyPosLab    release];
-    [orderInfoLab   release];
+    [studyPosLab         release];
+    [orderStudyTimeLab   release];
+    [orderSalaryLab      release];
+    [orderTotalMoneyLab  release];
+    [orderPayMoneyLab    release];
+    [orderCommentLab     release];
+    [commentImgView release];
+    
     [orderDateLab   release];
     [bgLabImageView release];
-    [noConfirmLab   release];
+//    [noConfirmLab   release];
     [finishLab      release];
-    [buttonArray    removeAllObjects];
+    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
     [super dealloc];
 }
 
@@ -42,12 +48,44 @@
         studyPosLab.backgroundColor = [UIColor clearColor];
         [self addSubview:studyPosLab];
         
-        orderInfoLab = [[UILabel alloc]init];
-        orderInfoLab.textColor       = [UIColor whiteColor];
-        orderInfoLab.font  = [UIFont systemFontOfSize:12.f];
-        orderInfoLab.frame = CGRectMake(10, 25, 200, 20);
-        orderInfoLab.backgroundColor = [UIColor clearColor];
-        [self addSubview:orderInfoLab];
+        orderStudyTimeLab = [[UILabel alloc]init];
+        orderStudyTimeLab.textColor       = [UIColor whiteColor];
+        orderStudyTimeLab.font  = [UIFont systemFontOfSize:12.f];
+        orderStudyTimeLab.frame = CGRectMake(10, 25, 200, 20);
+        orderStudyTimeLab.backgroundColor = [UIColor clearColor];
+        [self addSubview:orderStudyTimeLab];
+        
+        orderSalaryLab = [[UILabel alloc]init];
+        orderSalaryLab.textColor       = [UIColor whiteColor];
+        orderSalaryLab.font  = [UIFont systemFontOfSize:12.f];
+        orderSalaryLab.frame = CGRectMake(10, 45, 200, 20);
+        orderSalaryLab.backgroundColor = [UIColor clearColor];
+        [self addSubview:orderSalaryLab];
+        
+        orderTotalMoneyLab = [[UILabel alloc]init];
+        orderTotalMoneyLab.textColor       = [UIColor whiteColor];
+        orderTotalMoneyLab.font  = [UIFont systemFontOfSize:12.f];
+        orderTotalMoneyLab.frame = CGRectMake(10, 65, 200, 20);
+        orderTotalMoneyLab.backgroundColor = [UIColor clearColor];
+        [self addSubview:orderTotalMoneyLab];
+        
+        orderPayMoneyLab = [[UILabel alloc]init];
+        orderPayMoneyLab.textColor       = [UIColor whiteColor];
+        orderPayMoneyLab.font  = [UIFont systemFontOfSize:12.f];
+        orderPayMoneyLab.frame = CGRectMake(10, 65, 200, 20);
+        orderPayMoneyLab.backgroundColor = [UIColor clearColor];
+        [self addSubview:orderPayMoneyLab];
+        
+        orderCommentLab = [[UILabel alloc]init];
+        orderCommentLab.textColor       = [UIColor whiteColor];
+        orderCommentLab.font  = [UIFont systemFontOfSize:12.f];
+        orderCommentLab.frame = CGRectMake(10, 85, 200, 20);
+        orderCommentLab.backgroundColor = [UIColor clearColor];
+        [self addSubview:orderCommentLab];
+        
+        commentImgView = [[UIImageView alloc]init];
+        commentImgView.frame = CGRectMake(75, 85, 20, 20);
+        [self addSubview:commentImgView];
         
         orderDateLab = [[UILabel alloc]init];
         orderDateLab.font  = [UIFont systemFontOfSize:12.f];
@@ -57,14 +95,13 @@
         orderDateLab.backgroundColor = [UIColor clearColor];
         [self addSubview:orderDateLab];
         
-        
         UIImage *bgImg = [UIImage imageNamed:@"spp_order_status_bg"];
-        noConfirmLab = [[UILabel alloc]init];
-        noConfirmLab.font  = [UIFont systemFontOfSize:12.f];
-        noConfirmLab.frame = CGRectMake(210, 25, bgImg.size.width, bgImg.size.width);
-        noConfirmLab.textColor       = [UIColor whiteColor];
-        noConfirmLab.backgroundColor = [UIColor clearColor];
-        [self addSubview:noConfirmLab];
+//        noConfirmLab = [[UILabel alloc]init];
+//        noConfirmLab.font  = [UIFont systemFontOfSize:12.f];
+//        noConfirmLab.frame = CGRectMake(210, 25, bgImg.size.width, bgImg.size.width);
+//        noConfirmLab.textColor       = [UIColor whiteColor];
+//        noConfirmLab.backgroundColor = [UIColor clearColor];
+//        [self addSubview:noConfirmLab];
         
         finishLab = [[UILabel alloc]init];
         finishLab.textColor       = [UIColor whiteColor];
@@ -75,105 +112,119 @@
         
         bgLabImageView = [[UIImageView alloc]init];
         bgLabImageView.image = bgImg;
-        bgLabImageView.frame = CGRectMake(230, 35, bgImg.size.width, bgImg.size.height);
+        bgLabImageView.frame = CGRectMake(230, 30, bgImg.size.width, bgImg.size.height);
         [bgLabImageView addSubview:finishLab];
         [self addSubview:bgLabImageView];
         
-        UIImage *freeImg = [UIImage imageNamed:@"mt_fbook_normal_btn"];
-        UILabel *freeLab = [[UILabel alloc]init];
-        freeLab.text = @"免费教辅";
-        freeLab.backgroundColor = [UIColor clearColor];
-        freeLab.font = [UIFont systemFontOfSize:10.f];
-        freeLab.textColor = [UIColor colorWithHexString:@"ff6600"];
-        freeLab.frame = CGRectMake(0, freeImg.size.height,
-                                     freeImg.size.width,
-                                     10);
-        freeLab.textAlignment = NSTextAlignmentCenter;
-        freeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        freeBtn.tag = 0;
-        freeBtn.frame = CGRectMake(10, 50,
-                                   freeImg.size.width,
-                                   freeImg.size.height);
-        [freeBtn setImage:freeImg
-                    forState:UIControlStateNormal];
-        [freeBtn addTarget:self
-                       action:@selector(doButtonClicked:)
-             forControlEvents:UIControlEventTouchUpInside];
-        [freeBtn addSubview:freeLab];
-        [self addSubview:freeBtn];
+        ctrBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+        ctrBtn.tag = 0;
+        [ctrBtn setBackgroundImage:[UIImage imageNamed:@"normal_btn"]
+                          forState:UIControlStateNormal];
+        [ctrBtn setBackgroundImage:[UIImage imageNamed:@"hight_btn"]
+                          forState:UIControlStateHighlighted];
+        [ctrBtn setTitleColor:[UIColor colorWithHexString:@"#ff6600"] forState:UIControlStateNormal];
+        ctrBtn.titleLabel.font = [UIFont systemFontOfSize:12.f];
+        ctrBtn.frame = CGRectMake(230+2, 30+bgImg.size.height+25, bgImg.size.width-4, bgImg.size.height);
+        [ctrBtn addTarget:self
+                   action:@selector(doButtonClicked:)
+         forControlEvents:UIControlEventTouchUpInside];
+        [self addSubview:ctrBtn];
+        
+//        UIImage *freeImg = [UIImage imageNamed:@"mt_fbook_normal_btn"];
+//        UILabel *freeLab = [[UILabel alloc]init];
+//        freeLab.text = @"免费教辅";
+//        freeLab.backgroundColor = [UIColor clearColor];
+//        freeLab.font = [UIFont systemFontOfSize:10.f];
+//        freeLab.textColor = [UIColor colorWithHexString:@"ff6600"];
+//        freeLab.frame = CGRectMake(0, freeImg.size.height,
+//                                     freeImg.size.width,
+//                                     10);
+//        freeLab.textAlignment = NSTextAlignmentCenter;
+//        freeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+//        freeBtn.tag = 0;
+//        freeBtn.frame = CGRectMake(10, 50,
+//                                   freeImg.size.width,
+//                                   freeImg.size.height);
+//        [freeBtn setImage:freeImg
+//                    forState:UIControlStateNormal];
+//        [freeBtn addTarget:self
+//                       action:@selector(doButtonClicked:)
+//             forControlEvents:UIControlEventTouchUpInside];
+//        [freeBtn addSubview:freeLab];
+//        [self addSubview:freeBtn];
         
         
-        UIImage *cmmImg = [UIImage imageNamed:@"mt_comment_normal_btn"];
-        UILabel *cmmLab = [[UILabel alloc]init];
-        cmmLab.text = @"评价老师";
-        cmmLab.backgroundColor = [UIColor clearColor];
-        cmmLab.font = [UIFont systemFontOfSize:10.f];
-        cmmLab.textColor = [UIColor colorWithHexString:@"ff6600"];
-        cmmLab.frame = CGRectMake(0, cmmImg.size.height,
-                                  cmmImg.size.width,
-                                  10);
-        cmmLab.textAlignment = NSTextAlignmentCenter;
+//        UIImage *cmmImg = [UIImage imageNamed:@"mt_comment_normal_btn"];
+//        UILabel *cmmLab = [[UILabel alloc]init];
+//        cmmLab.text = @"评价老师";
+//        cmmLab.backgroundColor = [UIColor clearColor];
+//        cmmLab.font = [UIFont systemFontOfSize:10.f];
+//        cmmLab.textColor = [UIColor colorWithHexString:@"ff6600"];
+//        cmmLab.frame = CGRectMake(0, cmmImg.size.height,
+//                                  cmmImg.size.width,
+//                                  10);
+//        cmmLab.textAlignment = NSTextAlignmentCenter;
         
-        commentBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        commentBtn.tag   = 1;
-        commentBtn.frame = CGRectMake(10+cmmImg.size.width, 50, cmmImg.size.width, cmmImg.size.height);
-        [commentBtn setImage:cmmImg forState:UIControlStateNormal];
-        [commentBtn addTarget:self
-                       action:@selector(doButtonClicked:)
-             forControlEvents:UIControlEventTouchUpInside];
-        [commentBtn addSubview:cmmLab];
-        [self addSubview:commentBtn];
+//        commentBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+//        commentBtn.tag   = 1;
+//        commentBtn.frame = CGRectMake(10+cmmImg.size.width, 50, cmmImg.size.width, cmmImg.size.height);
+//        [commentBtn setImage:cmmImg forState:UIControlStateNormal];
+//        [commentBtn addTarget:self
+//                       action:@selector(doButtonClicked:)
+//             forControlEvents:UIControlEventTouchUpInside];
+//        [commentBtn addSubview:cmmLab];
+//        [self addSubview:commentBtn];
         
-        commView = [[CommentView alloc]initWithFrame:CGRectMake(0, 0, 170, 70)];
-        commView.hidden   = YES;
-        commView.orderId  = order.orderId;
-        [pView addSubview:commView];
+//        commView = [[CommentView alloc]initWithFrame:CGRectMake(0, 0, 170, 70)];
+//        commView.hidden   = YES;
+//        commView.orderId  = order.orderId;
+//        [pView addSubview:commView];
         
-        UIImage *updateImg = [UIImage imageNamed:@"mt_update_normal_btn"];
-        UILabel *updateLab = [[UILabel alloc]init];
-        updateLab.text = @"修改订单";
-        updateLab.backgroundColor = [UIColor clearColor];
-        updateLab.font = [UIFont systemFontOfSize:10.f];
-        updateLab.textColor = [UIColor colorWithHexString:@"ff6600"];
-        updateLab.frame = CGRectMake(0, updateImg.size.height,
-                                  updateImg.size.width,
-                                  10);
-        updateLab.textAlignment = NSTextAlignmentCenter;
+//        UIImage *updateImg = [UIImage imageNamed:@"mt_update_normal_btn"];
+//        UILabel *updateLab = [[UILabel alloc]init];
+//        updateLab.text = @"修改订单";
+//        updateLab.backgroundColor = [UIColor clearColor];
+//        updateLab.font = [UIFont systemFontOfSize:10.f];
+//        updateLab.textColor = [UIColor colorWithHexString:@"ff6600"];
+//        updateLab.frame = CGRectMake(0, updateImg.size.height,
+//                                  updateImg.size.width,
+//                                  10);
+//        updateLab.textAlignment = NSTextAlignmentCenter;
         
-        updateBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        updateBtn.tag   = 2;
-        updateBtn.frame = CGRectMake(10+2*cmmImg.size.width, 50, updateImg.size.width, updateImg.size.height);
-        [updateBtn setImage:updateImg
-                   forState:UIControlStateNormal];
-        [updateBtn addTarget:self
-                      action:@selector(doButtonClicked:)
-            forControlEvents:UIControlEventTouchUpInside];
-        [updateBtn addSubview:updateLab];
-        [self addSubview:updateBtn];
-        
-        UIImage *finishImg = [UIImage imageNamed:@"mt_finish_nomal_btn"];
-        UILabel *finishInfoLab = [[UILabel alloc]init];
-        finishInfoLab.text = @"订单审批";
-        finishInfoLab.backgroundColor = [UIColor clearColor];
-        finishInfoLab.font = [UIFont systemFontOfSize:10.f];
-        finishInfoLab.textColor = [UIColor colorWithHexString:@"ff6600"];
-        finishInfoLab.frame = CGRectMake(0, finishImg.size.height,
-                                     finishImg.size.width,
-                                     10);
-        finishInfoLab.textAlignment = NSTextAlignmentCenter;
-        
-        finishBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-        finishBtn.tag   = 3;
-        finishBtn.frame = CGRectMake(10+3*cmmImg.size.width, 50,
-                                     finishImg.size.width,
-                                     finishImg.size.height);
-        [finishBtn setImage:finishImg
-                   forState:UIControlStateNormal];
-        [finishBtn addTarget:self
-                      action:@selector(doButtonClicked:)
-            forControlEvents:UIControlEventTouchUpInside];
-        [finishBtn addSubview:finishInfoLab];
-        [self addSubview:finishBtn];
+//        updateBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+//        updateBtn.tag   = 2;
+//        updateBtn.frame = CGRectMake(10+2*cmmImg.size.width, 50, updateImg.size.width, updateImg.size.height);
+//        [updateBtn setImage:updateImg
+//                   forState:UIControlStateNormal];
+//        [updateBtn addTarget:self
+//                      action:@selector(doButtonClicked:)
+//            forControlEvents:UIControlEventTouchUpInside];
+//        [updateBtn addSubview:updateLab];
+//        [self addSubview:updateBtn];
+//        
+//        UIImage *finishImg = [UIImage imageNamed:@"mt_finish_nomal_btn"];
+//        UILabel *finishInfoLab = [[UILabel alloc]init];
+//        finishInfoLab.text = @"订单审批";
+//        finishInfoLab.backgroundColor = [UIColor clearColor];
+//        finishInfoLab.font = [UIFont systemFontOfSize:10.f];
+//        finishInfoLab.textColor = [UIColor colorWithHexString:@"ff6600"];
+//        finishInfoLab.frame = CGRectMake(0, finishImg.size.height,
+//                                     finishImg.size.width,
+//                                     10);
+//        finishInfoLab.textAlignment = NSTextAlignmentCenter;
+//        
+//        finishBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+//        finishBtn.tag   = 3;
+//        finishBtn.frame = CGRectMake(10+3*cmmImg.size.width, 50,
+//                                     finishImg.size.width,
+//                                     finishImg.size.height);
+//        [finishBtn setImage:finishImg
+//                   forState:UIControlStateNormal];
+//        [finishBtn addTarget:self
+//                      action:@selector(doButtonClicked:)
+//            forControlEvents:UIControlEventTouchUpInside];
+//        [finishBtn addSubview:finishInfoLab];
+//        [self addSubview:finishBtn];
         
         UIView *bgView = [[UIView alloc]init];
         bgView.backgroundColor = [UIColor colorWithHexString:@"#686868"];
@@ -185,8 +236,8 @@
                                                      name:@"commentOrderNotice"
                                                    object:nil];
         
-        buttonArray = [[NSMutableArray alloc] initWithObjects:freeBtn,commentBtn,
-                                                              updateBtn,finishBtn, nil];
+//        buttonArray = [[NSMutableArray alloc] initWithObjects:freeBtn,commentBtn,
+//                                                              updateBtn,finishBtn, nil];
     }
     return self;
 }
@@ -212,62 +263,92 @@
     studyPosLab.text = pos;
     
     //其他控件根据上面位置进行调整
-    orderInfoLab.frame = CGRectMake(orderInfoLab.frame.origin.x,
-                                    orderInfoLab.frame.origin.y+offset,
-                                    orderInfoLab.frame.size.width,
-                                    orderInfoLab.frame.size.height);
+    orderStudyTimeLab.frame = CGRectMake(orderStudyTimeLab.frame.origin.x,
+                                    orderStudyTimeLab.frame.origin.y+offset,
+                                    orderStudyTimeLab.frame.size.width,
+                                    orderStudyTimeLab.frame.size.height);
     
-//    bgLabImageView.frame = CGRectMake(bgLabImageView.frame.origin.x,
-//                                 bgLabImageView.frame.origin.y+offset,
-//                                 bgLabImageView.frame.size.width,
-//                                 bgLabImageView.frame.size.height);
+    orderSalaryLab.frame = CGRectMake(orderSalaryLab.frame.origin.x,
+                                      orderSalaryLab.frame.origin.y+offset,
+                                      orderSalaryLab.frame.size.width,
+                                      orderSalaryLab.frame.size.height);
+    
+    orderTotalMoneyLab.frame = CGRectMake(orderTotalMoneyLab.frame.origin.x,
+                                          orderTotalMoneyLab.frame.origin.y+offset,
+                                          orderTotalMoneyLab.frame.size.width,
+                                          orderTotalMoneyLab.frame.size.height);
+    
+    orderPayMoneyLab.frame = CGRectMake(orderPayMoneyLab.frame.origin.x,
+                                        orderPayMoneyLab.frame.origin.y+offset,
+                                        orderPayMoneyLab.frame.size.width,
+                                        orderPayMoneyLab.frame.size.height);
+    
+    orderCommentLab.frame = CGRectMake(orderCommentLab.frame.origin.x,
+                                        orderCommentLab.frame.origin.y+offset,
+                                        orderCommentLab.frame.size.width,
+                                        orderCommentLab.frame.size.height);
+    
+    bgLabImageView.frame = CGRectMake(bgLabImageView.frame.origin.x,
+                                 bgLabImageView.frame.origin.y+offset,
+                                 bgLabImageView.frame.size.width,
+                                 bgLabImageView.frame.size.height);
+    
+    commentImgView.frame = CGRectMake(commentImgView.frame.origin.x,
+                                      commentImgView.frame.origin.y+offset,
+                                      commentImgView.frame.size.width,
+                                      commentImgView.frame.size.height);
+    
+    ctrBtn.frame = CGRectMake(ctrBtn.frame.origin.x,
+                              ctrBtn.frame.origin.y+offset,
+                              ctrBtn.frame.size.width,
+                              ctrBtn.frame.size.height);
 
-    commentBtn.frame = CGRectMake(commentBtn.frame.origin.x,
-                                  commentBtn.frame.origin.y+offset,
-                                  commentBtn.frame.size.width,
-                                  commentBtn.frame.size.height);
+//    commentBtn.frame = CGRectMake(commentBtn.frame.origin.x,
+//                                  commentBtn.frame.origin.y+offset,
+//                                  commentBtn.frame.size.width,
+//                                  commentBtn.frame.size.height);
     
-    updateBtn.frame  = CGRectMake(updateBtn.frame.origin.x,
-                                  updateBtn.frame.origin.y+offset,
-                                  updateBtn.frame.size.width,
-                                  updateBtn.frame.size.height);
-    
-    freeBtn.frame    = CGRectMake(freeBtn.frame.origin.x,
-                               freeBtn.frame.origin.y+offset,
-                               freeBtn.frame.size.width,
-                               freeBtn.frame.size.height);
-    
-    finishBtn.frame  = CGRectMake(finishBtn.frame.origin.x,
-                                 finishBtn.frame.origin.y+offset,
-                                 finishBtn.frame.size.width,
-                                 finishBtn.frame.size.height);
+//    updateBtn.frame  = CGRectMake(updateBtn.frame.origin.x,
+//                                  updateBtn.frame.origin.y+offset,
+//                                  updateBtn.frame.size.width,
+//                                  updateBtn.frame.size.height);
+//    
+//    freeBtn.frame    = CGRectMake(freeBtn.frame.origin.x,
+//                               freeBtn.frame.origin.y+offset,
+//                               freeBtn.frame.size.width,
+//                               freeBtn.frame.size.height);
+//    
+//    finishBtn.frame  = CGRectMake(finishBtn.frame.origin.x,
+//                                 finishBtn.frame.origin.y+offset,
+//                                 finishBtn.frame.size.width,
+//                                 finishBtn.frame.size.height);
     
     //cell高度调整
 }
 
 - (void) setAutoPosForButton:(BOOL) isAuto
 {
-    //自动缩进按钮
-    if (buttonArray)
-    {
-        for (int i=0; i<buttonArray.count; i++)
-        {
-            UIButton *btn = [buttonArray objectAtIndex:i];
-            if (btn.hidden)
-            {
-                CGRect preRect = btn.frame;
-                CGRect curRect;
-                for (int j=i+1; j<buttonArray.count; j++)
-                {
-                    UIButton *nextBtn = [buttonArray objectAtIndex:j];
-                    curRect = nextBtn.frame;
-                    nextBtn.frame = CGRectMake(preRect.origin.x,
-                                               nextBtn.frame.origin.y, nextBtn.frame.size.width, nextBtn.frame.size.height);
-                    preRect = curRect;
-                }
-            }
-        }
-    }
+//    //自动缩进按钮
+//    if (buttonArray)
+//    {
+//        for (int i=0; i<buttonArray.count; i++)
+//        {
+//            UIButton *btn = [buttonArray objectAtIndex:i];
+//            if (btn.hidden)
+//            {
+//                CGRect preRect = btn.frame;
+//                CGRect curRect;
+//                for (int j=i+1; j<buttonArray.count; j++)
+//                {
+//                    UIButton *nextBtn = [buttonArray objectAtIndex:j];
+//                    curRect = nextBtn.frame;
+//                    nextBtn.frame = CGRectMake(preRect.origin.x,
+//                                               nextBtn.frame.origin.y, nextBtn.frame.size.width, nextBtn.frame.size.height);
+//                    preRect = curRect;
+//                }
+//            }
+//        }
+//    }
 }
 
 - (void) setOrder:(Order *)orderObj
@@ -277,9 +358,46 @@
     
     //显示内容
     [self setStudyPos:self.order.orderStudyPos];
+    
     orderDateLab.text = self.order.orderAddTimes;
-    orderInfoLab.text = [NSString stringWithFormat:@"￥%@/小时  %@小时", self.order.everyTimesMoney, self.order.orderStudyTimes];
-
+    orderStudyTimeLab.text = [NSString stringWithFormat:@"预计辅导小时数:%@小时", self.order.orderStudyTimes];
+    
+    if (self.order.everyTimesMoney.intValue==0)
+        orderSalaryLab.text = @"课酬标准:师生协商";
+    else
+        orderSalaryLab.text = [NSString stringWithFormat:@"课酬标准:￥%@/小时", self.order.everyTimesMoney];
+    
+    
+    NSString *totalMoney = [NSString stringWithFormat:@"总金额:￥%@", self.order.totalMoney];
+    CGSize size = [totalMoney sizeWithFont:orderTotalMoneyLab.font
+                         constrainedToSize:CGSizeMake(orderTotalMoneyLab.frame.size.width, MAXFLOAT)
+                      lineBreakMode:NSLineBreakByWordWrapping];
+    orderTotalMoneyLab.frame  = CGRectMake(orderTotalMoneyLab.frame.origin.x, orderTotalMoneyLab.frame.origin.y, size.width,
+                                         orderTotalMoneyLab.frame.size.height);
+    orderTotalMoneyLab.text = totalMoney;
+    
+    
+    orderPayMoneyLab.frame = CGRectMake(orderTotalMoneyLab.frame.origin.x+size.width+5, orderPayMoneyLab.frame.origin.y, size.width+50,
+                                        orderPayMoneyLab.frame.size.height);
+    orderPayMoneyLab.text = [NSString stringWithFormat:@"消费金额:￥%@", self.order.payMoney];
+    
+    
+    if (self.order.commentAddTimes.intValue == 0)
+    {
+        orderCommentLab.text  = @"给我的评价:未评价";
+        commentImgView.hidden = YES;
+    }
+    else
+    {
+        orderCommentLab.text  = @"给我的评价:";
+        commentImgView.hidden = NO;
+        
+        if (self.order.orderCommentStatus==1)
+            commentImgView.image = [UIImage imageNamed:@"tdp_good_comment"];
+        else
+            commentImgView.image = [UIImage imageNamed:@"tdp_bad_comment"];
+    }
+    
     switch (order.orderStatus)
     {
         case NO_EMPLOY:         //未聘用
@@ -292,49 +410,58 @@
             //评价老师,修改订单按钮显示
             finishLab.text = @"未确认";
             
-            freeBtn.hidden    = YES;
-            updateBtn.hidden  = NO;
-            finishBtn.hidden  = YES;
             
+            [ctrBtn setTitle:@"去确认" forState:UIControlStateNormal];
+            
+//            freeBtn.hidden    = YES;
+//            updateBtn.hidden  = NO;
+//            finishBtn.hidden  = YES;
+            orderPayMoneyLab.hidden = YES;
             break;
         }
         case CONFIRMED:         //已确认
-        {
-            finishLab.text = @"已确认";
-            
-            freeBtn.hidden    = NO;
-            updateBtn.hidden  = NO;
-            finishBtn.hidden  = YES;
-            break;
-        }
+//        {
+//            finishLab.text = @"已确认";
+//            
+////            freeBtn.hidden    = NO;
+////            updateBtn.hidden  = NO;
+////            finishBtn.hidden  = YES;
+//            orderPayMoneyLab.hidden = YES;
+//            break;
+//        }
         case NO_FINISH:         //未结单
         {
             finishLab.text = @"未结单";
             
             //显示评价老师,结单审批按钮
-            freeBtn.hidden    = YES;
-            updateBtn.hidden  = YES;
-            finishBtn.hidden  = NO;
+//            freeBtn.hidden    = YES;
+//            updateBtn.hidden  = YES;
+//            finishBtn.hidden  = NO;
+            orderPayMoneyLab.hidden = YES;
+            
+            [ctrBtn setTitle:@"去结单" forState:UIControlStateNormal];
             break;
         }
         case FINISH:           //已结单
         {
             finishLab.text    = @"已结单";
             
-            freeBtn.hidden    = YES;
-            commentBtn.hidden = YES;
-            updateBtn.hidden  = YES;
-            finishBtn.hidden  = YES;
             
-            //高度缩小
+            ctrBtn.hidden = YES;
+            
+//            freeBtn.hidden    = YES;
+//            commentBtn.hidden = YES;
+//            updateBtn.hidden  = YES;
+//            finishBtn.hidden  = YES;
+            orderPayMoneyLab.hidden = NO;
             break;
         }
         default:
             break;
     }
     
-    if (order.orderCommentStatus != NO_COMMENT)
-        commentBtn.hidden = YES;
+//    if (order.orderCommentStatus != NO_COMMENT)
+//        commentBtn.hidden = YES;
     
     //自动缩进按钮
     [self setAutoPosForButton:YES];
@@ -347,8 +474,8 @@
     NSString *orderId = [notice.userInfo objectForKey:@"OrderID"];
     if ([orderId isEqualToString:order.orderId])
     {
-        commView.hidden   = YES;
-        commentBtn.hidden = YES;
+//        commView.hidden   = YES;
+//        commentBtn.hidden = YES;
         [self setAutoPosForButton:NO];   //手动评价后缩进
     }
 }

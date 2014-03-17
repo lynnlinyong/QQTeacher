@@ -129,11 +129,11 @@
         CGFloat avatarX = 0.5f;
         
         if(type == JSBubbleMessageTypeOutgoing) {
-            avatarX = (self.contentView.frame.size.width - kJSAvatarSize - 20);
-            offsetX = kJSAvatarSize - 4.0f + 20;
+            avatarX = (self.contentView.frame.size.width - 25 - 20);
+            offsetX = 25 - 4.0f + 20;
         }
         
-        if (avatarStyle == JSAvatarTxtIncomingImgOutgoing)
+        if (avatarStyle == JSAvatarStyleText)
         {
             if (type == JSBubbleMessageTypeIncoming)
             {
@@ -145,29 +145,9 @@
             else
             {
                 
-                UITapGestureRecognizer *tapReg = [[UITapGestureRecognizer alloc]initWithTarget:self
-                                                                                        action:@selector(tapGestureRecongnizerResponse:)];
-                
-                self.avatarImageView = [[TTImageView alloc] initWithFrame:CGRectMake(avatarX,
-                                                                                     self.contentView.frame.size.height - kJSAvatarSize,
-                                                                                     kJSAvatarSize,
-                                                                                     kJSAvatarSize)];
-                UIImage *idImg = [UIImage imageNamed:@"mp_rz"];
-                self.idImageView = [[UIImageView alloc]init];
-                self.idImageView.hidden = YES;
-                self.idImageView.image  = idImg;
-                self.idImageView.frame  = CGRectMake(self.avatarImageView.frame.size.width-idImg.size.width-5,
-                                                self.avatarImageView.frame.size.height/2-5,
-                                                idImg.size.width+10, idImg.size.height+10);
-                [self.avatarImageView addSubview:self.idImageView];
-                
-                [self.avatarImageView addGestureRecognizer:tapReg];
-                [tapReg release];
-                
-                self.avatarImageView.autoresizingMask = (UIViewAutoresizingFlexibleTopMargin
-                                                         | UIViewAutoresizingFlexibleLeftMargin
-                                                         | UIViewAutoresizingFlexibleRightMargin);
-                [self.contentView addSubview:self.avatarImageView];
+                self.nameLab = [[UILabel alloc] initWithFrame:CGRectMake(avatarX, self.contentView.frame.size.height-30, 25, 20)];
+                self.nameLab.backgroundColor = [UIColor clearColor];
+                [self.contentView addSubview:self.nameLab];
             }
         }
         else

@@ -176,6 +176,58 @@
     CLog(@"settimeArray:%@", setTimeArray);
 }
 
+- (void) getJxzl
+{
+    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+    {
+        return;
+    }
+
+    NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"viewstatus",@"sessid", nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"getJxzl",@"1",ssid, nil];
+    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+                                                     forKeys:paramsArr];
+    NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+    ServerRequest *request = [ServerRequest sharedServerRequest];
+    NSData   *resVal = [request requestSyncWith:kServerPostRequest
+                                       paramDic:pDic
+                                         urlStr:url];
+    NSString *resStr = [[[NSString alloc]initWithData:resVal
+                                             encoding:NSUTF8StringEncoding]autorelease];
+    NSDictionary *resDic   = [resStr JSONValue];
+    NSArray      *keysArr  = [resDic allKeys];
+    NSArray      *valsArr  = [resDic allValues];
+    CLog(@"***********Result****************");
+    for (int i=0; i<keysArr.count; i++)
+    {
+        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
+    }
+    CLog(@"***********Result****************");
+    
+    
+    NSNumber *errorid = [resDic objectForKey:@"errorid"];
+    if (errorid.intValue == 0)
+    {
+        NSDictionary *ccDic = [resDic objectForKey:@"cc"];
+        NSString *newApply  = [resDic objectForKey:@"new_apply"];
+        
+        
+    }
+    else
+    {
+        //重复登录
+        if (errorid.intValue==2)
+        {
+            //清除sessid,清除登录状态,回到地图页
+            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+            [AppDelegate popToMainViewController];
+        }
+    }
+}
+
 - (void) updateTeacherInfo
 {
     if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
@@ -207,7 +259,7 @@
                                @"time_period",@"info",@"certificates",nil];
     NSArray *infosValuesArr = [NSArray arrayWithObjects:phoneValLab.text,emailValLab.text,headUrl,
                                phoneNum,listenNum,locNum,
-                               [NSString stringWithFormat:@"%d",teacher.expense],
+                               [Student searchSalaryName:[NSString stringWithFormat:@"%d",teacher.expense]],
                                teacher.timePeriod,teacher.info,teacher.certArray,nil];
     NSDictionary *infosDic  = [NSDictionary dictionaryWithObjects:infosValuesArr
                                                           forKeys:infosParamsArr];
@@ -215,7 +267,7 @@
     
     NSString *ssid   = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"infos",@"sessid",nil];
-    NSArray *valuesArr = [NSArray arrayWithObjects:@"upinfo",infosJson, ssid, nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"upinfos",infosJson, ssid, nil];
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     CLog(@"Dic:%@", pDic);
@@ -223,7 +275,7 @@
     ServerRequest *serverReq = [ServerRequest sharedServerRequest];
     serverReq.delegate   = self;
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@/", webAddress,TEACHER];
+    NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
     [serverReq requestASyncWith:kServerPostRequest
                        paramDic:pDic
                          urlStr:url];
@@ -276,8 +328,9 @@
         setTimeArray = [((NSMutableArray *)[sender.userInfo objectForKey:@"SELECT_TIME_DIC"]) mutableCopy];
         
         NSMutableString *timePdStr = [[NSMutableString alloc]init];
-        for (int i=0; i<21; i++)
-             [timePdStr appendString:[setTimeArray objectAtIndex:i]];
+        for (int i=0; i<20; i++)
+             [timePdStr appendFormat:@"%@,",[setTimeArray objectAtIndex:i]];
+        [timePdStr appendString:[setTimeArray objectAtIndex:20]];
         teacher.timePeriod = [timePdStr copy];
         CLog(@"timePeriod:%@", teacher.timePeriod);
         [setTab reloadData];
@@ -313,7 +366,7 @@
         if (userInfoDic)
         {
             infoValue.text  = [userInfoDic objectForKey:@"personalInfo"];
-            teacher.info       = [userInfoDic objectForKey:@"personalInfo"];
+            teacher.info    = [userInfoDic objectForKey:@"personalInfo"];
         }
         
         [self updateTeacherInfo];
@@ -332,7 +385,7 @@
         salary = [notice.userInfo objectForKey:@"name"];
     
     salaryValLab.text = salary;
-    teacher.expense   = salary.intValue;
+    teacher.expense   = ((NSString *)[notice.userInfo objectForKey:@"id"]).intValue;
     
     [self updateTeacherInfo];
 }
@@ -393,6 +446,7 @@
 - (void) setCertitionNotice:(NSNotification *) notice
 {
     teacher.certArray = [[notice.userInfo objectForKey:@"CertyUrlArray"] copy];
+    CLog(@"teacher.cert:%@", teacher.certArray);
     [self updateTeacherInfo];
 }
 
@@ -471,8 +525,10 @@
                                             forKey:LOGINE_SUCCESS];
     
     //显示登录页面
-    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-    [nav popToRootViewControllerAnimated:YES];
+    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+    LoginViewController *loginVctr = [[LoginViewController alloc]init];
+    CustomNavigationViewController *nav = [[CustomNavigationViewController alloc]initWithRootViewController:loginVctr];
+    appDelegate.window.rootViewController = nav;
 }
 
 #pragma mark -
@@ -723,11 +779,31 @@
                     [certifyLab release];
                     
                     UILabel *certifyValLab = [[UILabel alloc]init];
-                    CLog(@"teacherCertyArray:%@", teacher.certArray);
                     if ([teacher.certArray isEqual:[NSNull null]])
+                    {
                         certifyValLab.text = @"未上传资质证书";
+                    }
                     else
-                        certifyValLab.text = @"";
+                    {
+                        certifyValLab.text   = @"";
+                        certifyValLab.hidden = YES;
+
+                        NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+                        for (int i=0; i<teacher.certArray.count; i++)
+                        {
+                            NSString *url = [teacher.certArray objectAtIndex:i];
+                            NSString *certUrl = [NSString stringWithFormat:@"%@%@", webAdd, url];
+                            
+                            TTImageView *certImgView = [[TTImageView alloc]init];
+                            certImgView.delegate = self;
+                            certImgView.defaultImage = [UIImage imageNamed:@"s_boy"];
+                            certImgView.URL   = certUrl;
+                            certImgView.frame = CGRectMake(320-50-25*i, 15, 20, 20);
+                            [cell addSubview:certImgView];
+                            [certImgView release];
+                        }
+                    }
+                    
                     certifyValLab.textAlignment   = NSTextAlignmentRight;
                     certifyValLab.backgroundColor = [UIColor clearColor];
                     certifyValLab.frame  = CGRectMake(87, 15, 200, 20);
@@ -1021,6 +1097,7 @@
                 case 4:        //个人简介
                 {
                     SetPersonalInfoViewController *spVctr = [[SetPersonalInfoViewController alloc]init];
+                    spVctr.contentInfo = teacher.info;
                     [nav presentPopupViewController:spVctr
                                       animationType:MJPopupViewAnimationFade];
                     break;
@@ -1028,6 +1105,7 @@
                 case 5:        //资历证书
                 {
                     UploadCertificateViewController *upCtr = [[UploadCertificateViewController alloc]init];
+                    upCtr.certyUrlArray = [teacher.certArray mutableCopy];
                     [nav pushViewController:upCtr animated:YES];
                     [upCtr release];
                     break;
@@ -1133,9 +1211,8 @@
         if ([action isEqualToString:@"submitProposal"])
         {
             CLog(@"upload suggest success!");
-
         }
-        else if ([action isEqualToString:@"upinfo"])
+        else if ([action isEqualToString:@"upinfos"])
         {
             CLog(@"update infomation success!");
             

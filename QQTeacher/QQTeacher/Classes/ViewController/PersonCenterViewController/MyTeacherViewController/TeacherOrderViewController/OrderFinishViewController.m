@@ -35,7 +35,7 @@
 {
     [super viewDidAppear:animated];
     
-    [MainViewController setNavTitle:@"结单审批"];
+    [MainViewController setNavTitle:@"结单审批申请"];
 }
 
 - (void)didReceiveMemoryWarning
@@ -50,12 +50,15 @@
     finishOrderTab.dataSource = nil;
     
     finishOrderTab = nil;
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super viewDidUnload];
 }
 
 - (void) dealloc
 {
     [payLab release];
+    [payFld release];
     [backMoneyLab release];
     [finishOrderTab release];
     [super dealloc];
@@ -68,46 +71,45 @@
 {
     self.view.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
     
-    UILabel *infoLab = [[UILabel alloc]init];
-    infoLab.text  = @"注意您还未对老师做出评价,批准审批后将自动设为好评!";
-    infoLab.backgroundColor = [UIColor clearColor];
-    infoLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
-    infoLab.numberOfLines = 0;
-    infoLab.lineBreakMode = NSLineBreakByWordWrapping;
-    infoLab.font  = [UIFont systemFontOfSize:14.f];
-    [self.view addSubview:infoLab];
+//    UIScrollView *bgScrollView = [[UIScrollView alloc]init];
+//    bgScrollView.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 480)
+//                                isBackView:YES];
+//    [self.view addSubview:bgScrollView];
     
-    
-    finishOrderTab = [[UITableView alloc]init];
-    finishOrderTab.delegate   = self;
-    finishOrderTab.dataSource = self;
-    finishOrderTab.scrollEnabled = NO;
+    finishOrderTab = [[UIGridView alloc]init];
+    finishOrderTab.uiGridViewDelegate = self;
+    finishOrderTab.scrollEnabled      = NO;
     [self.view addSubview:finishOrderTab];
     
     UILabel *payInfoLab = [[UILabel alloc]init];
-
     payInfoLab.text  = @"消费金额:";
     payInfoLab.font  = [UIFont systemFontOfSize:14.f];
     payInfoLab.backgroundColor = [UIColor clearColor];
     [self.view addSubview:payInfoLab];
     
     UILabel *backInfoLab = [[UILabel alloc]init];
-    
     backInfoLab.text  = @"应退金额:";
     backInfoLab.font  = [UIFont systemFontOfSize:14.f];
     backInfoLab.backgroundColor = [UIColor clearColor];
     [self.view addSubview:backInfoLab];
     
     payLab = [[UILabel alloc]init];
-
-    payLab.text      = [NSString stringWithFormat:@"￥ %@",order.payMoney];
+    payLab.text      = @"￥";
     payLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
     payLab.font      = [UIFont systemFontOfSize:15.f];
     payLab.backgroundColor = [UIColor clearColor];
     [self.view addSubview:payLab];
+
+    payFld = [[UITextField alloc]init];
+    payFld.delegate  = self;
+    payFld.text      = [NSString stringWithFormat:@" %d",order.payMoney.intValue];
+    payFld.textColor = [UIColor colorWithHexString:@"#ff6600"];
+    payFld.font      = [UIFont systemFontOfSize:15.f];
+    payFld.borderStyle = UITextBorderStyleNone;
+    payFld.backgroundColor = [UIColor whiteColor];
+    [self.view addSubview:payFld];
     
     backMoneyLab = [[UILabel alloc]init];
-
     backMoneyLab.text  = [NSString stringWithFormat:@"￥ %@", order.backMoney];
     backMoneyLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
     backMoneyLab.font      = [UIFont systemFontOfSize:15.f];
@@ -115,14 +117,13 @@
     [self.view addSubview:backMoneyLab];
     
     UIImage *loginImg  = [UIImage imageNamed:@"normal_btn"];
-    UIButton *okBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    okBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     okBtn.tag = 1;
-    [okBtn setTitle:@"批准申请"
+    [okBtn setTitle:@"完成,等待学生家长审批"
            forState:UIControlStateNormal];
     [okBtn setBackgroundImage:loginImg
                      forState:UIControlStateNormal];
-
-    [okBtn setTitleColor:[UIColor blackColor]
+    [okBtn setTitleColor:[UIColor colorWithHexString:@"#ff6600"]
                     forState:UIControlStateNormal];
     okBtn.titleLabel.font = [UIFont systemFontOfSize:15.f];
     [okBtn addTarget:self
@@ -130,64 +131,45 @@
     forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:okBtn];
     
-    UIButton *cancelBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-    cancelBtn.tag = 0;
-    [cancelBtn setTitle:@"退回申请"
-               forState:UIControlStateNormal];
-    [cancelBtn setTitleColor:[UIColor blackColor]
-                    forState:UIControlStateNormal];
-    cancelBtn.titleLabel.font = [UIFont systemFontOfSize:15.f];
-    [cancelBtn setBackgroundImage:loginImg
-                         forState:UIControlStateNormal];
-
-    [cancelBtn addTarget:self
-                  action:@selector(doButtonClicked:)
-        forControlEvents:UIControlEventTouchUpInside];
-    [self.view addSubview:cancelBtn];
-    
     if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
     {
         if (iPhone5)
         {
             //ios7 iphone5
             CLog(@"It's is iphone5 IOS7");
-            infoLab.frame = [UIView fitCGRect:CGRectMake(10, 10+44+20, 320-20, 40)
-                                   isBackView:NO];
             finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60+44+20, 320-40, 220)
                                           isBackView:NO];
             payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 260+44+20, 80, 20)
                                       isBackView:NO];
             backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 290+44+20, 80, 20)
                                        isBackView:NO];
-            payLab.frame = [UIView fitCGRect:CGRectMake(120, 260+44+20, 140, 20)
+            payLab.frame = [UIView fitCGRect:CGRectMake(120, 260+44+20, 15, 20)
+                                  isBackView:NO];
+            payFld.frame = [UIView fitCGRect:CGRectMake(135, 260+44+20, 100, 20)
                                   isBackView:NO];
             backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 290+44+20, 140, 20)
                                         isBackView:NO];
-            okBtn.frame = [UIView fitCGRect:CGRectMake(160-100, 320+44+20, 80, 40)
+            okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 320+44+20, loginImg.size.width, loginImg.size.height)
                                  isBackView:NO];
-            cancelBtn.frame = [UIView fitCGRect:CGRectMake(160+20, 320+44+20, 80, 40)
-                                     isBackView:NO];
         }
         else
         {
             CLog(@"It's is iphone4 IOS7");
             //ios 7 iphone 4
-            infoLab.frame = [UIView fitCGRect:CGRectMake(10, 10+44+5, 320-20, 40)
-                                   isBackView:NO];
             finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60+44, 320-40, 220)
                                           isBackView:NO];
             payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 260+44+20, 80, 20)
                                       isBackView:NO];
             backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 290+44+20, 80, 20)
                                        isBackView:NO];
-            payLab.frame = [UIView fitCGRect:CGRectMake(120, 260+44+20, 140, 20)
+            payLab.frame = [UIView fitCGRect:CGRectMake(120, 260+44+20, 15, 20)
+                                  isBackView:NO];
+            payFld.frame = [UIView fitCGRect:CGRectMake(135, 260+44+20, 130, 20)
                                   isBackView:NO];
             backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 290+44+20, 140, 20)
                                         isBackView:NO];
-            okBtn.frame = [UIView fitCGRect:CGRectMake(160-100, 320+44+20, 80, 40)
+            okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 320+44+20, loginImg.size.width, loginImg.size.height)
                                  isBackView:NO];
-            cancelBtn.frame = [UIView fitCGRect:CGRectMake(160+20, 320+44+20, 80, 40)
-                                     isBackView:NO];
         }
     }
     else
@@ -196,187 +178,380 @@
         {
             // ios 6 iphone4
             CLog(@"It's is iphone4 IOS6");
-            infoLab.frame = [UIView fitCGRect:CGRectMake(10, 20, 320-20, 40)
-                                   isBackView:NO];
-            finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60, 320-40, 220)
+            finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 40, 320-40, 200)
                                           isBackView:NO];
-            payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 270+20, 80, 20)
+            payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 270, 80, 20)
                                       isBackView:NO];
-            backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 300+20, 80, 20)
+            backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 300, 80, 20)
                                        isBackView:NO];
-            payLab.frame = [UIView fitCGRect:CGRectMake(120, 270+20, 140, 20)
+            payLab.frame = [UIView fitCGRect:CGRectMake(120, 270, 15, 20)
                                   isBackView:NO];
-            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 300+20, 140, 20)
+            payFld.frame = [UIView fitCGRect:CGRectMake(135, 270, 130, 20)
+                                  isBackView:NO];
+            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 300, 140, 20)
                                         isBackView:NO];
-            okBtn.frame = [UIView fitCGRect:CGRectMake(160-100, 330+20, 80, 40)
+            okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 330+20, loginImg.size.width, loginImg.size.height)
                                  isBackView:NO];
-            cancelBtn.frame = [UIView fitCGRect:CGRectMake(160+20, 330+20, 80, 40)
-                                     isBackView:NO];
         }
         else
         {
             //ios 6 iphone5
             CLog(@"It's is iphone5 IOS6");
-            infoLab.frame = [UIView fitCGRect:CGRectMake(10, 20, 320-20, 40)
-                                   isBackView:NO];
             finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60, 320-40, 220)
                                           isBackView:NO];
             payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 250+20, 80, 20)
                                       isBackView:NO];
             backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 280+20, 80, 20)
                                        isBackView:NO];
-            payLab.frame = [UIView fitCGRect:CGRectMake(120, 250+20, 140, 20)
+            payLab.frame = [UIView fitCGRect:CGRectMake(120, 250+20, 15, 20)
+                                  isBackView:NO];
+            payFld.frame = [UIView fitCGRect:CGRectMake(135, 250+20, 10, 20)
                                   isBackView:NO];
             backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 280+20, 140, 20)
                                         isBackView:NO];
-            okBtn.frame = [UIView fitCGRect:CGRectMake(160-100, 320+20, 80, 40)
+            okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 320+20, loginImg.size.width, loginImg.size.height)
                                  isBackView:NO];
-            cancelBtn.frame = [UIView fitCGRect:CGRectMake(160+20, 320+20, 80, 40)
-                                     isBackView:NO];
         }
     }
-    
     [backInfoLab release];
     [payInfoLab release];
-    [infoLab release];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(doValueChanged:)
+                                                 name:@"UITextFieldTextDidChangeNotification"
+                                               object:nil];
+}
+
+- (void) doValueChanged:(NSNotification *) notice
+{
+    if (payFld.text.length==0)
+    {
+        return;
+    }
+    
+    if(![self isPureInt:payFld.text] || ![self isPureFloat:payFld.text])
+    {
+        [self showAlertWithTitle:@"提示"
+                             tag:0
+                         message:@"消费金额必须输入数字!"
+                        delegate:self
+               otherButtonTitles:@"确定", nil];
+        return;
+    }
+    
+    if (payFld.text.floatValue>order.totalMoney.floatValue)
+    {
+        [self showAlertWithTitle:@"提示"
+                             tag:0
+                         message:@"消费金额不能大于总金额!"
+                        delegate:self
+               otherButtonTitles:@"确定",nil];
+        return;
+    }
+    
+    CGFloat backMoney = order.totalMoney.floatValue-payFld.text.floatValue;
+    backMoneyLab.text = [NSString stringWithFormat:@"￥ %.2f", backMoney];
+}
+
+//判断是否为整形
+- (BOOL)isPureInt:(NSString*)string
+{
+    NSScanner* scan = [NSScanner scannerWithString:string];
+    int val;
+    return[scan scanInt:&val] && [scan isAtEnd];
+}
+
+//判断是否为浮点形
+- (BOOL)isPureFloat:(NSString*)string
+{
+    NSScanner* scan = [NSScanner scannerWithString:string];
+    float val;
+    return[scan scanFloat:&val] && [scan isAtEnd];
 }
 
 #pragma mark -
-#pragma mark - UITableViewDelegate and UITableViewDataSource
-- (int) numberOfSectionsInTableView:(UITableView *)tableView
+#pragma mark - UIGridViewDelegate
+- (void) gridView:(UIGridView *)grid didSelectRowAt:(int)rowIndex AndColumnAt:(int)columnIndex
 {
-    return 1;
-}
-
-- (int) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
-{
-    return 5;
-}
-
-- (UITableViewCell *) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    static NSString *idString = @"idString";
-    UITableViewCell *cell     = [tableView dequeueReusableCellWithIdentifier:idString];
-    if (!cell)
-    {
-        cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault
-                                     reuseIdentifier:idString];
-    }
     
-    cell.backgroundView = [[UIImageView alloc]initWithImage:
-                                        [UIImage imageNamed:@"lt_list_bg"]];
-    switch (indexPath.row)
+}
+
+- (CGFloat) gridView:(UIGridView *)grid widthForColumnAt:(int)columnIndex
+{
+    return 120;
+}
+
+- (CGFloat) gridView:(UIGridView *)grid heightForRowAt:(int)rowIndex
+{
+    return 40;
+}
+
+- (NSInteger) numberOfColumnsOfGridView:(UIGridView *) grid
+{
+    return 2;
+}
+
+- (NSInteger) numberOfCellsOfGridView:(UIGridView *) grid
+{
+    return 10;
+}
+
+- (UIGridViewCell *) gridView:(UIGridView *)grid cellForRowAt:(int)rowIndex AndColumnAt:(int)columnIndex
+{
+    UIGridViewCell *cell = [[[UIGridViewCell alloc]init]autorelease];
+    switch (rowIndex)
     {
         case 0:
         {
-            UILabel *startDate = [[UILabel alloc]init];
-            startDate.text  = @"开始日期";
-            startDate.backgroundColor = [UIColor clearColor];
-            startDate.frame = [UIView fitCGRect:CGRectMake(5, 0, 80, 44)
-                                     isBackView:NO];
-            startDate.font  = [UIFont systemFontOfSize:14.f];
-            [cell addSubview:startDate];
-            [startDate release];
-            
-            UILabel *dateValLab = [[UILabel alloc]init];
-            dateValLab.text  = order.orderAddTimes;
-            dateValLab.backgroundColor = [UIColor clearColor];
-            dateValLab.frame = CGRectMake(140, 0, 140, 44);
-            dateValLab.font  = [UIFont systemFontOfSize:14.f];
-            [cell addSubview:dateValLab];
+            switch (columnIndex)
+            {
+                case 0:
+                {
+                    UILabel *infoLab = [[UILabel alloc]init];
+                    infoLab.text = @"开始日期";
+                    infoLab.font = [UIFont systemFontOfSize:14.f];
+                    infoLab.frame= CGRectMake(10, 10, 110, 20);
+                    infoLab.textAlignment = NSTextAlignmentLeft;
+                    infoLab.backgroundColor = [UIColor clearColor];
+                    [cell addSubview:infoLab];
+                    [infoLab release];
+                    break;
+                }
+                case 1:
+                {
+                    UILabel *infoLab = [[UILabel alloc]init];
+                    infoLab.text = order.orderStudyStartDate;
+                    infoLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
+                    infoLab.font = [UIFont systemFontOfSize:14.f];
+                    infoLab.frame= CGRectMake(10, 10, 110, 20);
+                    infoLab.textAlignment = NSTextAlignmentLeft;
+                    infoLab.backgroundColor = [UIColor clearColor];
+                    [cell addSubview:infoLab];
+                    [infoLab release];
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
         }
         case 1:
         {
-            UILabel *salaryLab = [[UILabel alloc]init];
-            salaryLab.text = @"每小时课酬标准";
-            salaryLab.backgroundColor = [UIColor clearColor];
-            salaryLab.frame = [UIView fitCGRect:CGRectMake(5, 0, 140, 44)
-                                     isBackView:NO];
-            salaryLab.font  = [UIFont systemFontOfSize:14.f];
-            [cell addSubview:salaryLab];
-            [salaryLab release];
-            
-            UILabel *salaryValLab  = [[UILabel alloc]init];
-            salaryValLab.text      = order.everyTimesMoney;
-            salaryValLab.backgroundColor = [UIColor clearColor];
-            salaryValLab.frame = CGRectMake(140, 0, 140, 44);
-            salaryValLab.font  = [UIFont systemFontOfSize:14.f];
-            [cell addSubview:salaryValLab];
+            switch (columnIndex)
+            {
+                case 0:
+                {
+                    UILabel *infoLab = [[UILabel alloc]init];
+                    infoLab.text = @"每小时课酬标准";
+                    infoLab.font = [UIFont systemFontOfSize:14.f];
+                    infoLab.frame= CGRectMake(10, 10, 110, 20);
+                    infoLab.textAlignment = NSTextAlignmentLeft;
+                    infoLab.backgroundColor = [UIColor clearColor];
+                    [cell addSubview:infoLab];
+                    [infoLab release];
+                    break;
+                }
+                case 1:
+                {
+                    UILabel *infoLab = [[UILabel alloc]init];
+                    infoLab.text = [NSString stringWithFormat:@"￥%@",order.everyTimesMoney];
+                    infoLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
+                    infoLab.font = [UIFont systemFontOfSize:14.f];
+                    infoLab.frame= CGRectMake(10, 10, 110, 20);
+                    infoLab.textAlignment = NSTextAlignmentLeft;
+                    infoLab.backgroundColor = [UIColor clearColor];
+                    [cell addSubview:infoLab];
+                    [infoLab release];
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
         }
         case 2:
         {
-            UILabel *timesLab = [[UILabel alloc]init];
-            timesLab.text = @"预计辅导小时数";
-            timesLab.backgroundColor = [UIColor clearColor];
-            timesLab.frame = [UIView fitCGRect:CGRectMake(5, 0, 140, 44)
-                                    isBackView:NO];
-            [cell addSubview:timesLab];
-            timesLab.font  = [UIFont systemFontOfSize:14.f];
-            [timesLab release];
-            
-            UILabel *timeValueLab = [[UILabel alloc]init];
-            timeValueLab.text  = order.orderStudyTimes;
-            timeValueLab.backgroundColor = [UIColor clearColor];
-            timeValueLab.frame = CGRectMake(140, 0, 140, 44);
-            timeValueLab.font  = [UIFont systemFontOfSize:14.f];
-            [cell addSubview:timeValueLab];
+            switch (columnIndex)
+            {
+                case 0:
+                {
+                    UILabel *infoLab = [[UILabel alloc]init];
+                    infoLab.text = @"预计辅导小时数";
+                    infoLab.frame= CGRectMake(10, 10, 110, 20);
+                    infoLab.font = [UIFont systemFontOfSize:14.f];
+                    infoLab.textAlignment   = NSTextAlignmentLeft;
+                    infoLab.backgroundColor = [UIColor clearColor];
+                    [cell addSubview:infoLab];
+                    [infoLab release];
+                    break;
+                }
+                case 1:
+                {
+                    UILabel *infoLab = [[UILabel alloc]init];
+                    infoLab.text = [NSString stringWithFormat:@"%@小时",order.orderStudyTimes];
+                    infoLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
+                    infoLab.font = [UIFont systemFontOfSize:14.f];
+                    infoLab.frame= CGRectMake(10, 10, 110, 20);
+                    infoLab.textAlignment = NSTextAlignmentLeft;
+                    infoLab.backgroundColor = [UIColor clearColor];
+                    [cell addSubview:infoLab];
+                    [infoLab release];
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
         }
         case 3:
         {
-            UILabel *posLab = [[UILabel alloc]init];
-            posLab.text = @"授课地点";
-            posLab.backgroundColor = [UIColor clearColor];
-            posLab.frame = [UIView fitCGRect:CGRectMake(5, 0, 140, 44)
-                                  isBackView:NO];
-            [cell addSubview:posLab];
-            posLab.font  = [UIFont systemFontOfSize:14.f];
-            [posLab release];
-            
-            UILabel *posValLab = [[UILabel alloc]init];
-            posValLab.text  = order.orderStudyPos;
-            posValLab.backgroundColor = [UIColor clearColor];
-            posValLab.frame = CGRectMake(140, 0, 140, 44);
-            posValLab.numberOfLines = 0;
-            posValLab.font  = [UIFont systemFontOfSize:14.f];
-            [cell addSubview:posValLab];
-            
-            CGSize size = [posValLab.text sizeWithFont:posValLab.font
-                                constrainedToSize:CGSizeMake(posValLab.frame.size.width, MAXFLOAT)
-                                    lineBreakMode:NSLineBreakByWordWrapping];
-            posValLab.frame = CGRectMake(posValLab.frame.origin.x, posValLab.frame.origin.y, posValLab.frame.size.width, size.height);
+            switch (columnIndex)
+            {
+                case 0:
+                {
+                    UILabel *infoLab = [[UILabel alloc]init];
+                    infoLab.text = @"授课地址";
+                    infoLab.frame= CGRectMake(10, 10, 110, 20);
+                    infoLab.font = [UIFont systemFontOfSize:14.f];
+                    infoLab.textAlignment   = NSTextAlignmentLeft;
+                    infoLab.backgroundColor = [UIColor clearColor];
+                    [cell addSubview:infoLab];
+                    [infoLab release];
+                    break;
+                }
+                case 1:
+                {
+                    UILabel *infoLab = [[UILabel alloc]init];
+                    infoLab.text = order.orderStudyPos;
+                    infoLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
+                    infoLab.font = [UIFont systemFontOfSize:14.f];
+                    infoLab.frame= CGRectMake(10, 10, 110, 20);
+                    infoLab.textAlignment = NSTextAlignmentLeft;
+                    infoLab.backgroundColor = [UIColor clearColor];
+                    [cell addSubview:infoLab];
+                    [infoLab release];
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
         }
         case 4:
         {
-            UILabel *posLab = [[UILabel alloc]init];
-            posLab.text = @"总金额";
-            posLab.backgroundColor = [UIColor clearColor];
-            posLab.frame = [UIView fitCGRect:CGRectMake(5, 0, 140, 44)
-                                  isBackView:NO];
-            [cell addSubview:posLab];
-            posLab.font  = [UIFont systemFontOfSize:14.f];
-            [posLab release];
-            
-            UILabel *moneyValLab = [[UILabel alloc]init];
-            moneyValLab.text  = order.totalMoney;
-            moneyValLab.backgroundColor = [UIColor clearColor];
-            moneyValLab.frame = CGRectMake(140, 0, 140, 44);
-            moneyValLab.font  = [UIFont systemFontOfSize:14.f];
-            [cell addSubview:moneyValLab];
+            switch (columnIndex)
+            {
+                case 0:
+                {
+                    UILabel *infoLab = [[UILabel alloc]init];
+                    infoLab.text = @"总金额数";
+                    infoLab.frame= CGRectMake(10, 10, 100, 20);
+                    infoLab.font = [UIFont systemFontOfSize:14.f];
+                    infoLab.textAlignment = NSTextAlignmentLeft;
+                    infoLab.backgroundColor = [UIColor clearColor];
+                    [cell addSubview:infoLab];
+                    [infoLab release];
+                    break;
+                }
+                case 1:
+                {
+                    UILabel *infoLab = [[UILabel alloc]init];
+                    infoLab.text = [NSString stringWithFormat:@"￥%@", order.totalMoney];
+                    infoLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
+                    infoLab.font = [UIFont systemFontOfSize:14.f];
+                    infoLab.frame= CGRectMake(10, 10, 110, 20);
+                    infoLab.textAlignment = NSTextAlignmentLeft;
+                    infoLab.backgroundColor = [UIColor clearColor];
+                    [cell addSubview:infoLab];
+                    [infoLab release];
+                    break;
+                }
+                default:
+                    break;
+            }
             break;
         }
+        default:
+            break;
     }
     
     return cell;
 }
 
 #pragma mark -
+#pragma mark - UITextFieldDelegate
+- (void) textFieldDidBeginEditing:(UITextField *)textField
+{
+    [self moveViewWhenViewHidden:okBtn parent:self.view];
+}
+
+- (BOOL) textFieldShouldReturn:(UITextField *)textField
+{
+    [self repickView:self.view];
+    [textField resignFirstResponder];
+    return YES;
+}
+
+#pragma mark -
+#pragma mark - UIViewController Custom Methods
+- (void) repickView:(UIView *)parent
+{
+    NSTimeInterval animationDuration = 0.30f;
+    [UIView beginAnimations:@"ResizeForKeyboard" context:nil];
+    
+    [UIView setAnimationDuration:animationDuration];
+    CGRect rect  = CGRectMake(parent.frame.origin.x,
+                              parent.frame.origin.y+offset,
+                              parent.frame.size.width,
+                              parent.frame.size.height);
+    parent.frame = rect;
+    
+    [UIView commitAnimations];
+    
+    offset = 0;
+}
+
+- (void) moveViewWhenViewHidden:(UIView *)view parent:(UIView *) parentView
+{
+    //键盘高度216
+    NSTimeInterval animationDuration = 0.30f;
+    [UIView beginAnimations:@"ResizeForKeyBoard" context:nil];
+    [UIView setAnimationDuration:animationDuration];
+    
+    offset = 180;
+    
+    int width  = parentView.frame.size.width;
+    int height = parentView.frame.size.height;
+    CGRect rect= CGRectMake(parentView.frame.origin.x,
+                            parentView.frame.origin.y-offset,width, height);
+    parentView.frame = rect;
+    [UIView commitAnimations];
+}
+
+#pragma mark -
 #pragma mark - Control Event
 - (void) doButtonClicked:(id)sender
 {
+    if( ![self isPureInt:payFld.text] || ![self isPureFloat:payFld.text])
+    {
+        [self showAlertWithTitle:@"提示"
+                             tag:0
+                         message:@"消费金额必须输入数字!"
+                        delegate:self
+               otherButtonTitles:@"确定", nil];
+        return;
+    }
+    
+    if (payFld.text.floatValue>order.totalMoney.floatValue)
+    {
+        [self showAlertWithTitle:@"提示"
+                             tag:0
+                         message:@"消费金额不能大于总金额!"
+                        delegate:self
+               otherButtonTitles:@"确定",nil];
+        return;
+    }
+    
     if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
     {
         return;
@@ -385,13 +560,14 @@
     CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
     [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
     
-    UIButton *btn  = sender;
-    NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-    NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd,STUDENT];
-    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"orderid",@"value",@"sessid",nil];
-    NSArray *valuesArr = [NSArray arrayWithObjects:@"submitApply",order.orderId,[NSNumber numberWithLong:btn.tag],ssid, nil];
+    CGFloat backMoney  = order.totalMoney.floatValue-payFld.text.floatValue;
     
+    NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+    NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
+    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"orderid",@"xfamount",@"tfamount",@"sessid",nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"submitApply",order.orderId,payFld.text,
+                                                  [NSString stringWithFormat:@"%f", backMoney],ssid, nil];
     CLog(@"values:%@", valuesArr);
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
@@ -400,7 +576,6 @@
     [request requestASyncWith:kServerPostRequest
                      paramDic:pDic
                        urlStr:url];
-        
 }
 
 #pragma mark -
@@ -443,6 +618,7 @@
     if (errorid.intValue == 0)
     {
         CLog(@"Submit Order Success!");
+        
         //返回上一页
         [self.navigationController popViewControllerAnimated:YES];
     }

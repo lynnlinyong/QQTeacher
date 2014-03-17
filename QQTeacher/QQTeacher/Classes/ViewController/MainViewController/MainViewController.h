@@ -17,7 +17,7 @@ CustomNavigationDataSource,
                                                 MAMapViewDelegate>
 {
     NSString        *appurl;
-    NSMutableArray  *teacherArray;
+    NSMutableArray  *studentArray;
     NSMutableArray  *annArray;
     AMapSearchAPI   *search;
     CalloutMapAnnotation *_calloutMapAnnotation;
