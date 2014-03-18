@@ -10,7 +10,9 @@
 #import "MQTTSession.h"
 
 @interface MainViewController : UIViewController<
-CustomNavigationDataSource,
+                                                UITableViewDelegate,
+                                                UITableViewDataSource,
+                                                CustomNavigationDataSource,
                                                 TeacherPropertyViewDelegate,
                                                 ServerRequestDelegate,
                                                 AMapSearchDelegate,
@@ -23,6 +25,7 @@ CustomNavigationDataSource,
     CalloutMapAnnotation *_calloutMapAnnotation;
     CustomPointAnnotation *meAnn;
     
+    UITableView     *noticeTab;
     CLLocation      *originPoint;
     
     BOOL  isLocation;
@@ -41,4 +44,6 @@ CustomNavigationDataSource,
 + (void) setNavBackButton:(UIViewController *) delegate parentVctr:(UIViewController *)parentVctr;
 
 + (NSString *) getPushAddress:(NSString *) str;
+
+- (void) addInviteNotice:(NSDictionary *)dic;
 @end

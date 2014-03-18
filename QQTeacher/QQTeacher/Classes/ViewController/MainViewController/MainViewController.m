@@ -10,6 +10,8 @@
 
 #define IOS7_OR_LATER   ( [[[UIDevice currentDevice] systemVersion] compare:@"7.0"] != NSOrderedAscending )
 
+static NSMutableArray *inviteMsgArray = nil;
+
 @interface MainViewController ()
 
 @end
@@ -34,6 +36,11 @@
     [MainViewController setNavTitle:@"个人中心"];
     
     [self initBackBarItem];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(inviteNotice:)
+                                                 name:@"InviteNotice"
+                                               object:nil];
 }
 
 - (void)viewDidLoad
@@ -56,8 +63,9 @@
 
 - (void) viewDidDisappear:(BOOL)animated
 {
-    CustomNavigationViewController *nav = (CustomNavigationViewController *) [MainViewController getNavigationViewController];
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
     nav.dataSource = nil;
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super viewDidDisappear:animated];
 }
 
@@ -72,7 +80,7 @@
     [annArray removeAllObjects];
     [studentArray removeAllObjects];
     self.mapView.delegate = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+
     
     [super viewDidUnload];
 }
@@ -83,11 +91,44 @@
     [annArray release];
     [studentArray release];
     [mapView release];
+    [noticeTab release];
     [super dealloc];
 }
 
 #pragma mark -
 #pragma mark - Custom Action
+- (void) inviteNotice:(NSNotification *) notice
+{
+    CLog(@"getNotice:%@", notice.userInfo);
+    NSDictionary *inviteDic = [notice.userInfo objectForKey:@"InviteDic"];
+    [self addInviteNotice:inviteDic];
+}
+
+- (void) addInviteNotice:(NSDictionary *)dic
+{
+    if (!inviteMsgArray)
+        inviteMsgArray = [[NSMutableArray alloc]init];
+    
+    [inviteMsgArray addObject:dic];
+    
+    if (!noticeTab)
+    {
+        noticeTab = [[UITableView alloc]init];
+        noticeTab.delegate   = self;
+        noticeTab.dataSource = self;
+        noticeTab.hidden     = YES;
+        noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 480)
+                                 isBackView:YES];
+        noticeTab.separatorStyle = UITableViewCellSeparatorStyleNone;
+        [self.view addSubview:noticeTab];
+    }
+    noticeTab.hidden = NO;
+    [noticeTab reloadData];
+    
+    CLog(@"dic:%@", dic);
+    CLog(@"inviteMsgArray:%d", inviteMsgArray.count);
+}
+
 - (void) initBackBarItem
 {
     CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
@@ -106,6 +147,107 @@
             break;
         }
     }
+}
+
+
+#pragma mark - 
+#pragma mark - UITableViewDelegate and UITableViewDataSource
+- (NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
+{
+    return 1;
+}
+
+- (NSInteger) tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+{
+    return inviteMsgArray.count;
+}
+
+- (CGFloat) tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 120.f;
+}
+
+- (UITableViewCell *) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    NSString *idString = @"idString";
+    UITableViewCell *cell = [[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:idString] autorelease];
+    
+    NSDictionary *inviteDic = [inviteMsgArray objectAtIndex:indexPath.row];
+    
+    
+    UILabel *infoLab = [[UILabel alloc]init];
+    NSString *totalMoney = [inviteDic objectForKey:@"tamount"];
+    if (totalMoney.intValue==0)
+    {
+        infoLab.text = [NSString stringWithFormat:@"%@ %@ %@  金额师生协商", [inviteDic objectForKey:@"nickname"],
+                                                                     [inviteDic objectForKey:@"grade"],
+                                                                     [Student searchGenderName:[inviteDic objectForKey:@"gender"]]];
+    }
+    else
+    {
+        infoLab.text = [NSString stringWithFormat:@"%@ %@ %@  ￥%@", [inviteDic objectForKey:@"nickname"], [inviteDic objectForKey:@"grade"], [Student searchGenderName:[inviteDic objectForKey:@"gender"]], [inviteDic objectForKey:@"tamount"]];
+    }
+    infoLab.font = [UIFont systemFontOfSize:14.f];
+    infoLab.backgroundColor = [UIColor clearColor];
+    infoLab.frame = CGRectMake(5, 5, 270, 20);
+    [cell addSubview:infoLab];
+    [infoLab release];
+    
+    
+    UILabel *timesLab = [[UILabel alloc]init];
+    timesLab.text = [NSString stringWithFormat:@"预计辅导小时数:%@", [inviteDic objectForKey:@"yjfdnum"]];
+    timesLab.backgroundColor = [UIColor clearColor];
+    timesLab.frame = CGRectMake(5, 25, 270, 20);
+    timesLab.font  = [UIFont systemFontOfSize:14.f];
+    [cell addSubview:timesLab];
+    [timesLab release];
+    
+    UILabel *startDateLab = [[UILabel alloc]init];
+    startDateLab.text = [NSString stringWithFormat:@"开课日期:%@", [inviteDic objectForKey:@"sd"]];
+    startDateLab.backgroundColor = [UIColor clearColor];
+    startDateLab.frame = CGRectMake(5, 45, 270, 20);
+    startDateLab.font  = [UIFont systemFontOfSize:14.f];
+    [cell addSubview:startDateLab];
+    [startDateLab release];
+    
+    UILabel *posLab = [[UILabel alloc]init];
+    posLab.text = [NSString stringWithFormat:@"授课地址:%@", [inviteDic objectForKey:@"iaddress"]];
+    posLab.backgroundColor = [UIColor clearColor];
+    posLab.frame = CGRectMake(5, 65, 270, 20);
+    posLab.font  = [UIFont systemFontOfSize:14.f];
+    [cell addSubview:posLab];
+    [posLab release];
+    
+    //计算距离
+    NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+    Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
+    
+    NSString *distLatitude = [inviteDic objectForKey:@"latitude"];
+    NSString *distLongtitude = [inviteDic objectForKey:@"longitude"];
+    
+    CLLocation* orig=[[[CLLocation alloc] initWithLatitude:[teacher.latitude doubleValue]  longitude:[teacher.longitude doubleValue]] autorelease];
+    CLLocation* dist=[[[CLLocation alloc] initWithLatitude:[distLatitude doubleValue] longitude:[distLongtitude doubleValue] ] autorelease];
+    
+    CLLocationDistance kilometers=[orig distanceFromLocation:dist]/1000;
+    
+    UILabel *distanceLab = [[UILabel alloc]init];
+    distanceLab.text = [NSString stringWithFormat:@"距离:%0.2fkm", kilometers];
+    distanceLab.backgroundColor = [UIColor clearColor];
+    distanceLab.frame = CGRectMake(5, 85, 270, 20);
+    distanceLab.font  = [UIFont systemFontOfSize:14.f];
+    [cell addSubview:distanceLab];
+    [distanceLab release];
+    
+    UILabel *secondeLab = [[UILabel alloc]init];
+    secondeLab.text = [NSString stringWithFormat:@"还剩50秒"];
+    secondeLab.backgroundColor = [UIColor clearColor];
+    secondeLab.frame = CGRectMake(320-70, 85, 60, 20);
+    secondeLab.font  = [UIFont systemFontOfSize:14.f];
+    [cell addSubview:secondeLab];
+    [secondeLab release];
+    
+    [cell setBackgroundView:[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"lt_list_bg"]]];
+    return cell;
 }
 
 #pragma mark -
@@ -167,6 +309,16 @@
     [mapView setZoomLevel:zooms];
     mapView.showsUserLocation = YES;
     [self.view addSubview:self.mapView];
+    
+    noticeTab = [[UITableView alloc]init];
+    noticeTab.delegate   = self;
+    noticeTab.dataSource = self;
+    noticeTab.hidden     = YES;
+    noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 480)
+                             isBackView:YES];
+    noticeTab.separatorStyle = UITableViewCellSeparatorStyleNone;
+//    noticeTab.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
+    [self.view addSubview:noticeTab];
 }
 
 - (void) setTerminalMapProperty

@@ -381,51 +381,29 @@
     int msgType = ((NSString *)[msgDic objectForKey:@"type"]).intValue;
     switch (msgType)
     {
-        case PUSH_TYPE_APPLY:       //接收到老师抢单信息
+        case PUSH_TYPE_PUSH:       //接收学生邀请信息
         {
-//            //添加到联系人,订单.等待老师确认。
-//            Teacher *tObj  = [[Teacher alloc]init];
-//            tObj.deviceId  = [msgDic objectForKey:@"deviceId"];
-//            tObj.sex       = ((NSNumber *) [msgDic objectForKey:@"gender"]).intValue;
-//            tObj.headUrl   = [msgDic objectForKey:@"icon"];
-//            tObj.idNums    = [msgDic objectForKey:@"idnumber"];
-//            tObj.info      = [msgDic objectForKey:@"info"];
-//            tObj.name      = [msgDic objectForKey:@"nickname"];
-//            tObj.phoneNums = [msgDic objectForKey:@"phone"];
-//            tObj.comment   = ((NSNumber *) [msgDic objectForKey:@"stars"]).intValue;
-//            tObj.studentCount = ((NSNumber *) [msgDic objectForKey:@"students"]).intValue;
-//            tObj.pf = [msgDic objectForKey:@"subjectText"];
-//            
-//            //获得是否已经抢单
-//            BOOL isConfirm = [[NSUserDefaults standardUserDefaults] boolForKey:IS_ORDER_CONFIRM];
-//            if (!isConfirm)
-//            {
-//                NSDictionary *infoDic = [[NSDictionary alloc]initWithObjectsAndKeys:tObj,@"OrderTeacher",nil];
-//                [[NSNotificationCenter defaultCenter] postNotificationName:@"OrderConfirm"
-//                                                                    object:nil
-//                                                                  userInfo:infoDic];
-//            }
-//            else
-//            {
-//                //发送订单失败信息
-//                NSString *orderId  = [[msgDic objectForKey:@"keyId"] copy];
-//                NSData *stuData    = [[NSUserDefaults standardUserDefaults] objectForKey:STUDENT];
-//                Student *student   = [NSKeyedUnarchiver unarchiveObjectWithData:stuData];
-//                NSArray *paramsArr = [NSArray arrayWithObjects:@"type",@"status",@"phone",
-//                                      @"nickname",@"keyId",@"taPhone", nil];
-//                NSArray *valuesArr = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_CONFIRM],@"failure",
-//                                      student.phoneNumber,
-//                                      student.nickName,orderId,tObj.phoneNums, nil];
-//                NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-//                                                                 forKeys:paramsArr];
-//                NSString *jsonDic  = [pDic JSONFragment];
-//                NSData *data = [jsonDic dataUsingEncoding:NSUTF8StringEncoding];
-//                
-//                //发送抢单失败消息
-//                SingleMQTT *session = [SingleMQTT shareInstance];
-//                [session.session publishData:data
-//                                     onTopic:tObj.deviceId];
-//            }
+            //跳转到抢单页显示
+            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+            if (![AppDelegate isInView:NSStringFromClass([MainViewController class])])  //不在最顶层页面.
+            {
+                MainViewController *mVctr = [[MainViewController alloc]init];
+                [mVctr addInviteNotice:msgDic];
+                [nav pushViewController:mVctr animated:YES];
+                [mVctr release];
+            }
+            else
+            {
+                //发送邀请Notice,在顶层
+                NSDictionary *userDic = [NSDictionary dictionaryWithObjectsAndKeys:msgDic,@"InviteDic", nil];
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"InviteNotice"
+                                                                    object:nil
+                                                                  userInfo:userDic];
+            }
+            break;
+        }
+        case PUSH_TYPE_APPLY:
+        {
             break;
         }
         case PUSH_TYPE_CONFIRM:     //确认老师的确认消息

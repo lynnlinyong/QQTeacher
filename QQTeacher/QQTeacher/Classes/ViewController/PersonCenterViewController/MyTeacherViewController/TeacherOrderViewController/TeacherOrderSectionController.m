@@ -138,7 +138,7 @@
             order = [[Order alloc]init];
             order.student = student;
         }
-        CLog(@"sdfjsdfjisdfjsi:student:%@", student.nickName);
+        
         MyTeacherCell *cell = [[[MyTeacherCell alloc]initWithStyle:UITableViewCellStyleDefault
                                                    reuseIdentifier:idString]autorelease];
         cell.order    = order;

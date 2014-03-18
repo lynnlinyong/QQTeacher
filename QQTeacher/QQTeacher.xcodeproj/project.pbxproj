@@ -26,7 +26,6 @@
 		BA50D6D718D1524800CCE95C /* stp_checked.png in Resources */ = {isa = PBXBuildFile; fileRef = BA50D6D618D1524800CCE95C /* stp_checked.png */; };
 		BA8EC25118D0C4D600D1AA12 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA8EC25018D0C4D600D1AA12 /* Foundation.framework */; };
 		BA8EC25318D0C4D600D1AA12 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA8EC25218D0C4D600D1AA12 /* CoreGraphics.framework */; };
-		BA8EC25518D0C4D600D1AA12 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA8EC25418D0C4D600D1AA12 /* UIKit.framework */; };
 		BA8EC25D18D0C4D600D1AA12 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC25C18D0C4D600D1AA12 /* main.m */; };
 		BA8EC26318D0C4D600D1AA12 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BA8EC26218D0C4D600D1AA12 /* Images.xcassets */; };
 		BA8EC57E18D0C5E300D1AA12 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC28218D0C5E100D1AA12 /* AppDelegate.m */; };
@@ -532,6 +531,7 @@
 		BAC73F4018D11B3600B97CC6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BAC73F3B18D11B3600B97CC6 /* InfoPlist.strings */; };
 		BAC73F4118D11B3600B97CC6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = BAC73F3E18D11B3600B97CC6 /* InfoPlist.strings */; };
 		BAD36AEB18D2BA51007EA380 /* UploadCertificateViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BAD36AEA18D2BA51007EA380 /* UploadCertificateViewController.m */; };
+		BAD4B60218D82380000D7A2A /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BAD4B60118D82380000D7A2A /* UIKit.framework */; };
 		BAE5B0CB18D76A22007D86EB /* location_x.png in Resources */ = {isa = PBXBuildFile; fileRef = BAE5B0CA18D76A22007D86EB /* location_x.png */; };
 /* End PBXBuildFile section */
 
@@ -561,7 +561,6 @@
 		BA8EC24D18D0C4D600D1AA12 /* QQTeacher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QQTeacher.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA8EC25018D0C4D600D1AA12 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		BA8EC25218D0C4D600D1AA12 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		BA8EC25418D0C4D600D1AA12 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		BA8EC25818D0C4D600D1AA12 /* QQTeacher-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "QQTeacher-Info.plist"; sourceTree = "<group>"; };
 		BA8EC25C18D0C4D600D1AA12 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		BA8EC25E18D0C4D600D1AA12 /* QQTeacher-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "QQTeacher-Prefix.pch"; sourceTree = "<group>"; };
@@ -1248,6 +1247,7 @@
 		BAC73F3F18D11B3600B97CC6 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = InfoPlist.strings; sourceTree = "<group>"; };
 		BAD36AE918D2BA51007EA380 /* UploadCertificateViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UploadCertificateViewController.h; sourceTree = "<group>"; };
 		BAD36AEA18D2BA51007EA380 /* UploadCertificateViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UploadCertificateViewController.m; sourceTree = "<group>"; };
+		BAD4B60118D82380000D7A2A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		BAE5B0CA18D76A22007D86EB /* location_x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = location_x.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -1256,6 +1256,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BAD4B60218D82380000D7A2A /* UIKit.framework in Frameworks */,
 				BA8EC78818D0C7B300D1AA12 /* SystemConfiguration.framework in Frameworks */,
 				BA8EC78618D0C7AC00D1AA12 /* Social.framework in Frameworks */,
 				BA03624318D0E25200AE5C07 /* MAMapKit.framework in Frameworks */,
@@ -1279,7 +1280,6 @@
 				BA8EC76618D0C6EF00D1AA12 /* libicucore.dylib in Frameworks */,
 				BA8EC61818D0C5E300D1AA12 /* libMqttSDK.a in Frameworks */,
 				BA8EC64A18D0C5E300D1AA12 /* libWeChatSDK.a in Frameworks */,
-				BA8EC25518D0C4D600D1AA12 /* UIKit.framework in Frameworks */,
 				BA03624218D0E25200AE5C07 /* AMapSearchKit.framework in Frameworks */,
 				BA8EC5C618D0C5E300D1AA12 /* libopencore-amrnb.a in Frameworks */,
 				BA8EC63418D0C5E300D1AA12 /* libTCWeiboSDK.a in Frameworks */,
@@ -1313,6 +1313,7 @@
 		BA8EC24F18D0C4D600D1AA12 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				BAD4B60118D82380000D7A2A /* UIKit.framework */,
 				BA8EC76518D0C6EF00D1AA12 /* libicucore.dylib */,
 				BA8EC76718D0C70300D1AA12 /* libsqlite3.dylib */,
 				BA8EC76918D0C70F00D1AA12 /* libstdc++.6.0.9.dylib */,
@@ -1333,7 +1334,6 @@
 				BA8EC78318D0C7A400D1AA12 /* Security.framework */,
 				BA8EC78518D0C7AC00D1AA12 /* Social.framework */,
 				BA8EC78718D0C7B300D1AA12 /* SystemConfiguration.framework */,
-				BA8EC25418D0C4D600D1AA12 /* UIKit.framework */,
 				BA8EC26918D0C4D600D1AA12 /* XCTest.framework */,
 			);
 			name = Frameworks;
