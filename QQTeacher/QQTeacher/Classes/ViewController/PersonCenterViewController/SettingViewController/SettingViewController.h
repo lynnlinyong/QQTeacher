@@ -19,7 +19,8 @@ typedef enum _tagUpdateType
                                                     TTImageViewDelegate,
                                                     ServerRequestDelegate,
                                                     UITableViewDataSource,
-                                                    UITableViewDelegate>
+                                                    UITableViewDelegate,
+                                                    CustomNavigationDataSource>
 {
     UITableView   *setTab;
     
@@ -33,6 +34,9 @@ typedef enum _tagUpdateType
     UILabel       *accountValLab;
     UILabel       *salaryValLab;
     UILabel       *infoValue;
+    UILabel *assitentLab;
+    NoticeNumberView *numView;
+    NSDictionary  *ccResDic;
     
     Teacher       *teacher;
     NSString      *headUrl;

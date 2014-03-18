@@ -30,6 +30,8 @@
 {
     [super viewDidLoad];
     
+    self.navigationController.navigationBarHidden = YES;
+    
     //初始化UI
     [self initUI];
     
@@ -84,10 +86,11 @@
 
 - (void) viewDidAppear:(BOOL)animated
 {
-    self.navigationController.navigationBarHidden = YES;
-    
-    [MainViewController setNavTitle:@"个人中心"];
     [super viewDidAppear:animated];
+    [MainViewController setNavTitle:@"个人中心"];
+    [self initBackBarItem];
+    ccResDic = nil;
+    [self getJxzl];
 }
 
 - (void) viewDidUnload
@@ -114,12 +117,19 @@
     [headUrl release];
     [salaryValLab release];
     [setTimeArray release];
-    [headImgView release];
+    [headImgView  release];
+    [assitentLab  release];
     [super dealloc];
 }
 
 #pragma mark -
 #pragma mark - Custom Action
+- (void) initBackBarItem
+{
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    nav.dataSource = self;
+}
+
 - (void) initUI
 {
     NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
@@ -206,14 +216,15 @@
     }
     CLog(@"***********Result****************");
     
-    
     NSNumber *errorid = [resDic objectForKey:@"errorid"];
     if (errorid.intValue == 0)
     {
-        NSDictionary *ccDic = [resDic objectForKey:@"cc"];
-        NSString *newApply  = [resDic objectForKey:@"new_apply"];
-        
-        
+        NSDictionary *ccDic = [[resDic objectForKey:@"cc"] copy];
+        if (ccDic.count!=0)     //已签约
+        {
+            ccResDic = [resDic copy];
+            [setTab reloadData];
+        }
     }
     else
     {
@@ -312,6 +323,40 @@
     [serverReq requestASyncWith:kServerPostRequest
                        paramDic:pDic
                          urlStr:url];
+}
+
+#pragma mark -
+#pragma mark - CustomNavigationDataSource
+- (UIBarButtonItem *) backBarButtomItem
+{
+    //设置返回按钮
+    UIImage *backImg  = [UIImage imageNamed:@"nav_back_normal_btn@2x"];
+    UIButton *backBtn = [UIButton buttonWithType:UIButtonTypeCustom];
+    backBtn.frame     = CGRectMake(0, 0,
+                                   50,
+                                   30);
+    [backBtn setBackgroundImage:backImg
+                       forState:UIControlStateNormal];
+    [backBtn setBackgroundImage:[UIImage imageNamed:@"nav_back_hlight_btn@2x"]
+                       forState:UIControlStateHighlighted];
+    [backBtn addTarget:self
+                action:@selector(doBackBtnClicked:)
+      forControlEvents:UIControlEventTouchUpInside];
+    
+    UILabel *titleLab = [[UILabel alloc]init];
+    titleLab.text     = @"返回";
+    titleLab.textColor= [UIColor whiteColor];
+    titleLab.font     = [UIFont systemFontOfSize:12.f];
+    titleLab.textAlignment = NSTextAlignmentCenter;
+    titleLab.frame = CGRectMake(8, 0,
+                                50,
+                                30);
+    titleLab.backgroundColor = [UIColor clearColor];
+    [backBtn addSubview:titleLab];
+    [titleLab release];
+    
+    return [[UIBarButtonItem alloc]
+            initWithCustomView:backBtn];
 }
 
 #pragma mark -
@@ -490,6 +535,23 @@
 
 #pragma mark -
 #pragma mark - Controller Event
+- (void) doBackBtnClicked:(id)sender
+{
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    NSArray *ctrsArr = nav.viewControllers;
+    for (UIViewController *ctr in ctrsArr)
+    {
+        if ([ctr isKindOfClass:[PersonCenterViewController class]])
+        {
+            PersonCenterViewController *pCvtr = (PersonCenterViewController *)ctr;
+            [pCvtr setSelectedIndex:4];
+            [nav popToViewController:pCvtr animated:NO];
+            break;
+        }
+        
+    }
+}
+
 - (void) doValueChanged:(id)sender
 {
     UISwitch *sw = sender;
@@ -682,12 +744,45 @@
                     [cell addSubview:emailLab];
                     [emailLab release];
                     
-                    UILabel *assitentLab = [[UILabel alloc]init];
-                    assitentLab.text   = @"未签约";
+                    assitentLab = [[UILabel alloc]init];
+                    CLog(@"ccResDic:%@", ccResDic);
+                    if (ccResDic)
+                    {
+                        NSDictionary *ccDic = [ccResDic objectForKey:@"cc"];
+                        if (ccDic.count!=0)
+                            assitentLab.text = [ccDic objectForKey:@"cc_name"];
+                        else
+                            assitentLab.text = @"未签约";
+                    }
+                    else
+                        assitentLab.text   = @"未签约";
                     assitentLab.textAlignment   = NSTextAlignmentRight;
                     assitentLab.backgroundColor = [UIColor clearColor];
                     assitentLab.frame  = CGRectMake(87, 15, 200, 20);
                     [cell addSubview:assitentLab];
+                    
+                    numView = [[[NoticeNumberView alloc]initWithFrame:CGRectMake(320-60, 15, 40, 40)]autorelease];
+                    if (!ccResDic)
+                        numView.hidden = YES;
+                    else
+                    {
+                        NSString *newApply = [[ccResDic objectForKey:@"new_apply"] copy];
+                        if (newApply.intValue==0)
+                            numView.hidden = YES;
+                        else
+                        {
+                            CGSize size = [assitentLab.text sizeWithFont:assitentLab.font constrainedToSize:CGSizeMake(assitentLab.frame.size.width, MAXFLOAT)
+                                                           lineBreakMode:NSLineBreakByWordWrapping];
+                            [numView setTitle:newApply];
+                            numView.hidden = NO;
+                            numView.frame = CGRectMake(320-30-numView.frame.size.width,
+                                                       numView.frame.origin.y, numView.frame.size.width,
+                                                       numView.frame.size.height);
+                            assitentLab.frame = CGRectMake(numView.frame.origin.x-size.width,
+                                                           assitentLab.frame.origin.y, size.width, size.height);
+                        }
+                    }
+                    [cell addSubview:numView];
                     
                     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
                     break;
@@ -1066,6 +1161,9 @@
             {
                 case 0:        //我的助教
                 {
+                    AssistentViewController *assVctr = [[AssistentViewController alloc]init];
+                    [nav pushViewController:assVctr animated:YES];
+                    [assVctr release];
                     break;
                 }
                 case 1:        //邮箱

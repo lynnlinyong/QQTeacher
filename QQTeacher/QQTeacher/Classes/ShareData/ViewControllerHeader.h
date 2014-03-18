@@ -141,5 +141,8 @@
 #import "SetTimePeriodViewController.h"
 #import "UploadCertificateViewController.h"
 #import "OrderConfirmViewController.h"
+#import "AssistentCell.h"
+#import "AssistentViewController.h"
+#import "AssistentPopViewController.h"
 
 #endif
