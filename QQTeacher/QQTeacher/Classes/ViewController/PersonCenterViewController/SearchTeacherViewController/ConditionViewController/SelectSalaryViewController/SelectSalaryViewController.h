@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface SelectSalaryViewController : UIViewController<
-                                            ServerRequestDelegate,
                                             SalaryAndFlagViewDelegate>
 {
     UIScrollView *scrollView;

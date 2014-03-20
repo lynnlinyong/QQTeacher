@@ -15,7 +15,7 @@
 {
     UIGraphicsBeginImageContext(image.size);
     CGContextRef context = UIGraphicsGetCurrentContext();
-    CGContextSetLineWidth(context, 12);
+    CGContextSetLineWidth(context, 4);
     CGContextSetStrokeColorWithColor(context, color.CGColor);
     CGRect rect = CGRectMake(inset, inset, image.size.width - inset * 2.0f, image.size.height - inset * 2.0f);
     CGContextAddEllipseInRect(context, rect);

@@ -130,102 +130,6 @@
          forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:ctrBtn];
         
-//        UIImage *freeImg = [UIImage imageNamed:@"mt_fbook_normal_btn"];
-//        UILabel *freeLab = [[UILabel alloc]init];
-//        freeLab.text = @"免费教辅";
-//        freeLab.backgroundColor = [UIColor clearColor];
-//        freeLab.font = [UIFont systemFontOfSize:10.f];
-//        freeLab.textColor = [UIColor colorWithHexString:@"ff6600"];
-//        freeLab.frame = CGRectMake(0, freeImg.size.height,
-//                                     freeImg.size.width,
-//                                     10);
-//        freeLab.textAlignment = NSTextAlignmentCenter;
-//        freeBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-//        freeBtn.tag = 0;
-//        freeBtn.frame = CGRectMake(10, 50,
-//                                   freeImg.size.width,
-//                                   freeImg.size.height);
-//        [freeBtn setImage:freeImg
-//                    forState:UIControlStateNormal];
-//        [freeBtn addTarget:self
-//                       action:@selector(doButtonClicked:)
-//             forControlEvents:UIControlEventTouchUpInside];
-//        [freeBtn addSubview:freeLab];
-//        [self addSubview:freeBtn];
-        
-        
-//        UIImage *cmmImg = [UIImage imageNamed:@"mt_comment_normal_btn"];
-//        UILabel *cmmLab = [[UILabel alloc]init];
-//        cmmLab.text = @"评价老师";
-//        cmmLab.backgroundColor = [UIColor clearColor];
-//        cmmLab.font = [UIFont systemFontOfSize:10.f];
-//        cmmLab.textColor = [UIColor colorWithHexString:@"ff6600"];
-//        cmmLab.frame = CGRectMake(0, cmmImg.size.height,
-//                                  cmmImg.size.width,
-//                                  10);
-//        cmmLab.textAlignment = NSTextAlignmentCenter;
-        
-//        commentBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-//        commentBtn.tag   = 1;
-//        commentBtn.frame = CGRectMake(10+cmmImg.size.width, 50, cmmImg.size.width, cmmImg.size.height);
-//        [commentBtn setImage:cmmImg forState:UIControlStateNormal];
-//        [commentBtn addTarget:self
-//                       action:@selector(doButtonClicked:)
-//             forControlEvents:UIControlEventTouchUpInside];
-//        [commentBtn addSubview:cmmLab];
-//        [self addSubview:commentBtn];
-        
-//        commView = [[CommentView alloc]initWithFrame:CGRectMake(0, 0, 170, 70)];
-//        commView.hidden   = YES;
-//        commView.orderId  = order.orderId;
-//        [pView addSubview:commView];
-        
-//        UIImage *updateImg = [UIImage imageNamed:@"mt_update_normal_btn"];
-//        UILabel *updateLab = [[UILabel alloc]init];
-//        updateLab.text = @"修改订单";
-//        updateLab.backgroundColor = [UIColor clearColor];
-//        updateLab.font = [UIFont systemFontOfSize:10.f];
-//        updateLab.textColor = [UIColor colorWithHexString:@"ff6600"];
-//        updateLab.frame = CGRectMake(0, updateImg.size.height,
-//                                  updateImg.size.width,
-//                                  10);
-//        updateLab.textAlignment = NSTextAlignmentCenter;
-        
-//        updateBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-//        updateBtn.tag   = 2;
-//        updateBtn.frame = CGRectMake(10+2*cmmImg.size.width, 50, updateImg.size.width, updateImg.size.height);
-//        [updateBtn setImage:updateImg
-//                   forState:UIControlStateNormal];
-//        [updateBtn addTarget:self
-//                      action:@selector(doButtonClicked:)
-//            forControlEvents:UIControlEventTouchUpInside];
-//        [updateBtn addSubview:updateLab];
-//        [self addSubview:updateBtn];
-//        
-//        UIImage *finishImg = [UIImage imageNamed:@"mt_finish_nomal_btn"];
-//        UILabel *finishInfoLab = [[UILabel alloc]init];
-//        finishInfoLab.text = @"订单审批";
-//        finishInfoLab.backgroundColor = [UIColor clearColor];
-//        finishInfoLab.font = [UIFont systemFontOfSize:10.f];
-//        finishInfoLab.textColor = [UIColor colorWithHexString:@"ff6600"];
-//        finishInfoLab.frame = CGRectMake(0, finishImg.size.height,
-//                                     finishImg.size.width,
-//                                     10);
-//        finishInfoLab.textAlignment = NSTextAlignmentCenter;
-//        
-//        finishBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-//        finishBtn.tag   = 3;
-//        finishBtn.frame = CGRectMake(10+3*cmmImg.size.width, 50,
-//                                     finishImg.size.width,
-//                                     finishImg.size.height);
-//        [finishBtn setImage:finishImg
-//                   forState:UIControlStateNormal];
-//        [finishBtn addTarget:self
-//                      action:@selector(doButtonClicked:)
-//            forControlEvents:UIControlEventTouchUpInside];
-//        [finishBtn addSubview:finishInfoLab];
-//        [self addSubview:finishBtn];
-        
         UIView *bgView = [[UIView alloc]init];
         bgView.backgroundColor = [UIColor colorWithHexString:@"#686868"];
         self.backgroundView  = bgView;
@@ -235,9 +139,6 @@
                                                  selector:@selector(doGetCommentNotice:)
                                                      name:@"commentOrderNotice"
                                                    object:nil];
-        
-//        buttonArray = [[NSMutableArray alloc] initWithObjects:freeBtn,commentBtn,
-//                                                              updateBtn,finishBtn, nil];
     }
     return self;
 }

@@ -1007,16 +1007,16 @@
 //            order.teacher = tObj;
             
             //显示跳转图层
-            NSNumber *maxWaitTime = [[NSUserDefaults standardUserDefaults] objectForKey:PUSHMAXTIME];
-            int second = maxWaitTime.integerValue - timer.totalSeconds;
-
-            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-            WaitMaskView *wmView = [[WaitMaskView alloc]initWithFrame:[UIScreen getCurrentBounds]];
-            wmView.delegate = self;
-            wmView.second = [NSString stringWithFormat:@"%d", second];
-            wmView.tObj   = tObj;
-            [nav.view addSubview:wmView];
-            [wmView release];
+//            NSNumber *maxWaitTime = [[NSUserDefaults standardUserDefaults] objectForKey:PUSHMAXTIME];
+//            int second = maxWaitTime.integerValue - timer.totalSeconds;
+//
+//            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+//            WaitMaskView *wmView = [[WaitMaskView alloc]initWithFrame:[UIScreen getCurrentBounds]];
+//            wmView.delegate = self;
+//            wmView.second = [NSString stringWithFormat:@"%d", second];
+//            wmView.tObj   = tObj;
+//            [nav.view addSubview:wmView];
+//            [wmView release];
         }
     }
     else

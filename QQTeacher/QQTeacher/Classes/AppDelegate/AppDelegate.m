@@ -43,7 +43,12 @@
         BOOL isLogin = [[NSUserDefaults standardUserDefaults] boolForKey:LOGINE_SUCCESS];
         if (isLogin)
         {
+//            NSArray *paramsArray = [NSArray arrayWithObjects:@"type",@"nickname",@"grade",@"gender",@"subjectId",@"teacherGender",@"tamount",@"yjfdnum",@"sd",@"iaddress",@"iaddress",@"longitude",@"latitude",@"otherText",@"deviceId",@"keyId", nil];
+//            
+//            NSArray *valuesArray = [NSArray arrayWithObjects:@"0",@"sdfsdf",@"大四",@"男",@"13",@"1",@"100",@"10",@"2013/3/3 上午",@"sdfsdfsdfsdf",@"10.2",@"10.2",@"sdfsd",@"sdfsdfsdf",@"sdfsdfs",@"sdfsd", nil];
+//            NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArray forKeys:paramsArray];
             MainViewController *mainVctr     = [[MainViewController alloc]init];
+//            [mainVctr addInviteNotice:pDic];
             
             //跳转个人中心
             MyTeacherViewController *mVctr = [[MyTeacherViewController alloc]init];
@@ -158,11 +163,12 @@
     //清除消息中心消息
     [[UIApplication sharedApplication ] setApplicationIconBadgeNumber:0];
     
-    //初始化MQTT Server
-    [self initMQTTServer];
-    
     //获得Web服务器地址
     [MainViewController getWebServerAddress];
+    
+    //初始化MQTT Server
+    [self initMQTTServer];
+
     
     //获取未读消息列表
     [self getPushMessage];
@@ -176,6 +182,11 @@
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(closeNoticeWall:)
                                                  name:@"closeNoticeWall"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(doOrderConfirmNotice:)
+                                                 name:@"setOrderConfirmNotice"
                                                object:nil];
 }
 
@@ -198,6 +209,91 @@
 
 #pragma mark -
 #pragma mark - Custom Action
+- (void) doOrderConfirmNotice:(NSNotification *) notice
+{
+    NSNumber *tag = [notice.userInfo objectForKey:@"TAG"];
+    Order *order  = [notice.userInfo objectForKey:@"ORDER"];
+    
+    if (tag.intValue == 0)
+    {
+        //订单确认
+        NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+        NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"orderid",@"sessid", nil];
+        NSArray *valuesArr = [NSArray arrayWithObjects:@"orderConfirm",order.orderId,ssid, nil];
+        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+                                                         forKeys:paramsArr];
+        CLog(@"sdfshdfushdfu:%@", pDic);
+        NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+        NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+        ServerRequest *request = [ServerRequest sharedServerRequest];
+        NSData *resVal = [request requestSyncWith:kServerPostRequest
+                                         paramDic:pDic
+                                           urlStr:url];
+        NSString *resStr = [[[NSString alloc]initWithData:resVal
+                                                 encoding:NSUTF8StringEncoding]autorelease];
+        NSDictionary *resDic   = [resStr JSONFragmentValue];
+        CLog(@"resDic:%@", resDic);
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
+        {
+            NSString *action = [resDic objectForKey:@"action"];
+            if ([action isEqualToString:@"orderConfirm"])
+            {
+                CLog(@"OrderConfirm Susscess!");
+                
+                NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+                Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
+                
+                NSNumber *numEmploy = [notice.userInfo objectForKey:@"IsEmploy"];
+                BOOL isEmploy = [numEmploy boolValue];
+                if (!isEmploy)   //修改订单消息
+                {
+                    //发出确认消息
+                    NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"icon",
+                                           @"orderid",@"taPhone",@"deviceId",nil];
+                    NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_CONFIRM_SUCCESS],teacher.phoneNums,teacher.name,teacher.headUrl,order.orderId,order.student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
+                    NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
+                                                                      forKeys:paramsArr];
+                    
+                    //发送消息
+                    NSString *jsonMsg   = [pDic JSONFragment];
+                    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+                    SingleMQTT *session = [SingleMQTT shareInstance];
+                    [session.session publishData:data
+                                         onTopic:order.student.deviceId];
+                }
+                else            //发起聘请消息
+                {
+                    //发出确认消息
+                    NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"icon",
+                                           @"orderid",@"taPhone",@"deviceId",nil];
+                    NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_EDIT_SUCCESS],teacher.phoneNums,teacher.name,teacher.headUrl,order.orderId,order.student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
+                    NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
+                                                                      forKeys:paramsArr];
+                    
+                    //发送消息
+                    NSString *jsonMsg   = [pDic JSONFragment];
+                    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+                    SingleMQTT *session = [SingleMQTT shareInstance];
+                    [session.session publishData:data
+                                         onTopic:order.student.deviceId];
+                }
+            }
+            
+            //通知界面更新
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"refreshOrders"
+                                                                object:nil];
+        }
+        else
+        {
+            CLog(@"OrderConfirm Failed!");
+        }
+    }
+    
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+}
+
 - (void) closeNoticeWall:(NSNotification *) notice
 {
     CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
@@ -383,6 +479,12 @@
     {
         case PUSH_TYPE_PUSH:       //接收学生邀请信息
         {
+            //提示音播放,刷新页面显示
+            NSString *path    = [[NSBundle mainBundle] pathForResource:@"sfx_record_start"
+                                                                ofType:@"wav"];
+            NSData *infoSound = [NSData dataWithContentsOfFile:path];
+            [RecordAudio playVoice:infoSound];
+            
             //跳转到抢单页显示
             CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
             if (![AppDelegate isInView:NSStringFromClass([MainViewController class])])  //不在最顶层页面.
@@ -406,8 +508,18 @@
         {
             break;
         }
-        case PUSH_TYPE_CONFIRM:     //确认老师的确认消息
+        case PUSH_TYPE_CONFIRM:     //学生的确认抢单消息
         {
+            //提示音播放,刷新页面显示
+            NSString *path    = [[NSBundle mainBundle] pathForResource:@"sfx_record_start"
+                                                                ofType:@"wav"];
+            NSData *infoSound = [NSData dataWithContentsOfFile:path];
+            [RecordAudio playVoice:infoSound];
+            
+            NSDictionary *confirmDic = [NSDictionary dictionaryWithObjectsAndKeys:msgDic,@"confirmDic", nil];
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"confirmOrderNotice"
+                                                                object:nil
+                                                              userInfo:confirmDic];
             break;
         }
         case PUSH_TYPE_IMAGE:       //接收到图片消息
@@ -427,7 +539,8 @@
                 
                 //发送刷新数据Notice
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"refreshNewData"
-                                                                    object:nil];
+                                                                    object:nil
+                                                                  userInfo:msgDic];
             }
             else
             {
@@ -467,7 +580,8 @@
                 
                 //发送刷新数据Notice
                 [[NSNotificationCenter defaultCenter] postNotificationName:@"refreshNewData"
-                                                                    object:nil];
+                                                                    object:nil
+                                                                 userInfo:msgDic];
             }
             else
             {
@@ -490,12 +604,36 @@
             }
             break;
         }
-        case PUSH_TYPE_ORDER_EDIT:    //发送修改订单消息
+        case PUSH_TYPE_ORDER_EDIT:    //收到学生修改订单消息
         {
+            //提示音播放,刷新页面显示
+            NSString *path    = [[NSBundle mainBundle] pathForResource:@"sfx_record_start"
+                                                                ofType:@"wav"];
+            NSData *infoSound = [NSData dataWithContentsOfFile:path];
+            [RecordAudio playVoice:infoSound];
+            
+            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+            OrderConfirmViewController *ocVctr  = [[OrderConfirmViewController alloc]init];
+            ocVctr.isEmploy = NO;
+            ocVctr.order = nil;
+            ocVctr.noticeDic = msgDic;
+            [nav presentPopupViewController:ocVctr animationType:MJPopupViewAnimationFade];
             break;
         }
-        case PUSH_TYPE_ORDER_CONFIRM:
+        case PUSH_TYPE_ORDER_CONFIRM: //收到学生聘请消息
         {
+            //提示音播放,刷新页面显示
+            NSString *path    = [[NSBundle mainBundle] pathForResource:@"sfx_record_start"
+                                                                ofType:@"wav"];
+            NSData *infoSound = [NSData dataWithContentsOfFile:path];
+            [RecordAudio playVoice:infoSound];
+            
+            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+            OrderConfirmViewController *ocVctr  = [[OrderConfirmViewController alloc]init];
+            ocVctr.isEmploy = YES;
+            ocVctr.order = nil;
+            ocVctr.noticeDic = msgDic;
+            [nav presentPopupViewController:ocVctr animationType:MJPopupViewAnimationFade];
             break;
         }
         case PUSH_TYPE_ORDER_EDIT_SUCCESS:
@@ -522,7 +660,7 @@
         {
             NoticeWallViewController *noticeWall = [[NoticeWallViewController alloc]init];
             noticeWall.title   = [msgDic objectForKey:@"title"];
-            noticeWall.content = [msgDic objectForKey:@"message"];
+            noticeWall.content = [msgDic objectForKey:@"text"];
             CustomNavigationViewController *nav  = [MainViewController getNavigationViewController];
             [nav presentPopupViewController:noticeWall
                               animationType:MJPopupViewAnimationFade];
@@ -625,7 +763,7 @@
         onTopic:(NSString*)topic
 {
     NSDictionary *pDic = nil;
-    NSLog(@"new message, %d bytes, topic=%@", [data length], topic);
+    CLog(@"new message, %lu bytes, topic=%@", (unsigned long)[data length], topic);
     NSString *payloadString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     if (payloadString)
     {

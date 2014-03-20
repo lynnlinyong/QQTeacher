@@ -29,8 +29,6 @@
 {
     [super viewDidLoad];
     
-    [self initBackBarItem];
-    
     //初始化UI
     [self initUI];
     
@@ -69,21 +67,21 @@
     
     upTab = nil;
     
-    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-    nav.dataSource = nil;
-    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super viewDidUnload];
 }
 
 - (void) viewDidAppear:(BOOL)animated
 {
+    [self initBackBarItem];
     [MainViewController setNavTitle:@"轻轻家教"];
     [super viewDidAppear:animated];
 }
 
 - (void) viewDidDisappear:(BOOL)animated
 {
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    nav.dataSource = nil;
     [super viewDidDisappear:animated];
 }
 
@@ -242,7 +240,8 @@
     NSString *dist    = [notice.userInfo objectForKey:@"DIST"];
     posValLab.text    = [NSString stringWithFormat:@"%@ %@ %@", provice, city, dist];
     order.orderStudyPos = posValLab.text;
-    [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
 }
 
 - (void) setDateFromNotice:(NSNotification *) notice
@@ -250,14 +249,17 @@
     NSString *dateString = [notice.userInfo objectForKey:@"SetDate"];
     dateValLab.text = dateString;
     order.orderAddTimes = dateString;
-    [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+    
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
 }
 
 - (void) setTimesFromNotice:(NSNotification *)notice
 {
     timeValueLab.text = [notice.userInfo objectForKey:@"Time"];
     order.orderStudyTimes = [[notice.userInfo objectForKey:@"Time"] copy];
-    [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
 }
 
 - (void) setSalaryFromNotice:(NSNotification *) notice
@@ -458,13 +460,13 @@
     [tableView deselectRowAtIndexPath:indexPath
                              animated:YES];
     
-    CustomNavigationViewController *nav = (CustomNavigationViewController *)[MainViewController getNavigationViewController];
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
     switch (indexPath.row)
     {
         case 0:
         {
             SelectDateViewController *sdVctr = [[SelectDateViewController alloc]init];
-            [self presentPopupViewController:sdVctr
+            [nav presentPopupViewController:sdVctr
                                animationType:MJPopupViewAnimationFade];
             break;
         }
@@ -480,7 +482,7 @@
         {
             SelectTimesViewController *stVctr = [[SelectTimesViewController alloc]init];
             stVctr.curValue = timeValueLab.text;
-            [self presentPopupViewController:stVctr
+            [nav presentPopupViewController:stVctr
                                animationType:MJPopupViewAnimationFade];
             break;
         }

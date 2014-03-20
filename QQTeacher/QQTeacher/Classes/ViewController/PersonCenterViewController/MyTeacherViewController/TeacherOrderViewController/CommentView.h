@@ -16,6 +16,5 @@
 @property (nonatomic, retain) UIImageView *contentView;
 @property (nonatomic, retain) NSString    *idStr;
 
-- (void) showView:(CGRect) rect;
 - (void) setMeHidden:(BOOL)h;
 @end

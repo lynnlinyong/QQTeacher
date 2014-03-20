@@ -61,9 +61,8 @@
     titleLab.text     = title;
     titleLab.textColor= [UIColor whiteColor];
     titleLab.textAlignment = NSTextAlignmentCenter;
-    titleLab.frame= [UIView fitCGRect:CGRectMake(0, -titleImg.size.height+1,
-                                                 self.view.frame.size.width+5, titleImg.size.height)
-                           isBackView:NO];
+    titleLab.frame= CGRectMake(0, -titleImg.size.height+1,
+                                                 self.view.frame.size.width+5, titleImg.size.height);
     titleLab.backgroundColor = [UIColor clearColor];
     [self.view addSubview:titleLab];
     [titleLab release];
@@ -75,10 +74,9 @@
     infoLab.textAlignment = NSTextAlignmentCenter;
     infoLab.numberOfLines = 0;
     infoLab.lineBreakMode = NSLineBreakByWordWrapping;
-    infoLab.frame = [UIView fitCGRect:CGRectMake(0,
+    infoLab.frame = CGRectMake(0,
                                                  (self.view.frame.size.height-bottomImg.size.height)/2-30,
-                                                 self.view.frame.size.width, 60)
-                           isBackView:NO];
+                                                 self.view.frame.size.width, 60);
     infoLab.backgroundColor = [UIColor clearColor];
     [self.view addSubview:infoLab];
     [infoLab release];

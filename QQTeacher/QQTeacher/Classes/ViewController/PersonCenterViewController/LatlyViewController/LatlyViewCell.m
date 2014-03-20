@@ -92,14 +92,16 @@
     if (sex == 1)
     {
         [headBtn setImage:[UIImage circleImage:[UIImage imageNamed:@"s_boy"]
-                                     withParam:0 withColor:[UIColor whiteColor]]
+                                     withParam:0
+                                     withColor:[UIColor colorWithHexString:@"#73CCAD"]]
                  forState:UIControlStateNormal];
         infoLab.text  = [NSString stringWithFormat:@"男   %@",[dic objectForKey:@"gradeText"]];
     }
     else
     {
         [headBtn setImage:[UIImage circleImage:[UIImage imageNamed:@"s_girl"]
-                                     withParam:0 withColor:[UIColor whiteColor]]
+                                     withParam:0
+                                     withColor:[UIColor colorWithHexString:@"#FF9800"]]
                  forState:UIControlStateNormal];
         infoLab.text  = [NSString stringWithFormat:@"女   %@",[dic objectForKey:@"gradeText"]];
     }

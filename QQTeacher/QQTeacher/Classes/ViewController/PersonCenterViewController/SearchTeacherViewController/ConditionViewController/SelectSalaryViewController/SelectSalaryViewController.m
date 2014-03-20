@@ -47,9 +47,19 @@
 - (void) viewDidDisappear:(BOOL)animated
 {
     NSDictionary *salaryDic = [potMoney objectAtIndex:selIndex];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"setSalaryNotice"
-                                                        object:self
-                                                      userInfo:salaryDic];
+    
+    if ([AppDelegate isInView:NSStringFromClass([CompletePersonalInfoViewController class])])
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"setSalaryFromCompleteNotice"
+                                                            object:self
+                                                          userInfo:salaryDic];
+    }
+    else
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"setSalaryFromSettingNotice"
+                                                            object:self
+                                                          userInfo:salaryDic];
+    }
     [super viewDidDisappear:animated];
 }
 
@@ -239,6 +249,7 @@
         sfView.tag = i;
         sfView.delegate = self;
         NSString *curMoney =(NSString *)[item objectForKey:@"name"];
+        CLog(@"curMoney:%@",curMoney);
         if (offsetIndex == 2)
         {
             if ([curMoney isEqualToString:money])

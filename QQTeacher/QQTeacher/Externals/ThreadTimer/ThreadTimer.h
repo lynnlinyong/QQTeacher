@@ -26,8 +26,9 @@
 @property (nonatomic, copy)   NSString  *strHour;
 @property (nonatomic, copy)   NSString  *strMinute;
 @property (nonatomic, copy)   NSString  *strSecond;
-
+@property (nonatomic, assign) BOOL isTimeOut;
 @property (nonatomic, assign) id<ThreadTimerDelegate> delegate;
 
+- (void) stopTimer;
 - (void) setMinutesNum:(NSInteger)second;
 @end

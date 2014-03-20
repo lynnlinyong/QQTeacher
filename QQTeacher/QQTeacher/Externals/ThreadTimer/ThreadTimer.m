@@ -14,7 +14,7 @@
 @synthesize second = _second;
 @synthesize totalSeconds = _totalSeconds;
 @synthesize delegate = _delegate;
-
+@synthesize isTimeOut;
 - (void)dealloc
 {
     [_strHour release];
@@ -26,6 +26,8 @@
 - (void) setMinutesNum:(NSInteger)second
 {
     self.totalSeconds = second;
+    
+    isTimeOut = NO;
     
     //多线程启动定时器
     [NSThread detachNewThreadSelector:@selector(startTimer)
@@ -42,6 +44,11 @@
                                             userInfo:nil
                                              repeats:YES];
     [[NSRunLoop currentRunLoop] run];
+}
+
+- (void) stopTimer
+{    
+    _delegate = nil;
 }
 
 - (void)handleWithTotalSeconds
@@ -71,6 +78,7 @@
 {
     if (_totalSeconds == 0)
     {
+        isTimeOut = YES;
         [_timer invalidate];
         return;
     }

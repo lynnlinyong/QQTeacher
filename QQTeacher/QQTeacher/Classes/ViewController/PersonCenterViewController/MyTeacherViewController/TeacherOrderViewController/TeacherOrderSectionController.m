@@ -186,7 +186,9 @@
         {
             OrderConfirmViewController *orderConfirmVctr = [[OrderConfirmViewController alloc]init];
             orderConfirmVctr.order = cell.order;
-            [nav presentPopupViewController:orderConfirmVctr animationType:MJPopupViewAnimationFade];
+            orderConfirmVctr.isEmploy = NO;
+            [nav presentPopupViewController:orderConfirmVctr
+                              animationType:MJPopupViewAnimationFade];
             break;
         }
         case CONFIRMED:

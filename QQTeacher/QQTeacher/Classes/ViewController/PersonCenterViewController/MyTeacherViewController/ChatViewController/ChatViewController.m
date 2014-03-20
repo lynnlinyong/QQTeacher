@@ -74,21 +74,10 @@
                                              selector:@selector(dismissComplainNotice:)
                                                  name:@"dismissComplainNotice"
                                                object:nil];
-    
-//    [[NSNotificationCenter defaultCenter] addObserver:self
-//                                             selector:@selector(listenChangedNotice:)
-//                                                 name:@"listenChanged"
-//                                               object:nil];
 }
 
 - (void) viewDidDisappear:(BOOL)animated
 {
-//    [listenBtn removeFromSuperview];
-//    listenBtn = nil;
-//    
-//    [employBtn removeFromSuperview];
-//    employBtn = nil;
-    
     [listenSwitch removeFromSuperview];
     listenSwitch = nil;
     
@@ -267,7 +256,7 @@
     nav.dataSource = self;
 }
 
-- (void) convertAmrToMp3:(NSString *)audioURL
++ (void) convertAmrToMp3:(NSString *)audioURL delegate:(id<RecordAudioDelegate>) delegate
 {
     if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
     {
@@ -283,13 +272,14 @@
     NSString *webAdd     = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
     NSString *url        = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
     ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate = self;
     NSData *resVal   = [request requestSyncWith:kServerPostRequest
                                        paramDic:pDic
                                          urlStr:url];
     if (resVal)
     {
-        [recordAudio playMP3:resVal];
+        RecordAudio *audio = [[RecordAudio alloc]init];
+        audio.delegate = delegate;
+        [audio playMP3:resVal];
     }
 }
 
@@ -299,38 +289,6 @@
     self.dataSource = self;
     messages   = [[NSMutableArray alloc]init];
 
-//    listenBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-//    [listenBtn setTitle:@"试听"
-//               forState:UIControlStateNormal];
-//    listenBtn.titleLabel.font = [UIFont systemFontOfSize:14.f];
-//    [listenBtn setTitleColor:[UIColor colorWithHexString:@"#ff6600"]
-//                    forState:UIControlStateNormal];
-//    [listenBtn setBackgroundImage:[UIImage imageNamed:@"cp_shiting_normal_bg"]
-//                         forState:UIControlStateNormal];
-//    [listenBtn setBackgroundImage:[UIImage imageNamed:@"cp_shiting_hlight_bg"]
-//                         forState:UIControlStateNormal];
-//    
-//    listenBtn.tag   = 0;
-//    listenBtn.frame = CGRectMake(320-110, 12, 40, 25);
-//    [listenBtn addTarget:self
-//                  action:@selector(doButtonClicked:)
-//        forControlEvents:UIControlEventTouchUpInside];
-//    [self.navigationController.navigationBar addSubview:listenBtn];
-//    
-//    employBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-//    employBtn.hidden = NO;
-//    employBtn.titleLabel.font = [UIFont systemFontOfSize:14.f];
-//    [employBtn setTitle:@"聘请TA"
-//               forState:UIControlStateNormal];
-//    [employBtn setBackgroundImage:[UIImage imageNamed:@"sp_share_btn_normal"]
-//                         forState:UIControlStateNormal];
-//    [employBtn setBackgroundImage:[UIImage imageNamed:@"sp_share_btn_hlight"]
-//                         forState:UIControlStateHighlighted];
-//    employBtn.tag   = 1;
-//    employBtn.frame = CGRectMake(320-65, 12, 60, 25);
-//    [employBtn addTarget:self
-//                  action:@selector(doButtonClicked:)
-//        forControlEvents:UIControlEventTouchUpInside];
     listenLab = [[UILabel alloc]init];
     listenLab.text  = @"试听";
     listenLab.font  = [UIFont systemFontOfSize:14.f];
@@ -352,17 +310,6 @@
     [self.navigationController.navigationBar addSubview:listenSwitch];
     
     [self initInfoPopView];
-    
-//    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-//    [nav.navigationBar addSubview:employBtn];
-    
-//    //是否支持试听、聘用
-//    [self isShowListenBtn];
-//    if (!order)
-//        [self isShowEmployBtn];
-//    //直接搜索时,调用显示接口
-//    if (isFromSearchCondition)
-//        [self isShowEmployBtn];
 }
 
 - (void) doValueChanged:(id)sender
@@ -397,7 +344,6 @@
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     CLog(@"sdfsDic:%@", pDic);
-    
     ServerRequest *serverReq = [ServerRequest sharedServerRequest];
     serverReq.delegate   = self;
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
@@ -598,12 +544,38 @@
     request.delegate = self;
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
     NSString *url = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-    [request requestASyncWith:kServerPostRequest
-                     paramDic:pDic
-                       urlStr:url];
+    NSData   *resVal = [request requestSyncWith:kServerPostRequest
+                                       paramDic:pDic
+                                         urlStr:url];
+    NSString *resStr = [[[NSString alloc]initWithData:resVal
+                                             encoding:NSUTF8StringEncoding]retain];
+    NSDictionary *resDic = [resStr JSONFragmentValue];
+    if (resDic)
+    {
+        NSArray *array = [resDic objectForKey:@"messages"];
+        if (array)
+        {
+            if (isNewData)
+                [messages removeAllObjects];
+            
+            for (int i=0; i<array.count; i++)
+            {
+                NSDictionary *item = [array objectAtIndex:i];
+                [messages addObject:item];
+                CLog(@"sdhfushdfItem:%@", item);
+                CLog(@"shdfsfhsudfhsufh:%d", [messages indexOfObject:item]);
+            }
+        }
+        
+        //刷新界面
+        [self finishSend];
+        
+        //消息查看更新
+        [self updateMessageZT];
+    }
 }
 
-- (NSString *) getRecordURL
++ (NSString *) getRecordURL
 {
     NSArray *paths   = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
                                                            NSUserDomainMask, YES);
@@ -626,7 +598,7 @@
     NSURL *url       = [recordAudio stopRecord];
     CLog(@"URL:%@", url);
     NSData *curAudio = EncodeWAVEToAMR([NSData dataWithContentsOfURL:url],1,16);
-    NSString *path   = [self getRecordURL];
+    NSString *path   = [ChatViewController getRecordURL];
     CLog(@"path:%@", path);
     [curAudio writeToFile:path
                atomically:YES];
@@ -662,7 +634,7 @@
     }
     
     //上传语音文件
-    NSString *path = [self getRecordURL];
+    NSString *path = [ChatViewController getRecordURL];
     
     //获得时间戳
     NSDate *dateNow  = [NSDate date];
@@ -711,6 +683,23 @@
             SingleMQTT *session = [SingleMQTT shareInstance];
             [session.session publishData:data
                                  onTopic:student.deviceId];
+            
+            NSDictionary *ccResDic = [[NSUserDefaults standardUserDefaults] objectForKey:@"AssistentData"];
+            if (![ccResDic isEqual:[NSNull null]])
+            {
+                NSDictionary *ccDic = [ccResDic objectForKey:@"cc"];
+                if (ccDic.count!=0)
+                {
+                    NSArray *ccParamsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"sound",@"stime",@"time",@"taPhone",@"deviceId",@"toPhone",nil];
+                    NSArray *ccValuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_AUDIO],teacher.phoneNums,teacher.name,path,[NSNumber numberWithInt:voiceTimes],timeSp,[ccDic objectForKey:@"cc_phone"],[SingleMQTT getCurrentDevTopic],student.phoneNumber,nil];
+                    NSDictionary *ccPDic  = [NSDictionary dictionaryWithObjects:ccValuesArr
+                                                                        forKeys:ccParamsArr];
+                    NSString *ccJsonMsg = [ccPDic JSONFragment];
+                    NSData *ccData      = [ccJsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+                    CLog(@"ccPic:%@, deviceId:%@", ccPDic, [ccDic objectForKey:@"deviceId"]);
+                    [session.session publishData:ccData onTopic:[ccDic objectForKey:@"deviceId"]];
+                }
+            }
             //消息上传服务器
             [self uploadMessageToServer:jsonMsg];
             
@@ -950,13 +939,6 @@
 #pragma mark - Notice
 - (void) showTeacherDetailNotice:(NSNotification *) notice
 {
-//    AppDelegate *app = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-//    CustomNavigationViewController *nav     = (CustomNavigationViewController *)app.window.rootViewController;
-//    TeacherDetailViewController *tdVctr = [[TeacherDetailViewController alloc]init];
-//    tdVctr.tObj = tObj;
-//    [nav pushViewController:tdVctr
-//                   animated:YES];
-//    [tdVctr release];
 }
 
 - (void) dismissComplainNotice:(NSNotification *) notice
@@ -966,14 +948,16 @@
 
 - (void) refreshNewData:(NSNotification *) notice
 {
-    [self getChatRecords];
+    NSMutableDictionary *msgDic = [notice.userInfo mutableCopy];
+    [msgDic setObject:@"0" forKey:@"messageId"];
+    [messages insertObject:msgDic atIndex:0];
+    
+    //刷新界面
+    [self finishSend];
+    
+    //消息查看更新
+    [self updateMessageZT];
 }
-
-//- (void) listenChangedNotice:(NSNotification *) notice
-//{
-//    //刷新试听接口
-//    [self isShowListenBtn];
-//}
 
 #pragma mark -
 #pragma mark Data Source Loading / Reloading Methods
@@ -1122,7 +1106,24 @@
     SingleMQTT *session = [SingleMQTT shareInstance];
     [session.session publishData:data
                          onTopic:student.deviceId];
-
+    
+    //检测是否存在助理,有给助理发一份
+    NSDictionary *ccResDic = [[NSUserDefaults standardUserDefaults] objectForKey:@"AssistentData"];
+    if (![ccResDic isEqual:[NSNull null]])
+    {
+        NSDictionary *ccDic = [ccResDic objectForKey:@"cc"];
+        if (ccDic.count!=0)
+        {
+            NSArray *ccParamsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"icon",@"text",@"time",@"taPhone",@"deviceId",@"toPhone",nil];
+            NSArray *ccValuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_TEXT],teacher.phoneNums,teacher.name,teacher.headUrl,text,timeSp,[ccDic objectForKey:@"cc_phone"],[SingleMQTT getCurrentDevTopic],student.phoneNumber,nil];
+            NSDictionary *ccPDic  = [NSDictionary dictionaryWithObjects:ccValuesArr
+                                                              forKeys:ccParamsArr];
+            NSString *ccJsonMsg = [ccPDic JSONFragment];
+            NSData *ccData      = [ccJsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+            CLog(@"ccPic:%@, deviceId:%@", ccPDic, [ccDic objectForKey:@"deviceId"]);
+            [session.session publishData:ccData onTopic:[ccDic objectForKey:@"deviceId"]];
+        }
+    }
     //消息上传服务器
     [self uploadMessageToServer:jsonMsg];
     
@@ -1149,7 +1150,7 @@
             dispatch_async(dispatch_get_global_queue(0, 0), ^{
                
                 //amr转换mp3文件
-                [self convertAmrToMp3:soundPath];
+                [ChatViewController convertAmrToMp3:soundPath delegate:self];
             
 //                //下载音频文件
 //                ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:soundPath]];
@@ -1344,19 +1345,6 @@
 
 #pragma mark -
 #pragma mark ServerRequest Delegate
-- (void)requestFinished:(ASIHTTPRequest *)request
-{   
-    //播放声音
-    NSString *soundPath = [[self getRecordURL] retain];
-    NSData *soundData   = [NSData dataWithContentsOfFile:soundPath];
-    [recordAudio play:soundData];
-    
-    //显示动画
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"startVoiceAnimation"
-                                                        object:nil
-                                                      userInfo:request.userInfo];
-}
-
 - (void) requestAsyncFailed:(ASIHTTPRequest *)request
 {
     //聊天记录刷新完成
@@ -1402,27 +1390,6 @@
                              message:@"您申请了试听课程,我们将以短信告知老师"
                             delegate:self
                    otherButtonTitles:@"确定",nil];
-        }
-        else if ([action isEqualToString:@"getMessages"])
-        {
-            NSArray *array = [resDic objectForKey:@"messages"];
-            if (array)
-            {
-                if (isNewData)
-                    [messages removeAllObjects];
-                
-                for (int i=0; i<array.count; i++)
-                {
-                    NSDictionary *item = [array objectAtIndex:i];
-                    [messages addObject:item];
-                }
-            }
-            
-            //刷新界面
-            [self finishSend];
-            
-            //消息查看更新
-            [self updateMessageZT];
         }
     }
     else

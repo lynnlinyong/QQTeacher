@@ -10,7 +10,6 @@
 
 @interface SelectHeadViewController : UIViewController<
                                                     TTImageViewDelegate,
-                                                    ServerRequestDelegate,
                                                     UIImagePickerControllerDelegate,
                                                     UINavigationControllerDelegate,
                                                     VPImageCropperDelegate>

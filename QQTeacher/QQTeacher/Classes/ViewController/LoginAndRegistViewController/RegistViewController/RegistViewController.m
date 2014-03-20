@@ -299,7 +299,7 @@
 
 - (void) doRegistBtnClicked:(id)sender
 {
-    //注册完成,跳转完成个人信息
+//    //注册完成,跳转完成个人信息
 //    CompletePersonalInfoViewController *cpVctr = [[CompletePersonalInfoViewController alloc]init];
 //    [self.navigationController pushViewController:cpVctr
 //                                         animated:YES];
@@ -333,7 +333,7 @@
     ServerRequest *serverReq = [ServerRequest sharedServerRequest];
     serverReq.delegate   = self;
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@/", webAddress,TEACHER];
+    NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
     [serverReq requestASyncWith:kServerPostRequest
                        paramDic:pDic
                          urlStr:url];

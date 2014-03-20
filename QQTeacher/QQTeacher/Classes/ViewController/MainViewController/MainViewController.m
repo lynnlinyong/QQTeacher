@@ -10,7 +10,299 @@
 
 #define IOS7_OR_LATER   ( [[[UIDevice currentDevice] systemVersion] compare:@"7.0"] != NSOrderedAscending )
 
-static NSMutableArray *inviteMsgArray = nil;
+static NSMutableArray  *inviteMsgArray = nil;
+static NSMutableArray  *timerArray= nil;
+
+@implementation MainViewBottomInfoView
+- (id) initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self)
+    {
+        bgView = [[UIImageView alloc]init];
+        bgView.image = [UIImage imageNamed:@"mtp_info_bg"];
+        bgView.frame = CGRectMake(0, 0, frame.size.width, frame.size.height);
+        [self addSubview:bgView];
+        
+        UITapGestureRecognizer *tapReg = [[UITapGestureRecognizer alloc]initWithTarget:self
+                                                                                action:@selector(doTapGestureReg:)];
+        [self addGestureRecognizer:tapReg];
+        [tapReg release];
+        
+        UILabel *starInfoLab = [[UILabel alloc]init];
+        starInfoLab.text = @"星级制度:";
+        starInfoLab.backgroundColor = [UIColor clearColor];
+        starInfoLab.textColor = [UIColor whiteColor];
+        starInfoLab.font = [UIFont systemFontOfSize:13.f];
+        starInfoLab.frame = CGRectMake(10, 20, frame.size.width-20, 15);
+        [self addSubview:starInfoLab];
+        [starInfoLab release];
+        
+        UIImageView *starImgView = [[UIImageView alloc]init];
+        starImgView.image = [UIImage imageNamed:@"mt_star_hlight"];
+        starImgView.frame = CGRectMake(10, 37, 10, 10);
+        [self addSubview:starImgView];
+        [starImgView release];
+        
+        UILabel *starValueLab = [[UILabel alloc]init];
+        starValueLab.text = @"   代表您的受欢迎程度,好评3次加1星,差评1次减1星,最多6星,So~~,鼓励学生多多给您好评吧！";
+        starValueLab.numberOfLines = 0;
+        starValueLab.lineBreakMode = NSLineBreakByWordWrapping;
+        starValueLab.backgroundColor = [UIColor clearColor];
+        starValueLab.textColor = [UIColor whiteColor];
+        starValueLab.font = [UIFont systemFontOfSize:13.f];
+        starValueLab.frame = CGRectMake(10, 28, frame.size.width-20, 60);
+        [self addSubview:starValueLab];
+        [starValueLab release];
+        
+        UILabel *complainInfoLab = [[UILabel alloc]init];
+        complainInfoLab.text = @"星级制度:";
+        complainInfoLab.backgroundColor = [UIColor clearColor];
+        complainInfoLab.textColor = [UIColor whiteColor];
+        complainInfoLab.font = [UIFont systemFontOfSize:13.f];
+        complainInfoLab.frame = CGRectMake(10, 85, frame.size.width-20, 15);
+        [self addSubview:complainInfoLab];
+        [complainInfoLab release];
+        
+        UILabel *complainValueLab = [[UILabel alloc]init];
+        complainValueLab.text = @"如果我们收到学生投诉,经客服查核若属实,将根据情节严重程度给予冻结账号一个月或永久封号的处罚.";
+        complainValueLab.numberOfLines = 0;
+        complainValueLab.lineBreakMode = NSLineBreakByWordWrapping;
+        complainValueLab.backgroundColor = [UIColor clearColor];
+        complainValueLab.textColor = [UIColor whiteColor];
+        complainValueLab.font = [UIFont systemFontOfSize:13.f];
+        complainValueLab.frame = CGRectMake(10, 95, frame.size.width-20, 60);
+        [self addSubview:complainValueLab];
+        [complainValueLab release];
+    }
+    
+    return self;
+}
+
+- (void) dealloc
+{
+    [bgView release];
+    [super dealloc];
+}
+
+- (void) doTapGestureReg:(UIGestureRecognizer *) reg
+{
+    self.hidden = YES;
+}
+@end
+
+@implementation MainViewPopInfoView
+@synthesize delegate;
+
+- (id) initWithFrame:(CGRect)frame type:(PopInfoType) tmpType
+{
+    self = [super initWithFrame:frame];
+    if (self)
+    {
+        type = tmpType;
+        switch (tmpType)
+        {
+            case kWaitPopInfoType:
+            {
+                UIImage *image    = [UIImage imageNamed:@"mtp_confirm_waited"];
+                popInfoView       = [[UIImageView alloc]init];
+                popInfoView.image = image;
+                popInfoView.frame = CGRectMake(frame.size.width/2-image.size.width/2, 20, image.size.width, image.size.height);
+                [self addSubview:popInfoView];
+                
+                
+                UIImage *loadImg = [UIImage imageNamed:@"mtp_wait_loading"];
+                UIImageView *loadImgView = [[[UIImageView alloc]init]autorelease];
+                loadImgView.image = loadImg;
+                loadImgView.frame = CGRectMake(20, frame.size.height-20-20-20,
+                                               loadImg.size.width, loadImg.size.height);
+                [self addSubview:loadImgView];
+                
+                //开始选择动画
+                [self startAnimation:loadImgView];
+                
+                UILabel *infoLab = [[UILabel alloc]init];
+                infoLab.text = @"系统正在处理...";
+                infoLab.textColor = [UIColor whiteColor];
+                infoLab.textAlignment   = NSTextAlignmentCenter;
+                infoLab.backgroundColor = [UIColor clearColor];
+                infoLab.font = [UIFont systemFontOfSize:18.f];
+                infoLab.frame = CGRectMake(frame.size.width/2-80,
+                                           frame.size.height-20-20-20, 200, 20);
+                [self addSubview:infoLab];
+                [infoLab release];
+                
+                UILabel *infoLineLab = [[UILabel alloc]init];
+                infoLineLab.text = @"请耐心稍等一会儿!";
+                infoLineLab.textAlignment   = NSTextAlignmentCenter;
+                infoLineLab.textColor = [UIColor whiteColor];
+                infoLineLab.backgroundColor = [UIColor clearColor];
+                infoLineLab.font = [UIFont systemFontOfSize:18.f];
+                infoLineLab.frame = CGRectMake(frame.size.width/2-80,
+                                           frame.size.height-20-20, 200, 20);
+                [self addSubview:infoLineLab];
+                [infoLineLab release];
+                
+                timer = [NSTimer scheduledTimerWithTimeInterval:1.0f
+                                                                  target:self
+                                                                selector:@selector(timeOut:)
+                                                                userInfo:nil
+                                                                 repeats:YES];
+                [timer fire];
+                break;
+            }
+            case kNoResponseType:
+            {
+                UIImage *image = [UIImage imageNamed:@"mtp_confirm_waited"];
+                popInfoView = [[UIImageView alloc]init];
+                popInfoView.image = image;
+                popInfoView.frame = CGRectMake(frame.size.width/2-image.size.width/2, 20, image.size.width, image.size.height);
+                [self addSubview:popInfoView];
+                
+                UILabel *infoLab = [[UILabel alloc]init];
+                infoLab.text = @"长时间未响应";
+                infoLab.textColor = [UIColor whiteColor];
+                infoLab.textAlignment   = NSTextAlignmentCenter;
+                infoLab.backgroundColor = [UIColor clearColor];
+                infoLab.font = [UIFont systemFontOfSize:18.f];
+                infoLab.frame = CGRectMake(frame.size.width/2-100,
+                                           frame.size.height-20-20-20, 200, 20);
+                [self addSubview:infoLab];
+                [infoLab release];
+                
+                UILabel *infoLineLab = [[UILabel alloc]init];
+                infoLineLab.text = @"请等待几秒再试!";
+                infoLineLab.textAlignment   = NSTextAlignmentCenter;
+                infoLineLab.textColor = [UIColor whiteColor];
+                infoLineLab.backgroundColor = [UIColor clearColor];
+                infoLineLab.font = [UIFont systemFontOfSize:18.f];
+                infoLineLab.frame = CGRectMake(frame.size.width/2-100,
+                                               frame.size.height-20-20, 200, 20);
+                [self addSubview:infoLineLab];
+                [infoLineLab release];
+
+                timer = [NSTimer scheduledTimerWithTimeInterval:1.0f
+                                                                  target:self
+                                                                selector:@selector(timeOut:)
+                                                                userInfo:nil
+                                                                 repeats:YES];
+                [timer fire];
+                break;
+            }
+            case kFailedReponseType:
+            {
+                UIImage *image = [UIImage imageNamed:@"mtp_confirm_failed"];
+                popInfoView = [[UIImageView alloc]init];
+                popInfoView.image = image;
+                popInfoView.frame = CGRectMake(frame.size.width/2-image.size.width/2, 20, image.size.width, image.size.height);
+                [self addSubview:popInfoView];
+                
+                UILabel *infoLab = [[UILabel alloc]init];
+                infoLab.text = @"您满了,此单已经被抢!";
+                infoLab.textColor = [UIColor whiteColor];
+                infoLab.textAlignment   = NSTextAlignmentCenter;
+                infoLab.backgroundColor = [UIColor clearColor];
+                infoLab.font = [UIFont systemFontOfSize:18.f];
+                infoLab.frame = CGRectMake(frame.size.width/2-100,
+                                           frame.size.height-20-20-20, 200, 20);
+                [self addSubview:infoLab];
+                [infoLab release];
+                
+                UILabel *infoLineLab = [[UILabel alloc]init];
+                infoLineLab.text = @"继续去抢单吧!";
+                infoLineLab.textAlignment   = NSTextAlignmentCenter;
+                infoLineLab.textColor = [UIColor whiteColor];
+                infoLineLab.backgroundColor = [UIColor clearColor];
+                infoLineLab.font = [UIFont systemFontOfSize:18.f];
+                infoLineLab.frame = CGRectMake(frame.size.width/2-100,
+                                               frame.size.height-20-20, 200, 20);
+                [self addSubview:infoLineLab];
+                [infoLineLab release];
+                
+                timer = [NSTimer scheduledTimerWithTimeInterval:1.f
+                                                                  target:self
+                                                                selector:@selector(timeOut:)
+                                                                userInfo:nil
+                                                                 repeats:YES];
+                [timer fire];
+                break;
+            }
+            default:
+                break;
+        }
+        self.backgroundColor = [UIColor blackColor];
+    }
+    
+    return self;
+}
+
+- (void) dealloc
+{
+    [popInfoView release];
+    [super dealloc];
+}
+
+- (void) stopTimer
+{
+    [timer invalidate];
+    timer = nil;
+}
+
+- (void)startAnimation:(UIImageView *) imgView
+{
+    static int angle = 90;
+    CGAffineTransform endAngle = CGAffineTransformMakeRotation(angle*(M_PI / 180.0f));
+    [UIView animateWithDuration:0.05 delay:0 options:UIViewAnimationOptionCurveLinear animations:^{
+        imgView.transform = endAngle;
+    } completion:^(BOOL finished) {
+        angle += 10;
+        [self startAnimation:imgView];
+    }];
+    
+}
+
+- (void) timeOut:(id)sender
+{
+    int calTimes     = 0;
+    static int count = 0;
+    switch (type)
+    {
+        case kWaitPopInfoType:
+        {
+            calTimes = 10;
+            break;
+        }
+        case kNoResponseType:
+        case kFailedReponseType:
+        {
+            calTimes = 3;
+            break;
+        }
+        default:
+            break;
+    }
+    
+    count++;
+    if (count == calTimes)
+    {
+        count = 0;
+        self.hidden = YES;
+        
+        NSTimer *timer = sender;
+        [timer invalidate];
+        timer = nil;
+        
+        if (type == kWaitPopInfoType)
+        {
+            if (delegate)
+            {
+                if ([delegate respondsToSelector:@selector(mainViewPopInfoWaitViewTimeOut:)])
+                    [delegate mainViewPopInfoWaitViewTimeOut:self];
+            }
+        }
+    }
+}
+@end
 
 @interface MainViewController ()
 
@@ -37,9 +329,26 @@ static NSMutableArray *inviteMsgArray = nil;
     
     [self initBackBarItem];
     
+    if (inviteMsgArray.count==0)
+    {
+        bottomView.hidden = NO;
+        noticeTab.hidden = YES;
+    }
+    else
+    {
+        noticeTab.hidden = NO;
+        bottomView.hidden = YES;
+    }
+
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(inviteNotice:)
                                                  name:@"InviteNotice"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(confirmOrderNotice:)
+                                                 name:@"confirmOrderNotice"
                                                object:nil];
 }
 
@@ -59,13 +368,18 @@ static NSMutableArray *inviteMsgArray = nil;
     
     //获取终端设置属性
     [self setTerminalMapProperty];
+    
+    //获取教学助理
+    [self getJxzl];
 }
 
 - (void) viewDidDisappear:(BOOL)animated
 {
     CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
     nav.dataSource = nil;
+    
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
     [super viewDidDisappear:animated];
 }
 
@@ -80,7 +394,6 @@ static NSMutableArray *inviteMsgArray = nil;
     [annArray removeAllObjects];
     [studentArray removeAllObjects];
     self.mapView.delegate = nil;
-
     
     [super viewDidUnload];
 }
@@ -91,12 +404,89 @@ static NSMutableArray *inviteMsgArray = nil;
     [annArray release];
     [studentArray release];
     [mapView release];
+
     [noticeTab release];
+    noticeTab = nil;
+    
+    [popInfoView release];
+    [bottomView release];
     [super dealloc];
 }
 
 #pragma mark -
 #pragma mark - Custom Action
+- (void) confirmOrderNotice:(NSNotification *) notice
+{
+    popInfoView.hidden = YES;
+    [popInfoView stopTimer];
+    
+    NSDictionary *confirmDic = [[notice.userInfo objectForKey:@"confirmDic"] copy];
+    CLog(@"confirmDic:%@", confirmDic);
+    
+    NSUInteger index = 0;
+    NSString *status = [confirmDic objectForKey:@"status"];
+    if ([status isEqualToString:@"success"])
+    {
+        //显示分享过度
+        NSString *keyId = [confirmDic objectForKey:@"keyId"];
+        for (NSDictionary *item in inviteMsgArray)
+        {
+            NSString *itemKeyId = [item objectForKey:@"keyId"];
+            if ([itemKeyId isEqualToString:keyId])
+            {
+                index = [inviteMsgArray indexOfObject:item];
+                break;
+            }
+        }
+        
+        ThreadTimer *timer = [timerArray objectAtIndex:index];
+        NSUInteger second = 50 - timer.totalSeconds;
+        
+        NSDictionary *inviteDic = [[inviteMsgArray objectAtIndex:index] copy];
+        NSDictionary *userDic = [NSDictionary dictionaryWithObjectsAndKeys:confirmDic,@"confirmDic",inviteDic,@"inviteDic", nil];
+        CLog(@"userDic:%@", userDic);
+        CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+        WaitMaskView *wmView = [[WaitMaskView alloc]initWithFrame:[UIScreen getCurrentBounds]];
+        wmView.delegate = self;
+        wmView.second = [NSString stringWithFormat:@"%lu", (unsigned long)second];
+        wmView.userDic = userDic;
+        [nav.view addSubview:wmView];
+        [wmView release];
+        [inviteDic release];
+    }
+    else
+    {
+        //显示失败PopView
+        [popInfoView release];
+        popInfoView = nil;
+        
+        popInfoView = [[MainViewPopInfoView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(40, self.view.frame.size.height/2-64-90, 240, 180) isBackView:NO] type:kFailedReponseType];
+        [self.view addSubview:popInfoView];
+        popInfoView.hidden = NO;
+    }
+    [confirmDic release];
+    
+    //删除数据源
+    [self deleteIndexDataSource:index];
+}
+
+- (void) deleteIndexDataSource:(NSInteger) index
+{
+    //删除数据源
+    [inviteMsgArray removeObjectAtIndex:index];
+    
+    ThreadTimer *timer = [timerArray objectAtIndex:index];
+    [timer stopTimer];
+    [timerArray removeObjectAtIndex:index];
+    
+    if (inviteMsgArray.count==0)
+    {
+        bottomView.hidden = NO;
+        noticeTab.hidden  = YES;
+    }
+    [noticeTab reloadData];
+}
+
 - (void) inviteNotice:(NSNotification *) notice
 {
     CLog(@"getNotice:%@", notice.userInfo);
@@ -109,24 +499,74 @@ static NSMutableArray *inviteMsgArray = nil;
     if (!inviteMsgArray)
         inviteMsgArray = [[NSMutableArray alloc]init];
     
-    [inviteMsgArray addObject:dic];
+    if (!timerArray)
+        timerArray = [[NSMutableArray alloc]init];
     
+    [inviteMsgArray insertObject:dic atIndex:0];
+    
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        //语音播报
+        [self speakUri:dic];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+        });
+    });
+
     if (!noticeTab)
     {
         noticeTab = [[UITableView alloc]init];
         noticeTab.delegate   = self;
         noticeTab.dataSource = self;
         noticeTab.hidden     = YES;
-        noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 480)
-                                 isBackView:YES];
+        if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
+        {
+            if (iPhone5)
+            {
+                //ios7 iphone5
+                CLog(@"It's is iphone5 IOS7");
+                noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 47, 320, 480-44)
+                                         isBackView:YES];
+            }
+            else
+            {
+                CLog(@"It's is iphone4 IOS7");
+                //ios 7 iphone 4
+                noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 53, 320, 480-44)
+                                         isBackView:YES];
+            }
+        }
+        else
+        {
+            if (!iPhone5)
+            {
+                // ios 6 iphone4
+                CLog(@"It's is iphone4 IOS6");
+                noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 480-44)
+                                         isBackView:YES];
+                
+            }
+            else
+            {
+                //ios 6 iphone5
+                CLog(@"It's is iphone5 IOS6");
+                noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 480-44)
+                                         isBackView:YES];
+            }
+        }
         noticeTab.separatorStyle = UITableViewCellSeparatorStyleNone;
         [self.view addSubview:noticeTab];
     }
     noticeTab.hidden = NO;
+    
+    ThreadTimer *timer = [[ThreadTimer alloc]init];
+    [timer setMinutesNum:60];
+    [timerArray insertObject:timer atIndex:0];
+    
+    bottomView.hidden = YES;
     [noticeTab reloadData];
     
     CLog(@"dic:%@", dic);
-    CLog(@"inviteMsgArray:%d", inviteMsgArray.count);
+    CLog(@"inviteMsgArray:%lu", (unsigned long)inviteMsgArray.count);
 }
 
 - (void) initBackBarItem
@@ -149,6 +589,162 @@ static NSMutableArray *inviteMsgArray = nil;
     }
 }
 
+#pragma mark -
+#pragma mark - WaitMaskViewDelegate
+- (void) shareClicked:(WaitMaskView *)view
+{
+    view.hidden = YES;
+    
+    //跳转到分享页面
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav popToRootViewControllerAnimated:NO];
+    
+    
+    MyTeacherViewController *mVctr = [[MyTeacherViewController alloc]init];
+    UINavigationController *navMvctr = [[UINavigationController alloc]initWithRootViewController:mVctr];
+    
+    LatlyViewController *lVctr = [[LatlyViewController alloc]init];
+    UINavigationController *navLVctr = [[UINavigationController alloc]initWithRootViewController:lVctr];
+    
+    SearchTeacherViewController *sVctr = [[SearchTeacherViewController alloc]init];
+    UINavigationController *navSVctr = [[UINavigationController alloc]initWithRootViewController:sVctr];
+    
+    ShareViewController *shareVctr = [[ShareViewController alloc]initWithNibName:nil
+                                                                          bundle:nil];
+    UINavigationController *navShareVctr = [[UINavigationController alloc]initWithRootViewController:shareVctr];
+    
+    SettingViewController *setVctr = [[SettingViewController alloc]initWithNibName:nil
+                                                                            bundle:nil];
+    UINavigationController *navSetVctr = [[UINavigationController alloc]initWithRootViewController:setVctr];
+    
+    
+    NSMutableDictionary *imgDic = [NSMutableDictionary dictionaryWithCapacity:3];
+    [imgDic setObject:[UIImage imageNamed:@"s_1_1"]
+               forKey:@"Default"];
+    [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
+               forKey:@"Highlighted"];
+    [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
+               forKey:@"Seleted"];
+    NSMutableDictionary *imgDic2 = [NSMutableDictionary dictionaryWithCapacity:3];
+    [imgDic2 setObject:[UIImage imageNamed:@"s_2_1"]
+                forKey:@"Default"];
+    [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
+                forKey:@"Highlighted"];
+    [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
+                forKey:@"Seleted"];
+    NSMutableDictionary *imgDic3 = [NSMutableDictionary dictionaryWithCapacity:3];
+    [imgDic3 setObject:[UIImage imageNamed:@"s_3_1"]
+                forKey:@"Default"];
+    [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
+                forKey:@"Highlighted"];
+    [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
+                forKey:@"Seleted"];
+    NSMutableDictionary *imgDic4 = [NSMutableDictionary dictionaryWithCapacity:3];
+    [imgDic4 setObject:[UIImage imageNamed:@"s_4_1"]
+                forKey:@"Default"];
+    [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
+                forKey:@"Highlighted"];
+    [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
+                forKey:@"Seleted"];
+    NSMutableDictionary *imgDic5 = [NSMutableDictionary dictionaryWithCapacity:3];
+    [imgDic5 setObject:[UIImage imageNamed:@"s_5_1"]
+                forKey:@"Default"];
+    [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
+                forKey:@"Highlighted"];
+    [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
+                forKey:@"Seleted"];
+    NSMutableArray *ctrlArr = [NSMutableArray arrayWithObjects:navMvctr,navLVctr,navSVctr,navShareVctr,navSetVctr,nil];
+    
+    NSArray *imgArr = [NSArray arrayWithObjects:imgDic,imgDic3,imgDic2,
+                       imgDic4,imgDic5,nil];
+    
+    PersonCenterViewController *pcVctr = [[PersonCenterViewController alloc]
+                                          initWithViewControllers:ctrlArr
+                                          imageArray:imgArr];
+    
+    nav.dataSource = pcVctr;
+    [nav pushViewController:pcVctr
+                   animated:YES];
+    [pcVctr setSelectedIndex:3];
+    [pcVctr release];
+}
+
+- (void) timeOutView:(WaitMaskView *)view
+{
+    view.hidden = YES;
+    
+    
+    NSDictionary *confirmDic = [view.userDic objectForKey:@"confirmDic"];
+    NSDictionary *inviteDic  = [view.userDic objectForKey:@"inviteDic"];
+    
+    Student *student = [Student setPropertyStudent:inviteDic];
+    student.phoneNumber = [confirmDic objectForKey:@"phone"];
+    
+    //跳转到聊天界面
+    ChatViewController *cVctr = [[ChatViewController alloc]init];
+    cVctr.student = student;
+    [self.navigationController pushViewController:cVctr
+                                         animated:YES];
+    [cVctr release];
+}
+
+#pragma mark -
+#pragma mark - MainViewPopInfoViewWaitDelegate
+- (void) mainViewPopInfoWaitViewTimeOut:(MainViewPopInfoView *)view
+{
+    [popInfoView release];
+    popInfoView = nil;
+    
+    popInfoView = [[MainViewPopInfoView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(40, self.view.frame.size.height/2-64-90, 240, 180) isBackView:NO] type:kNoResponseType];
+    [self.view addSubview:popInfoView];
+    popInfoView.hidden = NO;
+}
+
+#pragma mark -
+#pragma mark - InviteNoticeCellDelegate
+- (void) clickView:(InviteNoticeCell *)cell
+{
+    NSDictionary *inviteDic = [inviteMsgArray objectAtIndex:cell.noticeIndex];
+    CLog(@"inviteDicsdfsdf:%@", inviteDic);
+    
+    NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+    Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
+    
+    //发送抢单消息
+    NSArray *paramsArr  = [NSArray arrayWithObjects:@"type",@"phone",@"nickname",@"icon",
+                           @"gender",@"subjectText",@"stars",
+                           @"info",@"idnumber",@"students",
+                           @"pushcc",@"deviceId",@"keyId",nil];
+    NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_APPLY],teacher.phoneNums,teacher.name,teacher.headUrl,[NSNumber numberWithInt:teacher.sex],teacher.pf,[NSNumber numberWithInt:teacher.comment],teacher.info,teacher.idNums,[NSNumber numberWithInt:teacher.studentCount],@"0",[SingleMQTT getCurrentDevTopic],[inviteDic objectForKey:@"keyId"],nil];
+    CLog(@"valuesArra:%@", valuesArr);
+    NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
+                                                      forKeys:paramsArr];
+    NSLog(@"sdfjsidfjsidfjDic:%@", pDic);
+    NSString *jsonMsg   = [pDic JSONFragment];
+    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+    
+    //发送消息
+    NSString *deviceId  = [inviteDic objectForKey:@"deviceId"];
+    CLog(@"deviceIdsdfs:%@", deviceId);
+    SingleMQTT *session = [SingleMQTT shareInstance];
+    [session.session publishData:data
+                         onTopic:deviceId];
+    
+    //显示等待图层.
+    [popInfoView release];
+    popInfoView = nil;
+    
+    popInfoView = [[MainViewPopInfoView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(40, self.view.frame.size.height/2-64-90, 240, 180) isBackView:NO] type:kWaitPopInfoType];
+    popInfoView.delegate = self;
+    [self.view addSubview:popInfoView];
+    popInfoView.hidden = NO;
+}
+
+- (void) timeOut:(InviteNoticeCell *)cell
+{
+    //删除数据源
+    [self deleteIndexDataSource:cell.noticeIndex];
+}
 
 #pragma mark - 
 #pragma mark - UITableViewDelegate and UITableViewDataSource
@@ -170,83 +766,13 @@ static NSMutableArray *inviteMsgArray = nil;
 - (UITableViewCell *) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *idString = @"idString";
-    UITableViewCell *cell = [[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:idString] autorelease];
-    
+    InviteNoticeCell *cell  = [[[InviteNoticeCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:idString]autorelease];
+    cell.delegate = self;
     NSDictionary *inviteDic = [inviteMsgArray objectAtIndex:indexPath.row];
+    [cell setNoticeDic:inviteDic index:indexPath.row];
+    [cell setTimer:[timerArray objectAtIndex:indexPath.row]];
     
-    
-    UILabel *infoLab = [[UILabel alloc]init];
-    NSString *totalMoney = [inviteDic objectForKey:@"tamount"];
-    if (totalMoney.intValue==0)
-    {
-        infoLab.text = [NSString stringWithFormat:@"%@ %@ %@  金额师生协商", [inviteDic objectForKey:@"nickname"],
-                                                                     [inviteDic objectForKey:@"grade"],
-                                                                     [Student searchGenderName:[inviteDic objectForKey:@"gender"]]];
-    }
-    else
-    {
-        infoLab.text = [NSString stringWithFormat:@"%@ %@ %@  ￥%@", [inviteDic objectForKey:@"nickname"], [inviteDic objectForKey:@"grade"], [Student searchGenderName:[inviteDic objectForKey:@"gender"]], [inviteDic objectForKey:@"tamount"]];
-    }
-    infoLab.font = [UIFont systemFontOfSize:14.f];
-    infoLab.backgroundColor = [UIColor clearColor];
-    infoLab.frame = CGRectMake(5, 5, 270, 20);
-    [cell addSubview:infoLab];
-    [infoLab release];
-    
-    
-    UILabel *timesLab = [[UILabel alloc]init];
-    timesLab.text = [NSString stringWithFormat:@"预计辅导小时数:%@", [inviteDic objectForKey:@"yjfdnum"]];
-    timesLab.backgroundColor = [UIColor clearColor];
-    timesLab.frame = CGRectMake(5, 25, 270, 20);
-    timesLab.font  = [UIFont systemFontOfSize:14.f];
-    [cell addSubview:timesLab];
-    [timesLab release];
-    
-    UILabel *startDateLab = [[UILabel alloc]init];
-    startDateLab.text = [NSString stringWithFormat:@"开课日期:%@", [inviteDic objectForKey:@"sd"]];
-    startDateLab.backgroundColor = [UIColor clearColor];
-    startDateLab.frame = CGRectMake(5, 45, 270, 20);
-    startDateLab.font  = [UIFont systemFontOfSize:14.f];
-    [cell addSubview:startDateLab];
-    [startDateLab release];
-    
-    UILabel *posLab = [[UILabel alloc]init];
-    posLab.text = [NSString stringWithFormat:@"授课地址:%@", [inviteDic objectForKey:@"iaddress"]];
-    posLab.backgroundColor = [UIColor clearColor];
-    posLab.frame = CGRectMake(5, 65, 270, 20);
-    posLab.font  = [UIFont systemFontOfSize:14.f];
-    [cell addSubview:posLab];
-    [posLab release];
-    
-    //计算距离
-    NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
-    Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
-    
-    NSString *distLatitude = [inviteDic objectForKey:@"latitude"];
-    NSString *distLongtitude = [inviteDic objectForKey:@"longitude"];
-    
-    CLLocation* orig=[[[CLLocation alloc] initWithLatitude:[teacher.latitude doubleValue]  longitude:[teacher.longitude doubleValue]] autorelease];
-    CLLocation* dist=[[[CLLocation alloc] initWithLatitude:[distLatitude doubleValue] longitude:[distLongtitude doubleValue] ] autorelease];
-    
-    CLLocationDistance kilometers=[orig distanceFromLocation:dist]/1000;
-    
-    UILabel *distanceLab = [[UILabel alloc]init];
-    distanceLab.text = [NSString stringWithFormat:@"距离:%0.2fkm", kilometers];
-    distanceLab.backgroundColor = [UIColor clearColor];
-    distanceLab.frame = CGRectMake(5, 85, 270, 20);
-    distanceLab.font  = [UIFont systemFontOfSize:14.f];
-    [cell addSubview:distanceLab];
-    [distanceLab release];
-    
-    UILabel *secondeLab = [[UILabel alloc]init];
-    secondeLab.text = [NSString stringWithFormat:@"还剩50秒"];
-    secondeLab.backgroundColor = [UIColor clearColor];
-    secondeLab.frame = CGRectMake(320-70, 85, 60, 20);
-    secondeLab.font  = [UIFont systemFontOfSize:14.f];
-    [cell addSubview:secondeLab];
-    [secondeLab release];
-    
-    [cell setBackgroundView:[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"lt_list_bg"]]];
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     return cell;
 }
 
@@ -310,15 +836,221 @@ static NSMutableArray *inviteMsgArray = nil;
     mapView.showsUserLocation = YES;
     [self.view addSubview:self.mapView];
     
+    //检测Timer是否已经超时
+    [self checkTimersIsTimeOut];
+    
     noticeTab = [[UITableView alloc]init];
     noticeTab.delegate   = self;
     noticeTab.dataSource = self;
-    noticeTab.hidden     = YES;
-    noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 480)
-                             isBackView:YES];
+    if (inviteMsgArray.count==0)
+    {
+        noticeTab.hidden = YES;
+    }
+    else
+    {
+        noticeTab.hidden = NO;
+    }
     noticeTab.separatorStyle = UITableViewCellSeparatorStyleNone;
-//    noticeTab.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
     [self.view addSubview:noticeTab];
+    
+    UIImage *bgImg = [UIImage imageNamed:@"mtp_info_bg"];
+    if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
+    {
+        if (iPhone5)
+        {
+            //ios7 iphone5
+            CLog(@"It's is iphone5 IOS7");
+            bottomView = [[MainViewBottomInfoView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(160-bgImg.size.width/2,
+                                                                                                   480-15-bgImg.size.height,
+                                                                                                   bgImg.size.width,
+                                                                                                   bgImg.size.height)
+                                                                             isBackView:NO]];
+            noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 47, 320, 480-44)
+                                     isBackView:YES];
+        }
+        else
+        {
+            CLog(@"It's is iphone4 IOS7");
+            //ios 7 iphone 4
+            bottomView = [[MainViewBottomInfoView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(160-bgImg.size.width/2,
+                                                                                                   480-33-bgImg.size.height,
+                                                                                                   bgImg.size.width,
+                                                                                                   bgImg.size.height)
+                                                                             isBackView:NO]];
+            noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 53, 320, 480-44)
+                                     isBackView:YES];
+        }
+    }
+    else
+    {
+        if (!iPhone5)
+        {
+            // ios 6 iphone4
+            CLog(@"It's is iphone4 IOS6");
+            bottomView = [[MainViewBottomInfoView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(160-bgImg.size.width/2,
+                                                                                                   480-44-14-bgImg.size.height,
+                                                                                                   bgImg.size.width,
+                                                                                                   bgImg.size.height)
+                                                                             isBackView:NO]];
+            noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 480-44)
+                                     isBackView:YES];
+            
+        }
+        else
+        {
+            //ios 6 iphone5
+            CLog(@"It's is iphone5 IOS6");
+            bottomView = [[MainViewBottomInfoView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(160-bgImg.size.width/2,
+                                                                                                   480-30-bgImg.size.height,
+                                                                                                   bgImg.size.width,
+                                                                                                   bgImg.size.height)
+                                                                             isBackView:NO]];
+            noticeTab.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 480-44)
+                                     isBackView:YES];
+        }
+    }
+    
+    [self.view addSubview:bottomView];
+    
+    popInfoView = nil;
+}
+
+- (void) checkTimersIsTimeOut
+{
+    NSArray *tmpArray = [timerArray copy];
+    for (ThreadTimer *timer in tmpArray)
+    {
+        if ([timer isTimeOut])
+        {
+            CLog(@"TimerOut shdfshfusdhfus");
+            NSUInteger index = [timerArray indexOfObject:timer];
+            
+            //删除数据源
+            [self deleteIndexDataSource:index];
+        }
+    }
+    [tmpArray release];
+}
+
+- (void) getJxzl
+{
+    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+    {
+        return;
+    }
+    
+    NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"viewstatus",@"sessid", nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"getJxzl",@"1",ssid, nil];
+    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+                                                     forKeys:paramsArr];
+    NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+    ServerRequest *request = [ServerRequest sharedServerRequest];
+    NSData   *resVal = [request requestSyncWith:kServerPostRequest
+                                       paramDic:pDic
+                                         urlStr:url];
+    NSString *resStr = [[[NSString alloc]initWithData:resVal
+                                             encoding:NSUTF8StringEncoding]autorelease];
+    NSDictionary *resDic   = [resStr JSONValue];
+    NSArray      *keysArr  = [resDic allKeys];
+    NSArray      *valsArr  = [resDic allValues];
+    CLog(@"***********Result****************");
+    for (int i=0; i<keysArr.count; i++)
+    {
+        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
+    }
+    CLog(@"***********Result****************");
+    
+    NSNumber *errorid = [resDic objectForKey:@"errorid"];
+    if (errorid.intValue == 0)
+    {
+        NSDictionary *ccDic = [[resDic objectForKey:@"cc"] copy];
+        if (ccDic.count!=0)     //已签约
+        {
+            NSDictionary *ccResDic = [resDic copy];
+            [[NSUserDefaults standardUserDefaults] setObject:ccResDic forKey:@"AssistentData"];
+            [ccResDic release];
+        }
+        else
+        {
+            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"AssistentData"];
+        }
+    }
+    else
+    {
+        //重复登录
+        if (errorid.intValue==2)
+        {
+            //清除sessid,清除登录状态,回到地图页
+            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+            [AppDelegate popToMainViewController];
+        }
+    }
+}
+
+- (void) speakUri:(NSDictionary *) inviteDic
+{
+    NSString *msgCnt = nil;
+    NSString *totalMoney = [inviteDic objectForKey:@"tamount"];
+    if (totalMoney.intValue==0)
+    {
+        msgCnt   = [NSString stringWithFormat:@"订单金额师生协商;共%@课时;上课地址%@;", [inviteDic objectForKey:@"yjfdnum"], [inviteDic objectForKey:@"iaddress"]];
+    }
+    else
+    {
+        msgCnt   = [NSString stringWithFormat:@"订单金额%@;共%@课时;上课地址%@;", [inviteDic objectForKey:@"tamount"], [inviteDic objectForKey:@"yjfdnum"], [inviteDic objectForKey:@"iaddress"]];
+    }
+    
+    NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"text",@"mp3",@"sessid", nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"speakUri",msgCnt,@"1", ssid, nil];
+    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+                                                     forKeys:paramsArr];
+    
+    NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
+    NSData *resVal     = [serverReq requestSyncWith:kServerPostRequest
+                                           paramDic:pDic
+                                             urlStr:url];
+    NSString *resStr = [[[NSString alloc]initWithData:resVal
+                                             encoding:NSUTF8StringEncoding]autorelease];
+    NSDictionary *resDic  = [resStr JSONValue];
+    if (resDic)
+    {
+        NSString *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue==0)
+        {
+            //下载语音播报
+            if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+            {
+                return;
+            }
+            
+            NSString *downPath  = [[ChatViewController getRecordURL] retain];
+            
+            NSString *webAdd    = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+            NSString *soundPath = [NSString stringWithFormat:@"%@%@", webAdd, [resDic objectForKey:@"uri"]];
+            
+            //下载音频文件
+            ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:soundPath]];
+            [request setDelegate:self];
+            [request setDownloadProgressDelegate:self];
+            [request setDownloadDestinationPath:downPath];
+            [request startAsynchronous];
+            
+        }
+        else
+        {
+            CLog(@"speakUri failed!");
+        }
+    }
+    else
+    {
+        CLog(@"speark failed!")
+    }
 }
 
 - (void) setTerminalMapProperty
@@ -417,10 +1149,10 @@ static NSMutableArray *inviteMsgArray = nil;
         return;
     }
     
-    NSString *webAdd  = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *pushAdd = [[NSUserDefaults standardUserDefaults] objectForKey:PUSHADDRESS];
-    if (!webAdd||!pushAdd)
-    {
+//    NSString *webAdd  = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+//    NSString *pushAdd = [[NSUserDefaults standardUserDefaults] objectForKey:PUSHADDRESS];
+//    if (!webAdd||!pushAdd)
+//    {
         NSArray *paramsArr = [NSArray arrayWithObjects:@"action", nil];
         NSArray *valuesArr = [NSArray arrayWithObjects:@"lb", nil];
         NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
@@ -459,7 +1191,7 @@ static NSMutableArray *inviteMsgArray = nil;
         {
             CLog(@"getWebAddress failed!");
         }
-    }
+//    }
 }
 
 + (NSString *) getPushAddress:(NSString *) str
@@ -592,6 +1324,16 @@ static NSMutableArray *inviteMsgArray = nil;
 
 #pragma mark -
 #pragma mark ServerRequest Delegate
+- (void)requestFinished:(ASIHTTPRequest *)request
+{
+    //播放声音
+    NSString *soundPath = [[ChatViewController getRecordURL] retain];
+    NSData *soundData   = [NSData dataWithContentsOfFile:soundPath];
+    
+    RecordAudio *audio = [[RecordAudio alloc]init];
+    [audio playMP3:soundData];
+}
+
 - (void) requestAsyncFailed:(ASIHTTPRequest *)request
 {
     [self showAlertWithTitle:@"提示"

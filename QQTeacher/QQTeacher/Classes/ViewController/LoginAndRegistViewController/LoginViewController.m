@@ -92,7 +92,7 @@
         ServerRequest *serverReq = [ServerRequest sharedServerRequest];
         serverReq.delegate = self;
         NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-        NSString *url = [NSString stringWithFormat:@"%@%@/", webAddress,TEACHER];
+        NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
         [serverReq requestASyncWith:kServerPostRequest
                            paramDic:pDic
                              urlStr:url];

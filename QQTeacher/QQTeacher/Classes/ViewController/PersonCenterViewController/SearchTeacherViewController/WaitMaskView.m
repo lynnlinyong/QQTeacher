@@ -9,7 +9,7 @@
 #import "WaitMaskView.h"
 
 @implementation WaitMaskView
-@synthesize tObj;
+@synthesize userDic;
 @synthesize second;
 @synthesize delegate;
 
@@ -33,54 +33,52 @@
         bgView.frame = CGRectMake(20, 150, 280, 150);
         [self addSubview:bgView];
         
-        headImgView = [[TTImageView alloc]init];
-        headImgView.delegate = self;
-        headImgView.frame = CGRectMake(40, 160, 60, 60);
-        [self addSubview:headImgView];
+//        headImgView = [[TTImageView alloc]init];
+//        headImgView.delegate = self;
+//        headImgView.frame = CGRectMake(40, 160, 60, 60);
+//        [self addSubview:headImgView];
         
-        starImgView = [[UIStartsImageView alloc]initWithFrame:CGRectMake(30, 230, 80, 5)];
-        [self addSubview:starImgView];
+//        starImgView = [[UIStartsImageView alloc]initWithFrame:CGRectMake(30, 230, 80, 5)];
+//        [self addSubview:starImgView];
+        nameLab = [[UILabel alloc]init];
+        nameLab.font  = [UIFont systemFontOfSize:14.f];
+        nameLab.frame = CGRectMake(25, 150+5, 100, 20);
+        nameLab.backgroundColor = [UIColor clearColor];
+        nameLab.textColor = [UIColor whiteColor];
+        [self addSubview:nameLab];
         
-        infoLab = [[UILabel alloc]init];
-        infoLab.font  = [UIFont systemFontOfSize:14.f];
-        infoLab.frame = CGRectMake(120, 160, 170, 20);
-        infoLab.backgroundColor = [UIColor clearColor];
-        infoLab.textColor = [UIColor whiteColor];
-        [self addSubview:infoLab];
+        totalMoneyLab = [[UILabel alloc]init];
+        totalMoneyLab.font  = [UIFont systemFontOfSize:14.f];
+        totalMoneyLab.frame = CGRectMake(125, 150+5, 270, 20);
+        totalMoneyLab.backgroundColor = [UIColor clearColor];
+        totalMoneyLab.textColor = [UIColor whiteColor];
+        [self addSubview:totalMoneyLab];
         
-        idNumsLab = [[UILabel alloc]init];
-        idNumsLab.font  = [UIFont systemFontOfSize:14.f];
-        idNumsLab.frame = CGRectMake(120, 180, 170, 20);
-        idNumsLab.backgroundColor = [UIColor clearColor];
-        idNumsLab.textColor = [UIColor whiteColor];
-        [self addSubview:idNumsLab];
+        gradeLab = [[UILabel alloc]init];
+        gradeLab.font  = [UIFont systemFontOfSize:14.f];
+        gradeLab.frame = CGRectMake(25, 150+25, 270, 20);
+        gradeLab.backgroundColor = [UIColor clearColor];
+        gradeLab.textColor = [UIColor whiteColor];
+        [self addSubview:gradeLab];
         
-        fdStudentLab = [[UILabel alloc]init];
-        fdStudentLab.font  = [UIFont systemFontOfSize:14.f];
-        fdStudentLab.frame = CGRectMake(120, 200, 170, 20);
-        fdStudentLab.backgroundColor = [UIColor clearColor];
-        fdStudentLab.textColor = [UIColor whiteColor];
-        [self addSubview:fdStudentLab];
+        startDateLab = [[UILabel alloc]init];
+        startDateLab.font  = [UIFont systemFontOfSize:14.f];
+        startDateLab.frame = CGRectMake(25, 150+45, 270, 20);
+        startDateLab.backgroundColor = [UIColor clearColor];
+        startDateLab.textColor = [UIColor whiteColor];
+        [self addSubview:startDateLab];
         
-        UIImage *sayImg = [UIImage imageNamed:@"stmp_say_info_bg"];
-        sayImgView = [[UIImageView alloc]init];
-        sayImgView.alpha = 1.0f;
-        sayImgView.image = sayImg;
-        sayImgView.frame = CGRectMake(105, 220, sayImg.size.width, sayImg.size.height);
-        [self addSubview:sayImgView];
-        
-        sayLab = [[UILabel alloc]init];
-        sayLab.font = [UIFont systemFontOfSize:14.f];
-        sayLab.backgroundColor = [UIColor clearColor];
-        sayLab.frame = CGRectMake(15, 5, sayImg.size.width-15, 20);
-        sayLab.numberOfLines = 0;
-        sayLab.lineBreakMode = NSLineBreakByWordWrapping;
-        [sayImgView addSubview:sayLab];
+        posLab = [[UILabel alloc]init];
+        posLab.font  = [UIFont systemFontOfSize:14.f];
+        posLab.frame = CGRectMake(25, 150+65, 270, 20);
+        posLab.backgroundColor = [UIColor clearColor];
+        posLab.textColor = [UIColor whiteColor];
+        [self addSubview:posLab];
         
         secondLab = [[UILabel alloc]init];
         secondLab.text  = @"正在等待和老师建立沟通...3";
         secondLab.font  = [UIFont systemFontOfSize:14.f];
-        secondLab.frame = CGRectMake(90, 230+sayImg.size.height, 180, 20);
+        secondLab.frame = CGRectMake(90, 280-10, 180, 20);
         secondLab.backgroundColor = [UIColor clearColor];
         secondLab.textColor = [UIColor whiteColor];
         [self addSubview:secondLab];
@@ -127,6 +125,8 @@
                                                userInfo:nil
                                                 repeats:YES];
         [timer fire];
+        
+        userDic = [[NSDictionary alloc]init];
     }
     return self;
 }
@@ -136,17 +136,17 @@
     [timer invalidate];
     timer = nil;
     
+    [userDic release];
+    
     delegate = nil;
     
-    [headImgView release];
-    [starImgView release];
-    [mainView release];
-    [bgView release];
-    [infoLab release];
-    [idNumsLab release];
-    [fdStudentLab release];
-    [sayLab release];
-    [sayImgView release];
+    [mainView      release];
+    [bgView        release];
+    [nameLab       release];
+    [gradeLab      release];
+    [totalMoneyLab release];
+    [posLab release];
+    [startDateLab release];
     
     [sayHeadImgView release];
     [infoBgView release];
@@ -154,24 +154,27 @@
     [super dealloc];
 }
 
-- (void) setTObj:(Teacher *)obj
+- (void) setUserDic:(NSDictionary *)dic
 {
-    tObj = nil;
-    tObj = [obj copy];
+    [userDic release];
+    userDic = nil;
     
-    if (obj.sex == 1)
-        headImgView.defaultImage = [UIImage imageNamed:@"s_boy"];
+    userDic = [dic copy];
+    NSDictionary *inviteDic = [userDic objectForKey:@"inviteDic"];
+    
+    nameLab.text = [inviteDic objectForKey:@"nickname"];
+    
+    NSString *totalMoney = [inviteDic objectForKey:@"tamount"];
+    if (totalMoney.intValue==0)
+        totalMoneyLab.text = @"金额师生协商";
     else
-        headImgView.defaultImage = [UIImage imageNamed:@"s_gril"];
-    headImgView.URL   = obj.headUrl;
+        totalMoneyLab.text = [NSString stringWithFormat:@"￥%@", [inviteDic objectForKey:@"tamount"]];
     
-    [starImgView setHlightStar:obj.comment];
+    gradeLab.text = [inviteDic objectForKey:@"grade"];
     
-    infoLab.text      = [NSString stringWithFormat:@"%@    %@     %@", obj.name, [Student searchGenderName:[NSString stringWithFormat:@"%d",obj.sex]], obj.pf];
+    startDateLab.text = [NSString stringWithFormat:@"开课时间:%@",[inviteDic objectForKey:@"sd"]];
     
-    idNumsLab.text    = obj.idNums;
-    fdStudentLab.text = [NSString stringWithFormat:@"已辅导%d位学生", obj.studentCount];
-    sayLab.text       = obj.info;
+    posLab.text = [NSString stringWithFormat:@"授课地址:%@",[inviteDic objectForKey:@"iaddress"]];
     
     NSString *secondStr = [NSString stringWithFormat:@"只用了%@秒就找到了个家教老师,太给力了吧!", second];
     CGSize size = [secondStr sizeWithFont:infoSecondLab.font constrainedToSize:CGSizeMake(infoSecondLab.frame.size.width, MAXFLOAT)
@@ -180,40 +183,40 @@
     infoSecondLab.frame = CGRectMake(infoSecondLab.frame.origin.x, infoSecondLab.frame.origin.y, size.width, size.height);
     
     //自适应
-    [self setAutoSayContent];
+//    [self setAutoSayContent];
 }
 
-- (void) setAutoSayContent
-{
-    float offset = 0;
-    CGSize size = [tObj.info sizeWithFont:sayLab.font constrainedToSize:CGSizeMake(sayLab.frame.size.width, MAXFLOAT)
-                            lineBreakMode:NSLineBreakByWordWrapping];
-    if (size.height>sayImgView.frame.size.height)
-    {
-        offset = size.height - sayImgView.frame.size.height+5;
-    }
-    sayLab.frame = CGRectMake(sayLab.frame.origin.x, sayLab.frame.origin.y+offset/5, size.width, size.height);
-    sayImgView.frame = CGRectMake(sayImgView.frame.origin.x, sayImgView.frame.origin.y,
-                                  sayImgView.frame.size.width, sayImgView.frame.size.height+offset);
-    
-    secondLab.frame  = CGRectMake(secondLab.frame.origin.x,   secondLab.frame.origin.y+offset,
-                                  secondLab.frame.size.width, secondLab.frame.size.height);
-    
-    float sayLabPos = sayImgView.frame.origin.y+sayImgView.frame.size.height;
-    float bgViewPos = bgView.frame.origin.y+bgView.frame.size.height;
-    if (sayLabPos>bgViewPos)
-    {
-        offset = sayLabPos - bgViewPos;
-        bgView.frame = CGRectMake(bgView.frame.origin.x, bgView.frame.origin.y,
-                                  bgView.frame.size.width, bgView.frame.size.height+offset);
-        
-        
-        sayHeadImgView.frame = CGRectMake(sayHeadImgView.frame.origin.x, sayHeadImgView.frame.origin.y+offset,
-                                          sayHeadImgView.frame.size.width, sayHeadImgView.frame.size.height);
-        infoBgView.frame  = CGRectMake(infoBgView.frame.origin.x, infoBgView.frame.origin.y+offset,
-                                       infoBgView.frame.size.width, infoBgView.frame.size.height);
-    }
-}
+//- (void) setAutoSayContent
+//{
+//    float offset = 0;
+//    CGSize size = [tObj.info sizeWithFont:sayLab.font constrainedToSize:CGSizeMake(sayLab.frame.size.width, MAXFLOAT)
+//                            lineBreakMode:NSLineBreakByWordWrapping];
+//    if (size.height>sayImgView.frame.size.height)
+//    {
+//        offset = size.height - sayImgView.frame.size.height+5;
+//    }
+//    sayLab.frame = CGRectMake(sayLab.frame.origin.x, sayLab.frame.origin.y+offset/5, size.width, size.height);
+//    sayImgView.frame = CGRectMake(sayImgView.frame.origin.x, sayImgView.frame.origin.y,
+//                                  sayImgView.frame.size.width, sayImgView.frame.size.height+offset);
+//    
+//    secondLab.frame  = CGRectMake(secondLab.frame.origin.x,   secondLab.frame.origin.y+offset,
+//                                  secondLab.frame.size.width, secondLab.frame.size.height);
+//    
+//    float sayLabPos = sayImgView.frame.origin.y+sayImgView.frame.size.height;
+//    float bgViewPos = bgView.frame.origin.y+bgView.frame.size.height;
+//    if (sayLabPos>bgViewPos)
+//    {
+//        offset = sayLabPos - bgViewPos;
+//        bgView.frame = CGRectMake(bgView.frame.origin.x, bgView.frame.origin.y,
+//                                  bgView.frame.size.width, bgView.frame.size.height+offset);
+//        
+//        
+//        sayHeadImgView.frame = CGRectMake(sayHeadImgView.frame.origin.x, sayHeadImgView.frame.origin.y+offset,
+//                                          sayHeadImgView.frame.size.width, sayHeadImgView.frame.size.height);
+//        infoBgView.frame  = CGRectMake(infoBgView.frame.origin.x, infoBgView.frame.origin.y+offset,
+//                                       infoBgView.frame.size.width, infoBgView.frame.size.height);
+//    }
+//}
 
 - (void)timeOut
 {

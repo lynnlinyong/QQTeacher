@@ -13,5 +13,7 @@
     UIGridView *gdView;
 }
 
+@property (nonatomic, assign) BOOL isEmploy;
 @property (nonatomic, copy) Order *order;
+@property (nonatomic, copy) NSDictionary *noticeDic;
 @end

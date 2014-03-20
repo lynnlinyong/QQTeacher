@@ -19,19 +19,7 @@
     {
         headBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         headBtn.frame =  CGRectMake(10, 15, 50, 50);
-//        [headBtn addTarget:self
-//                    action:@selector(tapGestureRecongnizerResponse:)
-//          forControlEvents:UIControlEventTouchUpInside];
-        
-//        UIImage *idImg = [UIImage imageNamed:@"mp_rz"];
-//        idImageView = [[UIImageView alloc]init];
-//        idImageView.hidden = YES;
-//        idImageView.image  = idImg;
-//        idImageView.frame  = CGRectMake(headBtn.frame.size.width-idImg.size.width-5,
-//                                        headBtn.frame.size.height/2-5,
-//                                        idImg.size.width+10, idImg.size.height+10);
-//        [headBtn addSubview:idImageView];
-        
+
         nameLab = [[UILabel alloc]init];
         nameLab.backgroundColor = [UIColor clearColor];
         nameLab.font  = [UIFont systemFontOfSize:14.f];
@@ -43,8 +31,6 @@
         introduceLab.font = [UIFont systemFontOfSize:14.f];
         introduceLab.backgroundColor = [UIColor clearColor];
         introduceLab.frame = CGRectMake(65, 25, 100, 20);
-        
-//        starImageView = [[UIStartsImageView alloc]initWithFrame:CGRectMake(65, 27, 100, 20)];
         
         UIImage *chatImg = [UIImage imageNamed:@"mt_chat_normal_btn"];
         commBtn   = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -66,23 +52,11 @@
           forControlEvents:UIControlEventTouchUpInside];
         compBtn.frame = CGRectMake(110, 50, cmpImg.size.width, cmpImg.size.height);
         
-//        UIImage *recmmImg = [UIImage imageNamed:@"mt_recomment_normal_btn"];
-//        recommBtn = [UIButton buttonWithType:UIButtonTypeCustom];
-//        recommBtn.tag = 3;
-//        [recommBtn setImage:recmmImg
-//                   forState:UIControlStateNormal];
-//        [recommBtn addTarget:self
-//                      action:@selector(doButtonClicked:)
-//            forControlEvents:UIControlEventTouchUpInside];
-//        recommBtn.frame = CGRectMake(155, 50, recmmImg.size.width, recmmImg.size.height);
         
         [self addSubview:headBtn];
         [self addSubview:introduceLab];
-//        [self addSubview:starImageView];
         [self addSubview:commBtn];
         [self addSubview:compBtn];
-//        [self addSubview:recommBtn];
-
     }
     
     return self;
@@ -95,8 +69,6 @@
 
 - (void) dealloc
 {
-//    [idImageView release];
-//    [starImageView release];
     [nameLab release];
     [introduceLab  release];
     [super dealloc];
@@ -113,14 +85,16 @@
     if (student.gender.intValue == 1)
     {
         [headBtn setImage:[UIImage circleImage:[UIImage imageNamed:@"s_boy"]
-                                     withParam:0 withColor:[UIColor whiteColor]]
+                                     withParam:0
+                                     withColor:[UIColor colorWithHexString:@"#73CCAD"]]
                  forState:UIControlStateNormal];
         introduceLab.text = [NSString stringWithFormat:@"男  %@", student.grade];
     }
     else
     {
         [headBtn setImage:[UIImage circleImage:[UIImage imageNamed:@"s_girl"]
-                                     withParam:0 withColor:[UIColor whiteColor]]
+                                     withParam:0
+                                     withColor:[UIColor colorWithHexString:@"#FF9800"]]
                  forState:UIControlStateNormal];
         introduceLab.text = [NSString stringWithFormat:@"女  %@", student.grade];
     }
@@ -143,14 +117,4 @@
     }
 }
 
-//- (void) tapGestureRecongnizerResponse:(id) sender
-//{
-//    if (delegate)
-//    {
-//        if ([delegate respondsToSelector:@selector(tableViewCell:ClickedButton:)])
-//        {
-//            [delegate tableViewCell:self ClickedButton:0];
-//        }
-//    }
-//}
 @end

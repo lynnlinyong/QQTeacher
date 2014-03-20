@@ -32,17 +32,17 @@
     [self initBackBarItem];
     
     self.delegate = self;
-//    dispatch_async(dispatch_get_global_queue(0, 0), ^{
-//            [self checkSessidIsValid];
-//        dispatch_async(dispatch_get_main_queue(), ^{
-//            
-//        });
-//    });
 }
 
 - (void) viewDidLoad
 {
     [super viewDidLoad];
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        [self checkSessidIsValid];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+        });
+    });
 }
 
 - (void)didReceiveMemoryWarning
@@ -73,7 +73,7 @@
                                                      forKeys:paramsArr];
     
     NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, STUDENT];
+    NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
     ServerRequest *serverReq = [ServerRequest sharedServerRequest];
     NSData *resVal     = [serverReq requestSyncWith:kServerPostRequest
                                            paramDic:pDic
@@ -88,28 +88,12 @@
         {
             //获得最新个人信息
             CLog(@"get New Info:%@", resDic);
-            NSDictionary *stuDic = [[resDic objectForKey:@"studentInfo"] retain];
-            
-            //获得Student
-            Student *student    = [[Student alloc]init];
-            student.email       = [stuDic objectForKey:@"email"];
-            student.gender      = [[stuDic objectForKey:@"gender"] copy];
-            student.grade       = [[stuDic objectForKey:@"grade"]  copy];
-            student.icon        = [[stuDic objectForKey:@"icon"]   copy];
-            student.latitude    = [stuDic objectForKey:@"latitude"];
-            student.longitude   = [stuDic objectForKey:@"longitude"];
-            student.lltime      = [stuDic objectForKey:@"lltime"];
-            student.nickName    = [stuDic objectForKey:@"nickname"];
-            student.phoneNumber = [stuDic objectForKey:@"phone"];
-            student.status      = [[stuDic objectForKey:@"status"] copy];
-            student.phoneStars  = [[stuDic objectForKey:@"phone_stars"] copy];
-            student.locStars    = [[stuDic objectForKey:@"location_stars"] copy];
-            
-            NSData *stuData = [[NSKeyedArchiver archivedDataWithRootObject:student] retain];
-            [[NSUserDefaults standardUserDefaults] setObject:stuData
-                                                      forKey:STUDENT];
-            [student release];
-            [stuData release];
+            NSDictionary *teacherDic = [resDic objectForKey:@"teacherInfo"];
+            Teacher *teacher = [Teacher setTeacherProperty:teacherDic];
+
+            NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:teacher];
+            [[NSUserDefaults standardUserDefaults] setObject:teacherData
+                                                      forKey:TEACHER_INFO];
         }
         else
         {
@@ -137,10 +121,16 @@
 {
     if (tabBarController.selectedIndex == 2)
     {
-        MainViewController *mainVctr = [[MainViewController alloc]init];
+        [self initBackBarItem];
         
+        MainViewController *mainVctr = [[MainViewController alloc]init];
         CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
         [nav pushViewController:mainVctr animated:YES];
+    }
+    else
+    {
+        CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+        nav.dataSource = nil;
     }
 }
 
@@ -181,14 +171,13 @@
 - (void) doBackBtnClicked:(id)sender
 {
     CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-    [nav popToRootViewControllerAnimated:YES];
-    
     NSArray *viewCtrs = [nav viewControllers];
     for (UIViewController *vctr in viewCtrs)
     {
         if ([vctr isKindOfClass:[PersonCenterViewController class]])
         {
             PersonCenterViewController *pCvtr = (PersonCenterViewController *) vctr;
+            [nav popToViewController:pCvtr animated:YES];
             [pCvtr setSelectedIndex:0];
         }
     }

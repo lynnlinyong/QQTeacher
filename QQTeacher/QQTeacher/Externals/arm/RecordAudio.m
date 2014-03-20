@@ -70,8 +70,11 @@
 //0 播放 1 播放完成 2出错
 -(void)sendStatus:(int)status
 {
-    if ([self.delegate respondsToSelector:@selector(RecordStatus:)]) {
-        [self.delegate RecordStatus:status];
+    if (self.delegate)
+    {
+        if ([self.delegate respondsToSelector:@selector(RecordStatus:)]) {
+            [self.delegate RecordStatus:status];
+        }
     }
     
     if (status!=0) {

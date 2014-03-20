@@ -22,15 +22,20 @@
 @interface WaitMaskView : UIView <TTImageViewDelegate>
 {
     //top
-    TTImageView *headImgView;
-    UIStartsImageView *starImgView;
-    UIView  *mainView;
+//    TTImageView *headImgView;
+//    UIStartsImageView *starImgView;
+    UIView       *mainView;
     LBorderView  *bgView;
-    UILabel *infoLab;
-    UILabel *idNumsLab;
-    UILabel *fdStudentLab;
-    UILabel *sayLab;
-    UIImageView *sayImgView;
+    
+    UILabel *nameLab;
+    UILabel *totalMoneyLab;
+    UILabel *startDateLab;
+    UILabel *gradeLab;
+    UILabel *posLab;
+//    UILabel *idNumsLab;
+//    UILabel *fdStudentLab;
+//    UILabel *sayLab;
+//    UIImageView *sayImgView;
     UILabel *secondLab;
     
     
@@ -44,7 +49,7 @@
     NSTimer     *timer;
 }
 
-@property (nonatomic, copy)   Teacher *tObj;
+@property (nonatomic, copy) NSDictionary *userDic;
 @property (nonatomic, retain) NSString *second;
 @property (nonatomic, assign) id<WaitMaskViewDelegate> delegate;
 @end

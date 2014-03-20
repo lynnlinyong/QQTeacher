@@ -122,53 +122,125 @@
     indexLab.text = @"0/0";
     indexLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
     indexLab.textAlignment = NSTextAlignmentCenter;
-    indexLab.frame= [UIView fitCGRect:CGRectMake(120, 10, 80, 20)
-                           isBackView:NO];
     [self.view addSubview:indexLab];
     
-//    certyImgArray     = [[NSMutableArray alloc]init];
     certyImgPathArray = [[NSMutableArray alloc]init];
-    
     if (![certyUrlArray isEqual:[NSNull null]])
         certyImgPathArray = [certyUrlArray mutableCopy];
     
-    scrollView = [[UIScrollView alloc]init];
-    scrollView.delegate = self;
-    scrollView.pagingEnabled = YES;
-    scrollView.frame = CGRectMake(0, 40, 320, 320);
-    [self.view addSubview:scrollView];
-    
-    [self showCertificate];
-    
     //底部操作按钮
-    UIButton *cameraBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    UIImage *cameraImg = [UIImage imageNamed:@"stp_cert_camera_btn"];
+    UIButton *cameraBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     cameraBtn.tag = 1;
-    [cameraBtn setTitle:@"照相" forState:UIControlStateNormal];
-    cameraBtn.frame = [UIView fitCGRect:CGRectMake(100, 480-44-50, 40, 30)
-                             isBackView:NO];
+    [cameraBtn setImage:cameraImg forState:UIControlStateNormal];
+    
     [cameraBtn addTarget:self
                   action:@selector(doButtonClicked:)
         forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:cameraBtn];
     
-    UIButton *photoBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    UIImage *photoImg  = [UIImage imageNamed:@"stp_cert_photo_btn"];
+    UIButton *photoBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     photoBtn.tag = 2;
-    [photoBtn setTitle:@"相册" forState:UIControlStateNormal];
-    photoBtn.frame = [UIView fitCGRect:CGRectMake(140, 480-44-50, 40, 30)
-                            isBackView:NO];
+    [photoBtn setImage:photoImg forState:UIControlStateNormal];
+
     [photoBtn addTarget:self
                  action:@selector(doButtonClicked:)
        forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:photoBtn];
     
-    UIButton *deleteBtn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+    UIImage *delImg = [UIImage imageNamed:@"stp_cert_del_btn"];
+    UIButton *deleteBtn = [UIButton buttonWithType:UIButtonTypeCustom];
     deleteBtn.tag = 3;
-    [deleteBtn setTitle:@"删除" forState:UIControlStateNormal];
-    deleteBtn.frame = [UIView fitCGRect:CGRectMake(180, 480-44-50, 40, 30) isBackView:NO];
+    [deleteBtn setImage:delImg forState:UIControlStateNormal];
     [deleteBtn addTarget:self
                   action:@selector(doButtonClicked:)
         forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:deleteBtn];
+    
+    scrollView = [[UIScrollView alloc]init];
+    scrollView.delegate = self;
+    scrollView.pagingEnabled = YES;
+    if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
+    {
+        if (iPhone5)
+        {
+            //ios7 iphone5
+            CLog(@"It's is iphone5 IOS7");
+            indexLab.frame= [UIView fitCGRect:CGRectMake(120, 10+44+20, 80, 20)
+                                   isBackView:NO];
+            scrollView.frame = [UIView fitCGRect:CGRectMake(0, 44+20+10+30, 320, 320)
+                                      isBackView:NO];
+            cameraBtn.frame = [UIView fitCGRect:CGRectMake(100, 480-30-20-cameraImg.size.height,
+                                                           cameraImg.size.width, cameraImg.size.height)
+                                     isBackView:NO];
+            photoBtn.frame = [UIView fitCGRect:CGRectMake(100+cameraImg.size.width, 480-30-20-cameraImg.size.height,
+                                                          photoImg.size.width, photoImg.size.height)
+                                    isBackView:NO];
+            deleteBtn.frame = [UIView fitCGRect:CGRectMake(100+cameraImg.size.width+photoImg.size.width,
+                                                           480-30-20-cameraImg.size.height, delImg.size.width, delImg.size.height)
+                                     isBackView:NO];
+        }
+        else
+        {
+            CLog(@"It's is iphone4 IOS7");
+            //ios 7 iphone 4
+            indexLab.frame= [UIView fitCGRect:CGRectMake(120, 10+44+20, 80, 20)
+                                   isBackView:NO];
+            scrollView.frame = [UIView fitCGRect:CGRectMake(0, 44+20+10+30, 320, 320)
+                                      isBackView:NO];
+            cameraBtn.frame = [UIView fitCGRect:CGRectMake(100, 480-30-20-cameraImg.size.height,
+                                                           cameraImg.size.width, cameraImg.size.height)
+                                     isBackView:NO];
+            photoBtn.frame = [UIView fitCGRect:CGRectMake(100+cameraImg.size.width, 480-30-20-cameraImg.size.height,
+                                                          photoImg.size.width, photoImg.size.height)
+                                    isBackView:NO];
+            deleteBtn.frame = [UIView fitCGRect:CGRectMake(100+cameraImg.size.width+photoImg.size.width,
+                                                           480-30-20-cameraImg.size.height, delImg.size.width, delImg.size.height)
+                                     isBackView:NO];
+        }
+    }
+    else
+    {
+        if (!iPhone5)
+        {
+            // ios 6 iphone4
+            CLog(@"It's is iphone4 IOS6");
+            indexLab.frame= [UIView fitCGRect:CGRectMake(120, 10, 80, 20)
+                                   isBackView:NO];
+            scrollView.frame = [UIView fitCGRect:CGRectMake(0, 40, 320, 320) isBackView:NO];
+            cameraBtn.frame = [UIView fitCGRect:CGRectMake(100, 480-44-20-cameraImg.size.height,
+                                                           cameraImg.size.width, cameraImg.size.height)
+                                     isBackView:NO];
+            photoBtn.frame = [UIView fitCGRect:CGRectMake(100+cameraImg.size.width, 480-44-20-cameraImg.size.height,
+                                                          photoImg.size.width, photoImg.size.height)
+                                    isBackView:NO];
+            deleteBtn.frame = [UIView fitCGRect:CGRectMake(100+cameraImg.size.width+photoImg.size.width,
+                                                           480-44-20-cameraImg.size.height, delImg.size.width, delImg.size.height)
+                                     isBackView:NO];
+        }
+        else
+        {
+            //ios 6 iphone5
+            CLog(@"It's is iphone5 IOS6");
+            indexLab.frame= [UIView fitCGRect:CGRectMake(120, 10, 80, 20)
+                                   isBackView:NO];
+            scrollView.frame = [UIView fitCGRect:CGRectMake(0, 40, 320, 320) isBackView:NO];
+            cameraBtn.frame = [UIView fitCGRect:CGRectMake(100, 480-44-20-cameraImg.size.height,
+                                                           cameraImg.size.width, cameraImg.size.height)
+                                     isBackView:NO];
+            photoBtn.frame = [UIView fitCGRect:CGRectMake(100+cameraImg.size.width, 480-44-20-cameraImg.size.height,
+                                                          photoImg.size.width, photoImg.size.height)
+                                    isBackView:NO];
+            deleteBtn.frame = [UIView fitCGRect:CGRectMake(100+cameraImg.size.width+photoImg.size.width,
+                                                           480-44-20-cameraImg.size.height, delImg.size.width, delImg.size.height)
+                                     isBackView:NO];
+        }
+    }
+    [self.view addSubview:scrollView];
+    
+    [self showCertificate];
+    
 }
 
 #pragma mark -

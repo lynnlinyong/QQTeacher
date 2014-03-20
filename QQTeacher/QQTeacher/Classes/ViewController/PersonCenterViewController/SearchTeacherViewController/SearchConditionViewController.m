@@ -29,12 +29,45 @@
 {
     [super viewDidAppear:animated];
     [MainViewController setNavTitle:@"轻轻家教"];
+    
+    //注册设置性别消息
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(setSexFromNotice:)
+                                                 name:@"setSexNotice"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(setSalaryFromNotice:)
+                                                 name:@"setSalaryNotice"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(setDateFromNotice:)
+                                                 name:@"setDateNotice"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(setTimesFromNotice:)
+                                                 name:@"setTimesNotice"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(setSubjectFromNotice:)
+                                                 name:@"setSubjectNotice"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(setPosNotice:)
+                                                 name:@"setPosNotice"
+                                               object:nil];
 }
 
 - (void)viewDidDisappear:(BOOL)animated
 {
     CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
     nav.dataSource = nil;
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super viewDidDisappear:animated];
 }
 
@@ -62,8 +95,6 @@
 
 - (void) viewDidUnload
 {
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
     messageField.delegate = nil;
     messageField = nil;
     
@@ -205,45 +236,6 @@
     
     NSDictionary *userDic = [[NSUserDefaults standardUserDefaults] objectForKey:@"Condition"];
     posDic = [[userDic objectForKey:@"POSDIC"] copy];
-    //注册设置性别消息
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(setSexFromNotice:)
-                                                 name:@"setSexNotice"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(setSalaryFromNotice:)
-                                                 name:@"setSalaryNotice"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(setDateFromNotice:)
-                                                 name:@"setDateNotice"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(setTimesFromNotice:)
-                                                 name:@"setTimesNotice"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(setSubjectFromNotice:)
-                                                 name:@"setSubjectNotice"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(setPosNotice:) name:@"setPosNotice"
-                                               object:nil];
-}
-
-- (NSString *) getRecordURL
-{
-    NSArray *paths   = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-                                                           NSUserDomainMask, YES);
-    NSString *documentsDirectory = [paths objectAtIndex:0];
-    NSMutableString  *path       = [[[NSMutableString alloc]initWithString:documentsDirectory]autorelease];
-    [path appendString:VOICE_NAME];
-    return path;
 }
 
 - (void) startRecord
@@ -258,7 +250,7 @@
     NSURL *url       = [recordAudio stopRecord];
     CLog(@"URL:%@", url);
     NSData *curAudio = EncodeWAVEToAMR([NSData dataWithContentsOfURL:url],1,16);
-    NSString *path   = [[self getRecordURL] retain];
+    NSString *path   = [[ChatViewController getRecordURL] retain];
     CLog(@"path:%@", path);
     [curAudio writeToFile:path
                atomically:YES];
@@ -428,7 +420,7 @@
             NSString *path = @"";
             if (recordLongPressBtn.isRecord)
             {
-                path = [self getRecordURL];
+                path = [ChatViewController getRecordURL];
                 //获得时间戳
                 NSDate *dateNow  = [NSDate date];
                 NSString *timeSp = [NSString stringWithFormat:@"%ld", (long)[dateNow timeIntervalSince1970]];
@@ -657,7 +649,9 @@
                 break;
         }
     }
-    [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+    
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
     
     [self checkConditionIsFinish];
 }
@@ -671,7 +665,8 @@
         dateValLab.text = dateString;
     }
     
-    [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
     
     [self checkConditionIsFinish];
 }
@@ -683,7 +678,8 @@
     {
         timeValueLab.text = [notice.userInfo objectForKey:@"Time"];
     }
-    [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
     
     [self checkConditionIsFinish];
 }
@@ -699,7 +695,8 @@
         [self checkConditionIsFinish];
     }
     
-    [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
 }
 
 #pragma mark -
@@ -711,7 +708,7 @@
         case 0:      //重听一遍
         {
             //写入amr数据文件
-            NSString *path   = [self getRecordURL];
+            NSString *path   = [ChatViewController getRecordURL];
             NSData *curAudio = [NSData dataWithContentsOfFile:path];
             [recordAudio play:curAudio];
             break;
@@ -1062,13 +1059,14 @@
 {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
     switch (indexPath.row)
     {
         case 0:         //选择时间
         {
             SelectDateViewController *sdVctr = [[SelectDateViewController alloc]init];
             sdVctr.curValue = dateValLab.text;
-            [self presentPopupViewController:sdVctr
+            [nav presentPopupViewController:sdVctr
                                animationType:MJPopupViewAnimationFade];
             break;
         }
@@ -1082,7 +1080,7 @@
             {
                 SelectSubjectViewController *ssVctr = [[SelectSubjectViewController alloc]init];
                 ssVctr.subName = subValLab.text;
-                [self presentPopupViewController:ssVctr
+                [nav presentPopupViewController:ssVctr
                                    animationType:MJPopupViewAnimationFade];
             }
             break;
@@ -1100,7 +1098,7 @@
                     ssVctr.sexName = @"男";
                 else
                     ssVctr.sexName = sexValLab.text;
-                [self presentPopupViewController:ssVctr
+                [nav presentPopupViewController:ssVctr
                                    animationType:MJPopupViewAnimationFade];
             }
             break;
@@ -1124,7 +1122,7 @@
                 stVctr.curValue = @"200";
             else
                 stVctr.curValue = timeValueLab.text;
-            [self presentPopupViewController:stVctr
+            [nav presentPopupViewController:stVctr
                                animationType:MJPopupViewAnimationFade];
             break;
         }

@@ -147,7 +147,7 @@
     {
         if ([view isKindOfClass:[UIImageView class]])
         {
-            int index = (rowIndex-1)*3+(columnIndex-1);
+            int index = (columnIndex-1)*7+(rowIndex-1);//(rowIndex-1)*3+(columnIndex-1);
             view.hidden = !view.hidden;
             if (view.hidden==NO)
                 [setTimesArray setObject:@"1" atIndexedSubscript:index];
@@ -223,7 +223,7 @@
         checkImgView.hidden= YES;
     else
     {
-        int index = (rowIndex-1)*3+(columnIndex-1);
+        int index = (columnIndex-1)*7+(rowIndex-1);//(rowIndex-1)*3+(columnIndex-1);
         NSString *num = [setTimesArray objectAtIndex:index];
         if (num.intValue==1)
             checkImgView.hidden= NO;
@@ -246,8 +246,9 @@
                     UILabel *dayLab = [[UILabel alloc]init];
                     dayLab.text  = @"上午";
                     dayLab.font  = [UIFont systemFontOfSize:11.f];
-                    dayLab.frame = CGRectMake(3, 5, 54, 20);
-                    dayLab.textAlignment = NSTextAlignmentLeft;
+                    dayLab.frame = CGRectMake(3, 2, 54, 20);
+                    dayLab.textAlignment   = NSTextAlignmentLeft;
+                    dayLab.backgroundColor = [UIColor clearColor];
                     [cell addSubview:dayLab];
                     [dayLab release];
                     
@@ -256,6 +257,7 @@
                     timeLab.font  = [UIFont systemFontOfSize:9.f];
                     timeLab.frame = CGRectMake(3, 15, 54, 20);
                     timeLab.textAlignment = NSTextAlignmentLeft;
+                    timeLab.backgroundColor = [UIColor clearColor];
                     [cell addSubview:timeLab];
                     [timeLab release];
                     break;
@@ -265,8 +267,9 @@
                     UILabel *dayLab = [[UILabel alloc]init];
                     dayLab.text  = @"下午";
                     dayLab.font  = [UIFont systemFontOfSize:11.f];
-                    dayLab.frame = CGRectMake(3, 5, 54, 20);
+                    dayLab.frame = CGRectMake(3, 2, 54, 20);
                     dayLab.textAlignment = NSTextAlignmentLeft;
+                    dayLab.backgroundColor = [UIColor clearColor];
                     [cell addSubview:dayLab];
                     [dayLab release];
                     
@@ -274,6 +277,7 @@
                     timeLab.text  = @"12:00-18:00";
                     timeLab.font  = [UIFont systemFontOfSize:9.f];
                     timeLab.frame = CGRectMake(3, 15, 54, 20);
+                    timeLab.backgroundColor = [UIColor clearColor];
                     timeLab.textAlignment = NSTextAlignmentLeft;
                     [cell addSubview:timeLab];
                     [timeLab release];
@@ -284,8 +288,9 @@
                     UILabel *dayLab = [[UILabel alloc]init];
                     dayLab.text  = @"晚上";
                     dayLab.font  = [UIFont systemFontOfSize:11.f];
-                    dayLab.frame = CGRectMake(3, 5, 54, 20);
+                    dayLab.frame = CGRectMake(3, 2, 54, 20);
                     dayLab.textAlignment = NSTextAlignmentLeft;
+                    dayLab.backgroundColor = [UIColor clearColor];
                     [cell addSubview:dayLab];
                     [dayLab release];
                     
@@ -294,6 +299,7 @@
                     timeLab.font  = [UIFont systemFontOfSize:9.f];
                     timeLab.frame = CGRectMake(3, 15, 54, 20);
                     timeLab.textAlignment = NSTextAlignmentLeft;
+                    timeLab.backgroundColor = [UIColor clearColor];
                     [cell addSubview:timeLab];
                     [timeLab release];
                     break;
@@ -415,8 +421,18 @@
     UIButton *btn = sender;
     NSDictionary *userDic = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithLong:btn.tag],@"TAG",
                              setTimesArray,@"SELECT_TIME_DIC" ,nil];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"SELECT_TIME_PERTIOD_NOTICE"
-                                                        object:nil
-                                                      userInfo:userDic];
+    CLog(@"settimesArray:%@", setTimesArray);
+    if ([AppDelegate isInView:NSStringFromClass([CompletePersonalInfoViewController class])])
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"SELECT_TIME_PERTIOD_FROM_COMPLETE_NOTICE"
+                                                            object:nil
+                                                          userInfo:userDic];
+    }
+    else
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"SELECT_TIME_PERTIOD_FROM_SETTING_NOTICE"
+                                                            object:nil
+                                                          userInfo:userDic];
+    }
 }
 @end

@@ -180,6 +180,13 @@
                 
                 leftBgImgView.hidden  = NO;
                 rightBgImgView.hidden = YES;
+                
+                if (self.tag == 0)
+                    leftBgLab.text = @"￥师生协商";
+                
+                CGSize size = [leftBgLab.text sizeWithFont:[UIFont systemFontOfSize:12.f]
+                                         constrainedToSize:CGSizeMake(self.frame.size.width, MAXFLOAT)];
+                leftBgLab.frame = CGRectMake(leftBgLab.frame.origin.x, leftBgLab.frame.origin.y, size.width, size.height);
             }
             else
             {

@@ -62,14 +62,14 @@
     
     //注册设置每小时课酬消息
     [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(setSalaryFromNotice:)
-                                                 name:@"setSalaryNotice"
+                                             selector:@selector(setSalaryFromSettingNotice:)
+                                                 name:@"setSalaryFromSettingNotice"
                                                object:nil];
     
     //注册设置个人简介消息
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(setPersonalInfoFromNotice:)
-                                                 name:@"setPersonalInfoNotice"
+                                                 name:@"setPersonalInfoFromSettingNotice"
                                                object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
@@ -80,7 +80,13 @@
     //注册设置时间段消息
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(selectTimePeriodNotice:)
-                                                 name:@"SELECT_TIME_PERTIOD_NOTICE"
+                                                 name:@"SELECT_TIME_PERTIOD_FROM_SETTING_NOTICE"
+                                               object:nil];
+    
+    //注册隐藏选择头像消息
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(hiddenHeadViewNotice:)
+                                                 name:@"hiddenHeadViewFromSettingNotice"
                                                object:nil];
 }
 
@@ -89,8 +95,13 @@
     [super viewDidAppear:animated];
     [MainViewController setNavTitle:@"个人中心"];
     [self initBackBarItem];
+
     ccResDic = nil;
-    [self getJxzl];
+    ccResDic = [[NSUserDefaults standardUserDefaults] objectForKey:@"AssistentData"];
+    if ([ccResDic isEqual:[NSNull null]])
+        [self getJxzl];
+    else
+        [setTab reloadData];
 }
 
 - (void) viewDidUnload
@@ -101,6 +112,9 @@
 
 - (void) viewDidDisappear:(BOOL)animated
 {
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    nav.dataSource = nil;
+
     [super viewDidDisappear:animated];
 }
 
@@ -224,7 +238,11 @@
         {
             ccResDic = [resDic copy];
             [setTab reloadData];
+
+            [[NSUserDefaults standardUserDefaults] setObject:ccResDic forKey:@"AssistentData"];
         }
+        else
+            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"AssistentData"];
     }
     else
     {
@@ -265,12 +283,18 @@
         listenNum = [NSNumber numberWithInt:0];
     
     //更新个人资料
+    NSString *salary = nil;
+    if ([salaryValLab.text isEqualToString:@"师生协商"])
+        salary = @"0";
+    else
+        salary = salaryValLab.text;
+    
     NSArray *infosParamsArr = [NSArray arrayWithObjects:@"phone",@"email",@"icon",@"phone_stars",
                                @"pre_listening",@"location_stars",@"expenseValue",
                                @"time_period",@"info",@"certificates",nil];
     NSArray *infosValuesArr = [NSArray arrayWithObjects:phoneValLab.text,emailValLab.text,headUrl,
                                phoneNum,listenNum,locNum,
-                               [Student searchSalaryName:[NSString stringWithFormat:@"%d",teacher.expense]],
+                               salary,
                                teacher.timePeriod,teacher.info,teacher.certArray,nil];
     NSDictionary *infosDic  = [NSDictionary dictionaryWithObjects:infosValuesArr
                                                           forKeys:infosParamsArr];
@@ -319,7 +343,7 @@
     ServerRequest *serverReq = [ServerRequest sharedServerRequest];
     serverReq.delegate   = self;
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@/", webAddress,TEACHER];
+    NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
     [serverReq requestASyncWith:kServerPostRequest
                        paramDic:pDic
                          urlStr:url];
@@ -399,7 +423,8 @@
         [self updateTeacherInfo];
     }
     
-    [self dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
 }
 
 - (void) setPersonalInfoFromNotice:(NSNotification *)sender
@@ -421,7 +446,7 @@
     [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
 }
 
-- (void) setSalaryFromNotice:(NSNotification *) notice
+- (void) setSalaryFromSettingNotice:(NSNotification *) notice
 {
     NSString *salary  = @"";
     if ([[notice.userInfo objectForKey:@"name"] isEqualToString:@"0"])
@@ -431,6 +456,7 @@
     
     salaryValLab.text = salary;
     teacher.expense   = ((NSString *)[notice.userInfo objectForKey:@"id"]).intValue;
+    CLog(@"teacher.expense:%d", teacher.expense);
     
     [self updateTeacherInfo];
 }
@@ -746,7 +772,7 @@
                     
                     assitentLab = [[UILabel alloc]init];
                     CLog(@"ccResDic:%@", ccResDic);
-                    if (ccResDic)
+                    if (![ccResDic isEqual:[NSNull null]])
                     {
                         NSDictionary *ccDic = [ccResDic objectForKey:@"cc"];
                         if (ccDic.count!=0)
@@ -874,7 +900,7 @@
                     [certifyLab release];
                     
                     UILabel *certifyValLab = [[UILabel alloc]init];
-                    if ([teacher.certArray isEqual:[NSNull null]])
+                    if ([teacher.certArray isEqual:[NSNull null]] || (teacher.certArray.count==0))
                     {
                         certifyValLab.text = @"未上传资质证书";
                     }
@@ -928,7 +954,6 @@
                     [cell addSubview:photoLab];
                     [photoLab release];
                     
-                    
                     headImgView = [[TTImageView alloc]init];
                     headImgView.delegate = self;
                     headImgView.frame  = CGRectMake(320-60, 15, 20, 20);
@@ -952,9 +977,21 @@
                     
                     UILabel *timeValueLab = [[UILabel alloc]init];
                     if ([self isSetTimePeriod])
+                    {
                         timeValueLab.text = @"已设置";
+                        timeValueLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
+                    }
                     else
+                    {
+                        UIImageView *flagImgView = [[UIImageView alloc]init];
+                        flagImgView.image = [UIImage imageNamed:@"quanquan.png"];
+                        flagImgView.frame = CGRectMake(320-30-80, 15, 20, 20);
+                        [cell addSubview:flagImgView];
+                        [flagImgView release];
+                        
                         timeValueLab.text = @"未设置";
+                        timeValueLab.textColor = [UIColor blackColor];
+                    }
                     timeValueLab.textAlignment   = NSTextAlignmentRight;
                     timeValueLab.backgroundColor = [UIColor clearColor];
                     timeValueLab.frame  = CGRectMake(87, 15, 200, 20);
@@ -1330,12 +1367,12 @@
     }
     else
     {
-        NSString *errorMsg = [resDic objectForKey:@"message"];
-        [self showAlertWithTitle:@"提示"
-                             tag:0
-                         message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
-                        delegate:self
-               otherButtonTitles:@"确定",nil];
+//        NSString *errorMsg = [resDic objectForKey:@"message"];
+//        [self showAlertWithTitle:@"提示"
+//                             tag:0
+//                         message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
+//                        delegate:self
+//               otherButtonTitles:@"确定",nil];
         
         //重复登录
         if (errorid.intValue==2)

@@ -122,15 +122,14 @@
     }
     
     CGFloat offsetX = 0.0f;
-    
     if(avatarStyle != JSAvatarStyleNone) {
-        offsetX = 16.0f;
+        offsetX = 5.0f;
         bubbleX = kJSAvatarSize;
-        CGFloat avatarX = 0.5f;
+        CGFloat avatarX = 10.5f;
         
         if(type == JSBubbleMessageTypeOutgoing) {
-            avatarX = (self.contentView.frame.size.width - 25 - 20);
-            offsetX = 25 - 4.0f + 20;
+            avatarX = (self.contentView.frame.size.width - 30);
+            offsetX = 25 - 4.0f + 10.f;
         }
         
         if (avatarStyle == JSAvatarStyleText)

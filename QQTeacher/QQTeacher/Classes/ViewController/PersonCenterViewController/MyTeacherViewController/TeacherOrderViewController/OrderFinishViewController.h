@@ -12,8 +12,6 @@
                                                     UITextFieldDelegate,
                                                     UIGridViewDelegate,
                                                     MBProgressHUDDelegate,
-                                                    UITableViewDelegate,
-                                                    UITableViewDataSource,
                                                     ServerRequestDelegate>
 {
     UIGridView    *finishOrderTab;

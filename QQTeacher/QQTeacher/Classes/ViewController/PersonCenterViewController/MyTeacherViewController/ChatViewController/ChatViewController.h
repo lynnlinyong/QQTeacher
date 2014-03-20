@@ -39,4 +39,7 @@
 
 - (void)reloadTableViewDataSource;
 - (void)doneLoadingTableViewData;
+
++ (NSString *) getRecordURL;
++ (void) convertAmrToMp3:(NSString *)audioURL delegate:(id<RecordAudioDelegate>) delegate;
 @end

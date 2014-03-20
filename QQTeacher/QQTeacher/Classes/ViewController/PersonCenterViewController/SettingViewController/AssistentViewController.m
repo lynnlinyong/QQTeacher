@@ -102,18 +102,18 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    //初始化UI
-    [self initUI];
-    
-    //获得助理信息
-    [self getAssistentsMessage];
 }
 
 - (void) viewDidAppear:(BOOL)animated
 {
     [super viewDidAppear:animated];
     [MainViewController setNavTitle:@"我的助教"];
+    
+    //初始化UI
+    [self initUI];
+    
+    //获得助理信息
+    [self getAssistentsMessage];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(assistentNotice:)
@@ -199,9 +199,6 @@
                     NSString *errorid = [resDic objectForKey:@"errorid"];
                     if (errorid.intValue==0)
                     {
-                        CLog(@"jsApply Success!");
-                        
-                        
                         NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
                         Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
                         
@@ -345,6 +342,8 @@
     }
     [self.view addSubview:latlyTab];
     
+    latlyTab.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
+    self.view.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
     
     UIImage *bgImg = [UIImage imageNamed:@"pp_nodata_bg"];
     bgImgView      = [[UIImageView alloc]initWithImage:bgImg];
@@ -355,14 +354,54 @@
                             isBackView:NO];
     [self.view addSubview:bgImgView];
     
+    UILabel *infoLab = [[UILabel alloc]init];
+    infoLab.text = @"无教学助理";
+    infoLab.font = [UIFont systemFontOfSize:18.f];
+    infoLab.backgroundColor = [UIColor clearColor];
+    infoLab.textAlignment = NSTextAlignmentCenter;
+    infoLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
+    infoLab.frame = CGRectMake(0, 80, 100, 20);
+    [bgImgView addSubview:infoLab];
+    [infoLab release];
+    
     //初始化上拉刷新
     [self initPullView];
     
-    latlyTab.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
-    self.view.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
-    
-    BottomView *bView = [[BottomView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(0, 480-44-120, 320, 120)
-                                                                isBackView:NO]];
+    BottomView *bView = nil;
+    if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
+    {
+        if (iPhone5)
+        {
+            //ios7 iphone5
+            CLog(@"It's is iphone5 IOS7");
+            bView = [[BottomView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(0, 480-24-120, 320, 120)
+                                                    isBackView:NO]];
+        }
+        else
+        {
+            CLog(@"It's is iphone4 IOS7");
+            //ios 7 iphone 4
+            bView = [[BottomView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(0, 480-24-120, 320, 120)
+                                                    isBackView:NO]];
+        }
+    }
+    else
+    {
+        if (!iPhone5)
+        {
+            // ios 6 iphone4
+            CLog(@"It's is iphone4 IOS6");
+            bView = [[BottomView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(0, 480-44-120, 320, 120)
+                                                    isBackView:NO]];
+        }
+        else
+        {
+            //ios 6 iphone5
+            CLog(@"It's is iphone5 IOS6");
+            bView = [[BottomView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(0, 480-24-120, 320, 120)
+                                                    isBackView:NO]];
+        }
+    }
     [self.view addSubview:bView];
     [bView release];
 }
@@ -567,7 +606,8 @@
 {
     if (indexPath.row == 0)
     {
-        return 54;
+        if (ccDic.count!=0)
+            return 54;
     }
     
     return 80;
@@ -576,7 +616,7 @@
 - (UITableViewCell *) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *idString    = @"idString";
-    
+    CLog(@"sdjfisfjidjfsi");
     int index = 0;
     if (indexPath.row == 0)  //显示助理信息
     {
@@ -635,8 +675,22 @@
             [cell addSubview:okBtn];
             
             cell.backgroundView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"lp_sys_cell_bg"]];
+            return cell;
         }
-        return cell;
+        else
+        {
+            AssistentCell *cell = [[AssistentCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"idString"];
+            cell.delegate = self;
+            cell.tag      = indexPath.row-index;
+            if (applyArray.count>0)
+            {
+                [cell setBackgroundView:[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"lt_list_bg"]]];
+                NSDictionary *applyDic = [applyArray objectAtIndex:indexPath.row-index];
+                cell.applyDic = applyDic;
+            }
+            
+            return cell;
+        }
     }
     else                     //显示申请助理消息
     {

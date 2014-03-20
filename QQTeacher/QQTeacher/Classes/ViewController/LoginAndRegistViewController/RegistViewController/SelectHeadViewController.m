@@ -189,9 +189,19 @@
         }
         case 2:       //取消
         {
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"hiddenHeadViewNotice"
-                                                                object:self
-                                                              userInfo:nil];
+            CLog(@"sdjfsifjisdjfis");
+            if ([AppDelegate isInView:NSStringFromClass([CompletePersonalInfoViewController class])])
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"hiddenHeadViewFromCompleteNotice"
+                                                                    object:self
+                                                                  userInfo:nil];
+            }
+            else
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"hiddenHeadViewFromSettingNotice"
+                                                                    object:self
+                                                                  userInfo:nil];
+            }
             break;
         }
         default:
@@ -233,7 +243,6 @@
     NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
     
     ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate = self;
     NSData *resVal = [request requestSyncWith:kServerPostRequest
                                      paramDic:pDic
                                        urlStr:url];
@@ -300,9 +309,18 @@
             
             //隐藏选择头像popUpView
             NSDictionary *userDic = [NSDictionary dictionaryWithObjectsAndKeys:CurHeadUrl,@"HeadUrl", nil];
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"hiddenHeadViewNotice"
-                                                                object:self
-                                                              userInfo:userDic];
+            if ([AppDelegate isInView:NSStringFromClass([CompletePersonalInfoViewController class])])
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"hiddenHeadViewFromCompleteNotice"
+                                                                    object:self
+                                                                  userInfo:userDic];
+            }
+            else
+            {
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"hiddenHeadViewFromSettingNotice"
+                                                                    object:self
+                                                                  userInfo:userDic];
+            }
         });
     });
     

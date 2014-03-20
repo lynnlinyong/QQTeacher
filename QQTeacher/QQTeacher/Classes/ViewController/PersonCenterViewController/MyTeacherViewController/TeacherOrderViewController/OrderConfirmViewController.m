@@ -14,6 +14,8 @@
 
 @implementation OrderConfirmViewController
 @synthesize order;
+@synthesize isEmploy;
+@synthesize noticeDic;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -27,6 +29,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
+    if (!order)
+        [self getOrder];
     
     //初始化UI
     [self initUI];
@@ -46,6 +51,78 @@
 
 #pragma mark -
 #pragma mark - Custom Action
+- (void) getOrder
+{
+    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+    {
+        return;
+    }
+    
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
+    
+    NSString *orderId = [noticeDic objectForKey:@"orderid"];
+    NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"orderid",@"sessid", nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"getOrder",orderId,ssid, nil];
+    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+                                                     forKeys:paramsArr];
+    NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+    
+    ServerRequest *request = [ServerRequest sharedServerRequest];
+    NSData   *resVal = [request requestSyncWith:kServerPostRequest
+                                       paramDic:pDic
+                                         urlStr:url];
+    NSString *resStr = [[[NSString alloc]initWithData:resVal
+                                             encoding:NSUTF8StringEncoding]autorelease];
+    NSDictionary *resDic   = [resStr JSONValue];
+    NSArray      *keysArr  = [resDic allKeys];
+    NSArray      *valsArr  = [resDic allValues];
+    CLog(@"***********Result****************");
+    for (int i=0; i<keysArr.count; i++)
+    {
+        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
+    }
+    CLog(@"***********Result****************");
+    
+    
+    NSNumber *errorid = [resDic objectForKey:@"errorid"];
+    if (errorid.intValue == 0)
+    {
+        Order *curOrder = [Order setOrderProperty:[resDic objectForKey:@"order"]];
+        order = [curOrder copy];
+        
+        Student *student = [[Student alloc]init];
+        student.nickName = [noticeDic objectForKey:@"nickname"];
+        student.deviceId = [noticeDic objectForKey:@"deviceId"];
+        student.phoneNumber = [noticeDic objectForKey:@"phone"];
+        order.student = student;
+        
+        CLog(@"order:%@", order.orderId);
+    }
+    else
+    {
+        NSString *errorMsg = [resDic objectForKey:@"message"];
+        [self showAlertWithTitle:@"提示"
+                             tag:0
+                         message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
+                        delegate:self
+               otherButtonTitles:@"确定",nil];
+        
+        //重复登录
+        if (errorid.intValue==2)
+        {
+            //清除sessid,清除登录状态,回到地图页
+            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+            [AppDelegate popToMainViewController];
+        }
+    }
+    
+    [MBProgressHUD hideHUDForView:nav.view animated:YES];
+}
+
 - (void) initUI
 {
     UIImage *bottomImg= [UIImage imageNamed:@"dialog_bottom"];
@@ -218,7 +295,10 @@
                 case 1:
                 {
                     UILabel *infoLab = [[UILabel alloc]init];
-                    infoLab.text = [NSString stringWithFormat:@"￥%@",order.everyTimesMoney];
+                    if (order.everyTimesMoney.intValue==0)
+                        infoLab.text = @"师生协商";
+                    else
+                        infoLab.text = [NSString stringWithFormat:@"￥%@",order.everyTimesMoney];
                     infoLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
                     infoLab.font = [UIFont systemFontOfSize:14.f];
                     infoLab.frame= CGRectMake(10, 10, 110, 20);
@@ -347,7 +427,7 @@
 - (void) doButtonClicked:(id)sender
 {
     UIButton *btn = sender;
-    NSDictionary *userDic = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithLong:btn.tag],@"TAG",order,@"ORDER", nil];
+    NSDictionary *userDic = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithLong:btn.tag],@"TAG",order,@"ORDER",[NSNumber numberWithBool:isEmploy],@"IsEmploy", nil];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"setOrderConfirmNotice"
                                                         object:nil
                                                       userInfo:userDic];

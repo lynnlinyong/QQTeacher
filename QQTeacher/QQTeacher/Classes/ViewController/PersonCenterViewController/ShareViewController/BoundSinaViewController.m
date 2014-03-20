@@ -50,7 +50,7 @@
 
 - (void) viewDidDisappear:(BOOL)animated
 {
-    CustomNavigationViewController *nav = (CustomNavigationViewController *) [MainViewController getNavigationViewController];
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
     nav.dataSource = nil;
     [super viewDidDisappear:animated];
 }

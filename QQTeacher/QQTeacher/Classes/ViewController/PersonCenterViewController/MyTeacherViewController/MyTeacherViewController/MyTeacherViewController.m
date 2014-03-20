@@ -63,11 +63,26 @@
         }
     }
     
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(dismissComplainNotice:)
+                                                 name:@"dismissComplainNotice"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(doCommentOrderNotice:)
+                                                 name:@"commentOrderNotice"
+                                               object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(refreshOrders:)
+                                                 name:@"refreshOrders"
+                                               object:nil];
+    
     [self getOrderStudents];
 }
 
 - (void) viewDidDisappear:(BOOL)animated
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super viewDidDisappear:animated];
 }
 
@@ -95,21 +110,6 @@
     
     self.tableView.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
     self.view.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(dismissComplainNotice:)
-                                                 name:@"dismissComplainNotice"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(doCommentOrderNotice:)
-                                                 name:@"commentOrderNotice"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(doOrderConfirmNotice:)
-                                                 name:@"setOrderConfirmNotice"
-                                               object:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -120,7 +120,6 @@
 - (void) viewDidUnload
 {
     _refreshHeaderView    = nil;
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
     [super viewDidUnload];
 }
 
@@ -141,71 +140,9 @@
     [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
 }
 
-- (void) doOrderConfirmNotice:(NSNotification *) notice
+- (void) refreshOrders:(NSNotification *) notice
 {
-    NSNumber *tag = [notice.userInfo objectForKey:@"TAG"];
-    Order *order  = [notice.userInfo objectForKey:@"ORDER"];
-    
-    if (tag.intValue == 0)
-    {
-        //订单确认
-        NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-        NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"orderid",@"sessid", nil];
-        NSArray *valuesArr = [NSArray arrayWithObjects:@"orderConfirm",order.orderId,ssid, nil];
-        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                         forKeys:paramsArr];
-        CLog(@"sdfshdfushdfu:%@", pDic);
-        NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-        NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-        ServerRequest *request = [ServerRequest sharedServerRequest];
-        request.delegate       = self;
-        NSData *resVal = [request requestSyncWith:kServerPostRequest
-                                         paramDic:pDic
-                                           urlStr:url];
-        NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                 encoding:NSUTF8StringEncoding]autorelease];
-        NSDictionary *resDic   = [resStr JSONFragmentValue];
-        CLog(@"resDic:%@", resDic);
-        NSNumber *errorid = [resDic objectForKey:@"errorid"];
-        if (errorid.intValue == 0)
-        {
-            NSString *action = [resDic objectForKey:@"action"];
-            if ([action isEqualToString:@"orderConfirm"])
-            {
-                CLog(@"OrderConfirm Susscess!");
-                
-                NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
-                Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
-                
-                //发出确认消息
-                NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"icon",
-                                                                @"orderid",@"taPhone",@"deviceId",nil];
-                NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_CONFIRM_SUCCESS],teacher.phoneNums,teacher.name,teacher.headUrl,order.orderId,order.student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
-                NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
-                                                                  forKeys:paramsArr];
-                
-                //发送消息
-                NSString *jsonMsg   = [pDic JSONFragment];
-                NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
-                SingleMQTT *session = [SingleMQTT shareInstance];
-                [session.session publishData:data
-                                     onTopic:order.student.deviceId];
-            }
-        }
-        else
-        {
-            CLog(@"OrderConfirm Failed!");
-            NSString *errorMsg = [resDic objectForKey:@"message"];
-            [self showAlertWithTitle:@"提示"
-                                 tag:0
-                             message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
-                            delegate:self
-                   otherButtonTitles:@"确定",nil];
-        }
-    }
-    
-    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+    [self reloadTableViewDataSource];
 }
 
 - (void) doCommentOrderNotice:(NSNotification *) notice

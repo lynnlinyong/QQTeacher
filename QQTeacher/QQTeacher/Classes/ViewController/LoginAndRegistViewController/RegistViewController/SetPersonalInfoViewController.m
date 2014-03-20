@@ -150,9 +150,18 @@
     NSDictionary *pDic = [NSDictionary dictionaryWithObjectsAndKeys:tagNum,@"TAG",
                                                                     self.contentView.text,@"personalInfo",nil];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"setPersonalInfoNotice"
+    if ([AppDelegate isInView:NSStringFromClass([CompletePersonalInfoViewController class])])
+    {
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"setPersonalInfoFromCompleteNotice"
                                                         object:nil
                                                       userInfo:pDic];
+    }
+    else
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"setPersonalInfoFromSettingNotice"
+                                                            object:nil
+                                                          userInfo:pDic];
+    }
 }
 
 #pragma mark -
