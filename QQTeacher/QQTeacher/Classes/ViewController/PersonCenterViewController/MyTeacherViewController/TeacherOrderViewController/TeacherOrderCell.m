@@ -298,7 +298,7 @@
         else
             commentImgView.image = [UIImage imageNamed:@"tdp_bad_comment"];
     }
-    
+    CLog(@"orderStatus:%d", order.orderStatus);
     switch (order.orderStatus)
     {
         case NO_EMPLOY:         //未聘用
@@ -310,59 +310,37 @@
         {
             //评价老师,修改订单按钮显示
             finishLab.text = @"未确认";
-            
-            
-            [ctrBtn setTitle:@"去确认" forState:UIControlStateNormal];
-            
-//            freeBtn.hidden    = YES;
-//            updateBtn.hidden  = NO;
-//            finishBtn.hidden  = YES;
+            [ctrBtn setTitle:@"去确认"
+                    forState:UIControlStateNormal];
             orderPayMoneyLab.hidden = YES;
             break;
         }
         case CONFIRMED:         //已确认
-//        {
-//            finishLab.text = @"已确认";
-//            
-////            freeBtn.hidden    = NO;
-////            updateBtn.hidden  = NO;
-////            finishBtn.hidden  = YES;
-//            orderPayMoneyLab.hidden = YES;
-//            break;
-//        }
-        case NO_FINISH:         //未结单
         {
             finishLab.text = @"未结单";
-            
-            //显示评价老师,结单审批按钮
-//            freeBtn.hidden    = YES;
-//            updateBtn.hidden  = YES;
-//            finishBtn.hidden  = NO;
             orderPayMoneyLab.hidden = YES;
-            
-            [ctrBtn setTitle:@"去结单" forState:UIControlStateNormal];
+            [ctrBtn setTitle:@"去结单"
+                    forState:UIControlStateNormal];
+            break;
+        }
+        case NO_FINISH:         //未结单
+        {
+            finishLab.font = [UIFont systemFontOfSize:11.f];
+            finishLab.text = @"已申请结单";
+            orderPayMoneyLab.hidden = YES;
+            ctrBtn.hidden  = YES;
             break;
         }
         case FINISH:           //已结单
         {
             finishLab.text    = @"已结单";
-            
-            
             ctrBtn.hidden = YES;
-            
-//            freeBtn.hidden    = YES;
-//            commentBtn.hidden = YES;
-//            updateBtn.hidden  = YES;
-//            finishBtn.hidden  = YES;
             orderPayMoneyLab.hidden = NO;
             break;
         }
         default:
             break;
     }
-    
-//    if (order.orderCommentStatus != NO_COMMENT)
-//        commentBtn.hidden = YES;
     
     //自动缩进按钮
     [self setAutoPosForButton:YES];

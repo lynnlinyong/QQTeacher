@@ -135,6 +135,9 @@
     [self.view addSubview:cancelBtn];
  
     cmpTab = [[UITableView alloc]init];
+    if ([cmpTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [cmpTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     cmpTab.delegate = self;
     cmpTab.dataSource = self;
     cmpTab.scrollEnabled = NO;

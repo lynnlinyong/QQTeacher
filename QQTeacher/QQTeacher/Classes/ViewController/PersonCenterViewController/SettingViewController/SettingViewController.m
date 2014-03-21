@@ -187,6 +187,9 @@
                                                  style:UITableViewStyleGrouped];
         }
     }
+    if ([setTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [setTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     setTab.delegate   = self;
     setTab.dataSource = self;
     [self.view addSubview:setTab];

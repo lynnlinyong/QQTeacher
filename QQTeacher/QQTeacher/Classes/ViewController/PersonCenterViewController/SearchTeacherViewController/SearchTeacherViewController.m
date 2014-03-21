@@ -82,6 +82,9 @@
     self.view.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
     
     searchTab = [[UITableView alloc]init];
+    if ([searchTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [searchTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     searchTab.delegate   = self;
     searchTab.dataSource = self;
     searchTab.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];

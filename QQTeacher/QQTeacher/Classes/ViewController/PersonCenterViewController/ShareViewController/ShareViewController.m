@@ -72,6 +72,9 @@
     
     UIImage *cellBgImg = [UIImage imageNamed:@"sp_content_normal_cell"];
     shareTab = [[UITableView alloc]init];
+    if ([shareTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [shareTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     shareTab.delegate   = self;
     shareTab.dataSource = self;
 

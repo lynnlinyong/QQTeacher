@@ -515,6 +515,9 @@ static NSMutableArray  *timerArray= nil;
     if (!noticeTab)
     {
         noticeTab = [[UITableView alloc]init];
+        if ([noticeTab respondsToSelector:@selector(setSeparatorInset:)]) {
+            [noticeTab setSeparatorInset:UIEdgeInsetsZero];
+        }
         noticeTab.delegate   = self;
         noticeTab.dataSource = self;
         noticeTab.hidden     = YES;
@@ -840,6 +843,9 @@ static NSMutableArray  *timerArray= nil;
     [self checkTimersIsTimeOut];
     
     noticeTab = [[UITableView alloc]init];
+    if ([noticeTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [noticeTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     noticeTab.delegate   = self;
     noticeTab.dataSource = self;
     if (inviteMsgArray.count==0)

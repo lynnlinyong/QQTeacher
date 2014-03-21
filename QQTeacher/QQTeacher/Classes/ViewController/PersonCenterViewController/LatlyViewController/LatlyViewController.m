@@ -84,6 +84,9 @@
 - (void) initUI
 {
     latlyTab = [[UITableView alloc]init];
+    if ([latlyTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [latlyTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     latlyTab.delegate   = self;
     latlyTab.dataSource = self;
     latlyTab.separatorStyle = UITableViewCellSeparatorStyleNone;

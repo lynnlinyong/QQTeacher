@@ -134,6 +134,9 @@
         [setTimeArray setObject:@"0" atIndexedSubscript:i];
     
     upTab = [[UITableView alloc]init];
+    if ([upTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [upTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     upTab.delegate     = self;
     upTab.dataSource   = self;
     

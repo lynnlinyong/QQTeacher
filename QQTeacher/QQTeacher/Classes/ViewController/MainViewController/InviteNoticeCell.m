@@ -163,7 +163,7 @@
     
     NSString *audio = [inviteDic objectForKey:@"audio"];
     NSString *text  = [inviteDic objectForKey:@"otherText"];
-    if (audio||text)
+    if ((audio.length!=0)||(text.length!=0))
     {
         audioBtn = [UIButton buttonWithType:UIButtonTypeCustom];
         UIImage *audioImg  = [UIImage imageNamed:@"mtp_audio_play_btn"];

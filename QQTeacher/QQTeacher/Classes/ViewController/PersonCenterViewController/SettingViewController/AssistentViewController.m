@@ -305,6 +305,9 @@
     latlyTab = [[UITableView alloc]init];
     latlyTab.delegate   = self;
     latlyTab.dataSource = self;
+    if ([latlyTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [latlyTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     latlyTab.separatorStyle = UITableViewCellSeparatorStyleNone;
     if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
     {

@@ -86,6 +86,9 @@
     [titleLab release];
     
     gdView = [[UIGridView alloc]init];
+    if ([gdView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [gdView setSeparatorInset:UIEdgeInsetsZero];
+    }
     gdView.uiGridViewDelegate = self;
     gdView.frame = CGRectMake(0, 20, 240, 210);
     [self.view addSubview:gdView];

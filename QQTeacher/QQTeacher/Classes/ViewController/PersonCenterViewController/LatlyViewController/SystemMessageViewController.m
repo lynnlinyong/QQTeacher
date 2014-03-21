@@ -71,6 +71,9 @@
     systemMsgArray = [[NSMutableArray alloc]init];
     
     systemMsgTab = [[UITableView alloc]init];
+    if ([systemMsgTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [systemMsgTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     systemMsgTab.delegate   = self;
     systemMsgTab.dataSource = self;
     systemMsgTab.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 420) isBackView:NO];

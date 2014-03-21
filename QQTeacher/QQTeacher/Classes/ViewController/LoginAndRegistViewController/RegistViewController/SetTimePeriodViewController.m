@@ -73,6 +73,9 @@
     [titleLab release];
     
     gdView = [[UIGridView alloc]init];
+    if ([gdView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [gdView setSeparatorInset:UIEdgeInsetsZero];
+    }
     gdView.isTimePeriod = YES;
     gdView.uiGridViewDelegate = self;
     gdView.separatorStyle = UITableViewCellSeparatorStyleNone;

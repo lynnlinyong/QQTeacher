@@ -144,6 +144,9 @@
     [titleImgView release];
     
     orderTab = [[UITableView alloc]init];
+    if ([orderTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [orderTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     orderTab.delegate = self;
     orderTab.dataSource = self;
     orderTab.scrollEnabled = NO;

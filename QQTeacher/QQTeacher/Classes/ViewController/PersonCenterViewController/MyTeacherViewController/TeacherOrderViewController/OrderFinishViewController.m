@@ -27,8 +27,6 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    [self initUI];
 }
 
 - (void) viewDidAppear:(BOOL)animated
@@ -36,6 +34,8 @@
     [super viewDidAppear:animated];
     
     [MainViewController setNavTitle:@"结单审批申请"];
+    
+    [self initUI];
 }
 
 - (void)didReceiveMemoryWarning
@@ -71,14 +71,11 @@
 {
     self.view.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
     
-//    UIScrollView *bgScrollView = [[UIScrollView alloc]init];
-//    bgScrollView.frame = [UIView fitCGRect:CGRectMake(0, 0, 320, 480)
-//                                isBackView:YES];
-//    [self.view addSubview:bgScrollView];
-    
     finishOrderTab = [[UIGridView alloc]init];
     finishOrderTab.uiGridViewDelegate = self;
-    finishOrderTab.scrollEnabled      = NO;
+    if ([finishOrderTab respondsToSelector:@selector(setSeparatorInset:)]) {
+        [finishOrderTab setSeparatorInset:UIEdgeInsetsZero];
+    }
     [self.view addSubview:finishOrderTab];
     
     UILabel *payInfoLab = [[UILabel alloc]init];
@@ -137,38 +134,46 @@
         {
             //ios7 iphone5
             CLog(@"It's is iphone5 IOS7");
-            finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60+44+20, 320-40, 220)
+            finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60+44, 320-40, 200)
                                           isBackView:NO];
-            payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 260+44+20, 80, 20)
+            [self scrollTableToFoot:NO];
+            finishOrderTab.scrollEnabled  = NO;
+            
+            payInfoLab.frame     = [UIView fitCGRect:CGRectMake(20, 260+44-20, 80, 20)
                                       isBackView:NO];
-            backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 290+44+20, 80, 20)
+            backInfoLab.frame    = [UIView fitCGRect:CGRectMake(20, 290+44-20, 80, 20)
                                        isBackView:NO];
-            payLab.frame = [UIView fitCGRect:CGRectMake(120, 260+44+20, 15, 20)
+            payLab.frame = [UIView fitCGRect:CGRectMake(120, 260+44-20, 15, 20)
                                   isBackView:NO];
-            payFld.frame = [UIView fitCGRect:CGRectMake(135, 260+44+20, 100, 20)
+            payFld.frame = [UIView fitCGRect:CGRectMake(135, 260+44-20, 130, 20)
                                   isBackView:NO];
-            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 290+44+20, 140, 20)
+            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 290+44-20, 140, 20)
                                         isBackView:NO];
-            okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 320+44+20, loginImg.size.width, loginImg.size.height)
+            okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 320+44,
+                                                       loginImg.size.width, loginImg.size.height)
                                  isBackView:NO];
         }
         else
         {
             CLog(@"It's is iphone4 IOS7");
             //ios 7 iphone 4
-            finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60+44, 320-40, 220)
+            finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60+44, 320-40, 200)
                                           isBackView:NO];
-            payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 260+44+20, 80, 20)
+            [self scrollTableToFoot:NO];
+            finishOrderTab.scrollEnabled  = NO;
+            
+            payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 260+44, 80, 20)
                                       isBackView:NO];
-            backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 290+44+20, 80, 20)
+            backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 290+44, 80, 20)
                                        isBackView:NO];
-            payLab.frame = [UIView fitCGRect:CGRectMake(120, 260+44+20, 15, 20)
+            payLab.frame = [UIView fitCGRect:CGRectMake(120, 260+44, 15, 20)
                                   isBackView:NO];
-            payFld.frame = [UIView fitCGRect:CGRectMake(135, 260+44+20, 130, 20)
+            payFld.frame = [UIView fitCGRect:CGRectMake(135, 260+44, 130, 20)
                                   isBackView:NO];
-            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 290+44+20, 140, 20)
+            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 290+44, 140, 20)
                                         isBackView:NO];
-            okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 320+44+20, loginImg.size.width, loginImg.size.height)
+            okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 320+44+20,
+                                                       loginImg.size.width, loginImg.size.height)
                                  isBackView:NO];
         }
     }
@@ -180,6 +185,9 @@
             CLog(@"It's is iphone4 IOS6");
             finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 40, 320-40, 200)
                                           isBackView:NO];
+            [self scrollTableToFoot:NO];
+            finishOrderTab.scrollEnabled  = NO;
+            
             payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 270, 80, 20)
                                       isBackView:NO];
             backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 300, 80, 20)
@@ -197,15 +205,18 @@
         {
             //ios 6 iphone5
             CLog(@"It's is iphone5 IOS6");
-            finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60, 320-40, 220)
+            finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60, 320-40, 200)
                                           isBackView:NO];
+            [self scrollTableToFoot:NO];
+            finishOrderTab.scrollEnabled  = NO;
+            
             payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 250+20, 80, 20)
                                       isBackView:NO];
             backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 280+20, 80, 20)
                                        isBackView:NO];
             payLab.frame = [UIView fitCGRect:CGRectMake(120, 250+20, 15, 20)
                                   isBackView:NO];
-            payFld.frame = [UIView fitCGRect:CGRectMake(135, 250+20, 10, 20)
+            payFld.frame = [UIView fitCGRect:CGRectMake(135, 250+20, 130, 20)
                                   isBackView:NO];
             backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 280+20, 140, 20)
                                         isBackView:NO];
@@ -220,6 +231,18 @@
                                              selector:@selector(doValueChanged:)
                                                  name:@"UITextFieldTextDidChangeNotification"
                                                object:nil];
+}
+
+- (void)scrollTableToFoot:(BOOL)animated
+{
+    NSInteger s = [finishOrderTab numberOfSections];
+    if (s<1) return;
+    NSInteger r = [finishOrderTab numberOfRowsInSection:s-1];
+    if (r<1) return;
+    
+    NSIndexPath *ip = [NSIndexPath indexPathForRow:r-1 inSection:s-1];
+    
+    [finishOrderTab scrollToRowAtIndexPath:ip atScrollPosition:UITableViewScrollPositionBottom animated:animated];
 }
 
 - (void) doValueChanged:(NSNotification *) notice
