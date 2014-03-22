@@ -597,7 +597,7 @@
                 //pop当前页显示提示
                 NoticePopView *popView = [NoticePopView shareInstance];
                 popView.noticeType     = NOTICE_MSG;
-                popView.contentDic     = msgDic;
+                popView.contentDic     = [msgDic copy];
                 popView.titleLab.text  = @"您有一条新消息";
                 popView.contentLab.text= [msgDic objectForKey:@"text"];
                 [popView popView];
@@ -664,6 +664,13 @@
             CustomNavigationViewController *nav  = [MainViewController getNavigationViewController];
             [nav presentPopupViewController:noticeWall
                               animationType:MJPopupViewAnimationFade];
+            
+            if ([AppDelegate isInView:NSStringFromClass([AssistentViewController class])])
+            {
+                //刷新界面
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"refreshNewApplyNotice"
+                                                                    object:nil];
+            }
             break;
         }
         case PUSH_TYPE_LISTENING_CHANG:       //试听改变
@@ -737,11 +744,11 @@
         {
             //处理未处理消息
             NSArray *messageArr = [resDic objectForKey:@"messages"];
-            for (int i=0; i<messageArr.count; i++)
+            if (messageArr.count>0)
             {
-                NSDictionary *msgDic = [messageArr objectAtIndex:messageArr.count-1-i];
+                NSDictionary *msgDic = [messageArr objectAtIndex:messageArr.count-1];
                 [AppDelegate dealWithMessage:msgDic
-                                 isPlayVoice:NO];
+                                 isPlayVoice:YES];
             }
         }
         [action release];

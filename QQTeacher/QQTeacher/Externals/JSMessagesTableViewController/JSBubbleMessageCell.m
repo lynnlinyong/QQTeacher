@@ -137,6 +137,7 @@
             if (type == JSBubbleMessageTypeIncoming)
             {
                 self.nameLab = [[UILabel alloc] initWithFrame:CGRectMake(avatarX, self.contentView.frame.size.height-30, kJSAvatarSize, 20)];
+                self.nameLab.textColor = [UIColor colorWithHexString:@"#666666"];
                 self.nameLab.backgroundColor = [UIColor clearColor];
                 [self.contentView addSubview:self.nameLab];
 
@@ -145,6 +146,7 @@
             {
                 
                 self.nameLab = [[UILabel alloc] initWithFrame:CGRectMake(avatarX, self.contentView.frame.size.height-30, 25, 20)];
+                self.nameLab.textColor = [UIColor colorWithHexString:@"#666666"];
                 self.nameLab.backgroundColor = [UIColor clearColor];
                 [self.contentView addSubview:self.nameLab];
             }
@@ -152,6 +154,7 @@
         else
         {
             self.nameLab = [[UILabel alloc] initWithFrame:CGRectMake(avatarX, self.contentView.frame.size.height-30, 25, 20)];
+            self.nameLab.textColor = [UIColor colorWithHexString:@"#666666"];
             self.nameLab.backgroundColor = [UIColor clearColor];
             [self.contentView addSubview:self.nameLab];
         }
@@ -218,10 +221,10 @@
 }
 
 //add by lynn
-- (void) setVoiceImage
+- (void) setVoiceImage:(BOOL) isRead
 {
     self.bubbleView.msgType = PUSH_TYPE_IMAGE;
-    [self.bubbleView setVoiceImage];
+    [self.bubbleView setVoiceImage:isRead];
 }
 
 - (void) setTag:(int) tag

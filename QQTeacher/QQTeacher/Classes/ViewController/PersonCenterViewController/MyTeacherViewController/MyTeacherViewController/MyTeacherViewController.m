@@ -109,6 +109,8 @@
     self.retractableControllers = [[NSMutableArray alloc]init];
     
     self.tableView.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
+    self.tableView.separatorStyle  = UITableViewCellSeparatorStyleNone;
+    
     self.view.backgroundColor = [UIColor colorWithHexString:@"#E1E0DE"];
 }
 

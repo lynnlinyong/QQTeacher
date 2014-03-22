@@ -101,7 +101,7 @@
     if ([ccResDic isEqual:[NSNull null]])
         [self getJxzl];
     else
-        [setTab reloadData];
+        [self getJxzl];
 }
 
 - (void) viewDidUnload
@@ -240,12 +240,19 @@
         if (ccDic.count!=0)     //已签约
         {
             ccResDic = [resDic copy];
+            
+            [[NSUserDefaults standardUserDefaults] setObject:ccResDic
+                                                      forKey:@"AssistentData"];
+            
             [setTab reloadData];
-
-            [[NSUserDefaults standardUserDefaults] setObject:ccResDic forKey:@"AssistentData"];
         }
         else
+        {
+            ccResDic = nil;
             [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"AssistentData"];
+            
+            [setTab reloadData];
+        }
     }
     else
     {
@@ -774,7 +781,6 @@
                     [emailLab release];
                     
                     assitentLab = [[UILabel alloc]init];
-                    CLog(@"ccResDic:%@", ccResDic);
                     if (![ccResDic isEqual:[NSNull null]])
                     {
                         NSDictionary *ccDic = [ccResDic objectForKey:@"cc"];

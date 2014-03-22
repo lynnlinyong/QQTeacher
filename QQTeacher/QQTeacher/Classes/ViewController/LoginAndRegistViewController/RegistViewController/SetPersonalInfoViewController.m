@@ -152,9 +152,9 @@
     
     if ([AppDelegate isInView:NSStringFromClass([CompletePersonalInfoViewController class])])
     {
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"setPersonalInfoFromCompleteNotice"
-                                                        object:nil
-                                                      userInfo:pDic];
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"setPersonalInfoFromCompleteNotice"
+                                                            object:nil
+                                                          userInfo:pDic];
     }
     else
     {

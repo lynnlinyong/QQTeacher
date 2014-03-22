@@ -52,7 +52,6 @@
           forControlEvents:UIControlEventTouchUpInside];
         compBtn.frame = CGRectMake(110, 50, cmpImg.size.width, cmpImg.size.height);
         
-        
         [self addSubview:headBtn];
         [self addSubview:introduceLab];
         [self addSubview:commBtn];

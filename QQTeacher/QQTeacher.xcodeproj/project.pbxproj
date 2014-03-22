@@ -23,6 +23,7 @@
 		BA4A7EC918D8AE7400A79F20 /* InviteNoticeCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BA4A7EC818D8AE7400A79F20 /* InviteNoticeCell.m */; };
 		BA50D6D518D1346000CCE95C /* SetTimePeriodViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA50D6D418D1346000CCE95C /* SetTimePeriodViewController.m */; };
 		BA50D6D718D1524800CCE95C /* stp_checked.png in Resources */ = {isa = PBXBuildFile; fileRef = BA50D6D618D1524800CCE95C /* stp_checked.png */; };
+		BA66559C18DCC64B003E06AC /* CancelApplyViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA66559B18DCC64B003E06AC /* CancelApplyViewController.m */; };
 		BA8B72FF18D92ED100ECBE28 /* mtp_wait_loading.png in Resources */ = {isa = PBXBuildFile; fileRef = BA8B72FD18D92ED100ECBE28 /* mtp_wait_loading.png */; };
 		BA8B730018D92ED100ECBE28 /* mtp_wait_loading@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = BA8B72FE18D92ED100ECBE28 /* mtp_wait_loading@2x.png */; };
 		BA8EC25118D0C4D600D1AA12 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BA8EC25018D0C4D600D1AA12 /* Foundation.framework */; };
@@ -581,6 +582,8 @@
 		BA50D6D318D1346000CCE95C /* SetTimePeriodViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SetTimePeriodViewController.h; sourceTree = "<group>"; };
 		BA50D6D418D1346000CCE95C /* SetTimePeriodViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SetTimePeriodViewController.m; sourceTree = "<group>"; };
 		BA50D6D618D1524800CCE95C /* stp_checked.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = stp_checked.png; sourceTree = "<group>"; };
+		BA66559A18DCC64B003E06AC /* CancelApplyViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CancelApplyViewController.h; sourceTree = "<group>"; };
+		BA66559B18DCC64B003E06AC /* CancelApplyViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CancelApplyViewController.m; sourceTree = "<group>"; };
 		BA8B72FD18D92ED100ECBE28 /* mtp_wait_loading.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mtp_wait_loading.png; sourceTree = "<group>"; };
 		BA8B72FE18D92ED100ECBE28 /* mtp_wait_loading@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "mtp_wait_loading@2x.png"; sourceTree = "<group>"; };
 		BA8EC24D18D0C4D600D1AA12 /* QQTeacher.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QQTeacher.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1700,6 +1703,8 @@
 				BA958C7018D79AAE007597FF /* AssistentViewController.m */,
 				BABE4F8C18D7B368000FF967 /* AssistentPopViewController.h */,
 				BABE4F8D18D7B368000FF967 /* AssistentPopViewController.m */,
+				BA66559A18DCC64B003E06AC /* CancelApplyViewController.h */,
+				BA66559B18DCC64B003E06AC /* CancelApplyViewController.m */,
 			);
 			path = SettingViewController;
 			sourceTree = "<group>";
@@ -3537,6 +3542,7 @@
 				BA8EC5B918D0C5E300D1AA12 /* ShareViewController.m in Sources */,
 				BA958C7118D79AAE007597FF /* AssistentViewController.m in Sources */,
 				BA8EC63B18D0C5E300D1AA12 /* TTURLRequest.m in Sources */,
+				BA66559C18DCC64B003E06AC /* CancelApplyViewController.m in Sources */,
 				BA8EC59418D0C5E300D1AA12 /* ComplainViewController.m in Sources */,
 				BA8EC64118D0C5E300D1AA12 /* UIGridViewRow.m in Sources */,
 				BA8EC59E18D0C5E300D1AA12 /* PersonCenterViewController.m in Sources */,

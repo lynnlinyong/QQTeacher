@@ -73,10 +73,10 @@
     
     finishOrderTab = [[UIGridView alloc]init];
     finishOrderTab.uiGridViewDelegate = self;
+    finishOrderTab.backgroundColor = [UIColor clearColor];
     if ([finishOrderTab respondsToSelector:@selector(setSeparatorInset:)]) {
         [finishOrderTab setSeparatorInset:UIEdgeInsetsZero];
     }
-    [self.view addSubview:finishOrderTab];
     
     UILabel *payInfoLab = [[UILabel alloc]init];
     payInfoLab.text  = @"消费金额:";
@@ -99,15 +99,14 @@
 
     payFld = [[UITextField alloc]init];
     payFld.delegate  = self;
-    payFld.text      = [NSString stringWithFormat:@" %d",order.payMoney.intValue];
+    payFld.text      = [NSString stringWithFormat:@" %d",order.totalMoney.intValue];
     payFld.textColor = [UIColor colorWithHexString:@"#ff6600"];
     payFld.font      = [UIFont systemFontOfSize:15.f];
     payFld.borderStyle = UITextBorderStyleNone;
     payFld.backgroundColor = [UIColor whiteColor];
-    [self.view addSubview:payFld];
     
     backMoneyLab = [[UILabel alloc]init];
-    backMoneyLab.text  = [NSString stringWithFormat:@"￥ %@", order.backMoney];
+    backMoneyLab.text  = [NSString stringWithFormat:@"￥  %@", order.backMoney];
     backMoneyLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
     backMoneyLab.font      = [UIFont systemFontOfSize:15.f];
     backMoneyLab.backgroundColor = [UIColor clearColor];
@@ -134,20 +133,42 @@
         {
             //ios7 iphone5
             CLog(@"It's is iphone5 IOS7");
+            LBorderView *infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(18, 60+42, 320-36, 204)
+                                                                             isBackView:NO]];
+            infoView.borderType   = BorderTypeSolid;
+            infoView.dashPattern  = 8;
+            infoView.spacePattern = 8;
+            infoView.borderWidth  = 1;
+            infoView.cornerRadius = 5;
+            infoView.alpha = 1.0;
+            infoView.borderColor     = [UIColor whiteColor];
+            infoView.backgroundColor = [UIColor whiteColor];
+            [self.view addSubview:infoView];
+            [infoView release];
+            
             finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60+44, 320-40, 200)
                                           isBackView:NO];
             [self scrollTableToFoot:NO];
             finishOrderTab.scrollEnabled  = NO;
+            [self.view addSubview:finishOrderTab];
             
-            payInfoLab.frame     = [UIView fitCGRect:CGRectMake(20, 260+44-20, 80, 20)
-                                      isBackView:NO];
-            backInfoLab.frame    = [UIView fitCGRect:CGRectMake(20, 290+44-20, 80, 20)
-                                       isBackView:NO];
-            payLab.frame = [UIView fitCGRect:CGRectMake(120, 260+44-20, 15, 20)
+            payInfoLab.frame     = [UIView fitCGRect:CGRectMake(30, 260+44-20, 80, 20)
+                                          isBackView:NO];
+            backInfoLab.frame    = [UIView fitCGRect:CGRectMake(30, 290+44-20, 80, 20)
+                                          isBackView:NO];
+            payLab.frame = [UIView fitCGRect:CGRectMake(100, 260+44-20, 15, 20)
                                   isBackView:NO];
-            payFld.frame = [UIView fitCGRect:CGRectMake(135, 260+44-20, 130, 20)
+            UIView *payFldBgView = [[UIView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(125, 255+44-20, 80, 30)
+                                                                       isBackView:NO]];
+            payFldBgView.backgroundColor = [UIColor whiteColor];
+            [self.view addSubview:payFldBgView];
+            [payFldBgView release];
+            
+            payFld.frame = [UIView fitCGRect:CGRectMake(125, 260+44-20, 80, 20)
                                   isBackView:NO];
-            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 290+44-20, 140, 20)
+            [self.view addSubview:payFld];
+            
+            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(100, 290+44-20, 140, 20)
                                         isBackView:NO];
             okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 320+44,
                                                        loginImg.size.width, loginImg.size.height)
@@ -157,20 +178,41 @@
         {
             CLog(@"It's is iphone4 IOS7");
             //ios 7 iphone 4
+            LBorderView *infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(18, 60+42, 320-36, 204)
+                                                                             isBackView:NO]];
+            infoView.borderType   = BorderTypeSolid;
+            infoView.dashPattern  = 8;
+            infoView.spacePattern = 8;
+            infoView.borderWidth  = 1;
+            infoView.cornerRadius = 5;
+            infoView.alpha = 1.0;
+            infoView.borderColor     = [UIColor whiteColor];
+            infoView.backgroundColor = [UIColor whiteColor];
+            [self.view addSubview:infoView];
+            [infoView release];
+
             finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60+44, 320-40, 200)
                                           isBackView:NO];
             [self scrollTableToFoot:NO];
             finishOrderTab.scrollEnabled  = NO;
+            [self.view addSubview:finishOrderTab];
             
-            payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 260+44, 80, 20)
+            payInfoLab.frame = [UIView fitCGRect:CGRectMake(30, 260+44, 80, 20)
                                       isBackView:NO];
-            backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 290+44, 80, 20)
+            backInfoLab.frame = [UIView fitCGRect:CGRectMake(30, 290+44, 80, 20)
                                        isBackView:NO];
-            payLab.frame = [UIView fitCGRect:CGRectMake(120, 260+44, 15, 20)
+            payLab.frame = [UIView fitCGRect:CGRectMake(100, 260+44, 15, 20)
                                   isBackView:NO];
-            payFld.frame = [UIView fitCGRect:CGRectMake(135, 260+44, 130, 20)
+            UIView *payFldBgView = [[UIView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(125, 255+44, 80, 30)
+                                                                       isBackView:NO]];
+            payFldBgView.backgroundColor = [UIColor whiteColor];
+            [self.view addSubview:payFldBgView];
+            [payFldBgView release];
+            
+            payFld.frame = [UIView fitCGRect:CGRectMake(125, 260+44, 80, 20)
                                   isBackView:NO];
-            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 290+44, 140, 20)
+            [self.view addSubview:payFld];
+            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(100, 290+44, 140, 20)
                                         isBackView:NO];
             okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 320+44+20,
                                                        loginImg.size.width, loginImg.size.height)
@@ -183,20 +225,41 @@
         {
             // ios 6 iphone4
             CLog(@"It's is iphone4 IOS6");
+            LBorderView *infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(18, 38, 320-36, 204)
+                                                                             isBackView:NO]];
+            infoView.borderType   = BorderTypeSolid;
+            infoView.dashPattern  = 8;
+            infoView.spacePattern = 8;
+            infoView.borderWidth  = 1;
+            infoView.cornerRadius = 5;
+            infoView.alpha = 1.0;
+            infoView.borderColor     = [UIColor whiteColor];
+            infoView.backgroundColor = [UIColor whiteColor];
+            [self.view addSubview:infoView];
+            [infoView release];
+            
             finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 40, 320-40, 200)
                                           isBackView:NO];
             [self scrollTableToFoot:NO];
             finishOrderTab.scrollEnabled  = NO;
+            [self.view addSubview:finishOrderTab];
             
-            payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 270, 80, 20)
+            payInfoLab.frame = [UIView fitCGRect:CGRectMake(30, 270, 80, 20)
                                       isBackView:NO];
-            backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 300, 80, 20)
+            backInfoLab.frame = [UIView fitCGRect:CGRectMake(30, 300, 80, 20)
                                        isBackView:NO];
-            payLab.frame = [UIView fitCGRect:CGRectMake(120, 270, 15, 20)
+            payLab.frame = [UIView fitCGRect:CGRectMake(100, 270, 15, 20)
                                   isBackView:NO];
-            payFld.frame = [UIView fitCGRect:CGRectMake(135, 270, 130, 20)
+            UIView *payFldBgView = [[UIView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(125, 265, 80, 30)
+                                                                       isBackView:NO]];
+            payFldBgView.backgroundColor = [UIColor whiteColor];
+            [self.view addSubview:payFldBgView];
+            [payFldBgView release];
+            
+            payFld.frame = [UIView fitCGRect:CGRectMake(125, 270, 80, 20)
                                   isBackView:NO];
-            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 300, 140, 20)
+            [self.view addSubview:payFld];
+            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(100, 300, 140, 20)
                                         isBackView:NO];
             okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 330+20, loginImg.size.width, loginImg.size.height)
                                  isBackView:NO];
@@ -205,20 +268,43 @@
         {
             //ios 6 iphone5
             CLog(@"It's is iphone5 IOS6");
+            LBorderView *infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(18, 58, 320-36, 204)
+                                                                             isBackView:NO]];
+            infoView.borderType   = BorderTypeSolid;
+            infoView.dashPattern  = 8;
+            infoView.spacePattern = 8;
+            infoView.borderWidth  = 1;
+            infoView.cornerRadius = 5;
+            infoView.alpha = 1.0;
+            infoView.borderColor     = [UIColor whiteColor];
+            infoView.backgroundColor = [UIColor whiteColor];
+            [self.view addSubview:infoView];
+            [infoView release];
+            
             finishOrderTab.frame = [UIView fitCGRect:CGRectMake(20, 60, 320-40, 200)
                                           isBackView:NO];
             [self scrollTableToFoot:NO];
             finishOrderTab.scrollEnabled  = NO;
+            [self.view addSubview:finishOrderTab];
             
-            payInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 250+20, 80, 20)
+            payInfoLab.frame = [UIView fitCGRect:CGRectMake(30, 250+20, 80, 20)
                                       isBackView:NO];
-            backInfoLab.frame = [UIView fitCGRect:CGRectMake(20, 280+20, 80, 20)
+            backInfoLab.frame = [UIView fitCGRect:CGRectMake(30, 280+20, 80, 20)
                                        isBackView:NO];
-            payLab.frame = [UIView fitCGRect:CGRectMake(120, 250+20, 15, 20)
+            payLab.frame = [UIView fitCGRect:CGRectMake(100, 250+20, 15, 20)
                                   isBackView:NO];
-            payFld.frame = [UIView fitCGRect:CGRectMake(135, 250+20, 130, 20)
+            
+            UIView *payFldBgView = [[UIView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(125, 245+20, 80, 30)
+                                                                      isBackView:NO]];
+            payFldBgView.backgroundColor = [UIColor whiteColor];
+            [self.view addSubview:payFldBgView];
+            [payFldBgView release];
+            
+            payFld.frame = [UIView fitCGRect:CGRectMake(125, 250+20, 80, 20)
                                   isBackView:NO];
-            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(120, 280+20, 140, 20)
+            [self.view addSubview:payFld];
+            
+            backMoneyLab.frame = [UIView fitCGRect:CGRectMake(100, 280+20, 140, 20)
                                         isBackView:NO];
             okBtn.frame = [UIView fitCGRect:CGRectMake(160-loginImg.size.width/2, 320+20, loginImg.size.width, loginImg.size.height)
                                  isBackView:NO];
@@ -249,16 +335,6 @@
 {
     if (payFld.text.length==0)
     {
-        return;
-    }
-    
-    if(![self isPureInt:payFld.text] || ![self isPureFloat:payFld.text])
-    {
-        [self showAlertWithTitle:@"提示"
-                             tag:0
-                         message:@"消费金额必须输入数字!"
-                        delegate:self
-               otherButtonTitles:@"确定", nil];
         return;
     }
     

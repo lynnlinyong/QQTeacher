@@ -51,7 +51,7 @@ typedef enum {
 
 
 @interface JSBubbleView : UIView
-
+@property (nonatomic, assign) BOOL isRead;
 @property (assign, nonatomic) JSBubbleMessageType type;
 @property (assign, nonatomic) JSBubbleMessageStyle style;
 @property (copy, nonatomic)   NSString *text;
@@ -73,7 +73,7 @@ typedef enum {
 
 #pragma mark - Bubble view
 //add by lynn
-- (void) setVoiceImage;
+- (void) setVoiceImage:(BOOL) tmpIsRead;
 
 + (UIImage *)bubbleImageForType:(JSBubbleMessageType)aType
                           style:(JSBubbleMessageStyle)aStyle;

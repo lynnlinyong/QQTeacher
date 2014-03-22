@@ -76,6 +76,7 @@ typedef enum {
 
 @protocol JSMessagesViewDataSource <NSObject>
 @required
+- (BOOL) isReadVoice:(NSIndexPath *) indexPath;
 - (NSString *)textForRowAtIndexPath:(NSIndexPath *)indexPath;
 - (NSDate *)timestampForRowAtIndexPath:(NSIndexPath *)indexPath;
 //add by lynn

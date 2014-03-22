@@ -112,75 +112,6 @@
 #pragma mark - Custom Action
 - (void) initInfoPopView
 {
-//    if ([[UIDevice currentDevice].systemVersion floatValue] >= 7)
-//    {
-//        if (iPhone5)
-//        {
-//            //ios7 iphone5
-//            CLog(@"It's is iphone5 IOS7");
-//            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 44+8,
-//                                                                                      300,
-//                                                                                      60)
-//                                                                isBackView:NO]];
-//        }
-//        else
-//        {
-//            CLog(@"It's is iphone4 IOS7");
-//            //ios 7 iphone 4
-//            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 44+20,
-//                                                                                      300,
-//                                                                                      60)
-//                                                                isBackView:NO]];
-//        }
-//    }
-//    else
-//    {
-//        if (!iPhone5)
-//        {
-//            // ios 6 iphone4
-//            CLog(@"It's is iphone4 IOS6");
-//            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 20,
-//                                                                                      300,
-//                                                                                      60)
-//                                                                isBackView:NO]];
-//        }
-//        else
-//        {
-//            //ios 6 iphone5
-//            CLog(@"It's is iphone5 IOS6");
-//            infoView = [[LBorderView alloc]initWithFrame:[UIView fitCGRect:CGRectMake(10, 20,
-//                                                                                      300,
-//                                                                                      60)
-//                                                                isBackView:NO]];
-//        }
-//    }
-//    infoView.hidden = NO;
-//    infoView.borderType   = BorderTypeSolid;
-//    infoView.dashPattern  = 8;
-//    infoView.spacePattern = 8;
-//    infoView.borderWidth  = 1;
-//    infoView.cornerRadius = 5;
-//    infoView.alpha = 0.8;
-//    infoView.borderColor  = [UIColor orangeColor];
-//    infoView.backgroundColor = [UIColor orangeColor];
-//    [self.view addSubview:infoView];
-//    
-//    UITapGestureRecognizer *tapReg = [[UITapGestureRecognizer alloc]initWithTarget:self
-//                                                                            action:@selector(doTapGestureReg:)];
-//    [infoView addGestureRecognizer:tapReg];
-//    
-//    UILabel *infoLab = [[UILabel alloc]init];
-//    infoLab.textColor = [UIColor whiteColor];
-//    infoLab.text = @"请注意:正式上课一般为2小时/次,上课前试听一般为1小时/次,同一学生同一教师试听一般不超过1次";
-//    infoLab.backgroundColor = [UIColor clearColor];
-//    infoLab.frame = CGRectMake(10,0,
-//                               280,
-//                               60);
-//    infoLab.numberOfLines = 0;
-//    infoLab.font = [UIFont systemFontOfSize:14.f];
-//    infoLab.lineBreakMode = NSLineBreakByWordWrapping;
-//    [infoView addSubview:infoLab];
-//    [infoLab release];
     UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc]initWithTarget:self
                                                                          action:@selector(doEmployClicked:)];
     listenView = [[UIView alloc]init];
@@ -544,35 +475,9 @@
     request.delegate = self;
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
     NSString *url = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-    NSData   *resVal = [request requestSyncWith:kServerPostRequest
+    [request requestASyncWith:kServerPostRequest
                                        paramDic:pDic
                                          urlStr:url];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]retain];
-    NSDictionary *resDic = [resStr JSONFragmentValue];
-    if (resDic)
-    {
-        NSArray *array = [resDic objectForKey:@"messages"];
-        if (array)
-        {
-            if (isNewData)
-                [messages removeAllObjects];
-            
-            for (int i=0; i<array.count; i++)
-            {
-                NSDictionary *item = [array objectAtIndex:i];
-                [messages addObject:item];
-                CLog(@"sdhfushdfItem:%@", item);
-                CLog(@"shdfsfhsudfhsufh:%d", [messages indexOfObject:item]);
-            }
-        }
-        
-        //刷新界面
-        [self finishSend];
-        
-        //消息查看更新
-        [self updateMessageZT];
-    }
 }
 
 + (NSString *) getRecordURL
@@ -950,6 +855,8 @@
 {
     NSMutableDictionary *msgDic = [notice.userInfo mutableCopy];
     [msgDic setObject:@"0" forKey:@"messageId"];
+    [msgDic setObject:[NSNumber numberWithBool:NO]
+             forKey:@"isRead"];
     [messages insertObject:msgDic atIndex:0];
     
     //刷新界面
@@ -1138,7 +1045,10 @@
     if (self.messages.count>0)
     {
         long index = self.messages.count-1-indexPath.row;
-        NSDictionary *item = [messages objectAtIndex:index];
+        NSMutableDictionary *item = [[messages objectAtIndex:index] mutableCopy];
+        [item setObject:[NSNumber numberWithBool:YES] forKey:@"isRead"];
+        [messages setObject:item atIndexedSubscript:index];
+        
         NSString *soundPath= [[item objectForKey:@"sound"] retain];
         if (soundPath)
         {
@@ -1177,6 +1087,8 @@
             });
             
         }
+        
+        [self finishSend];
     }
 }
 
@@ -1257,14 +1169,47 @@
 {
     if (self.messages.count>0)
     {
-        
-        NSDictionary *dic = [self.messages objectAtIndex:self.messages.count-indexPath.row-1];
-        CLog(@"Dic:%@", dic);
-        CLog(@"text:%@", [dic objectForKey:@"text"]);
-        return [dic objectForKey:@"text"];
+        long index = self.messages.count-1-indexPath.row;
+        NSDictionary *dic = [self.messages objectAtIndex:index];
+        if ([dic objectForKey:@"text"])
+        {
+            NSDictionary *dic = [self.messages objectAtIndex:self.messages.count-indexPath.row-1];
+            CLog(@"Dic:%@", dic);
+            CLog(@"text:%@", [dic objectForKey:@"text"]);
+            return [dic objectForKey:@"text"];
+        }
+        else if ([dic objectForKey:@"sound"])
+        {
+            
+            NSDictionary *dic = [self.messages objectAtIndex:self.messages.count-indexPath.row-1];
+            CLog(@"Dic:%@", dic);
+            CLog(@"stime:%@", [dic objectForKey:@"stime"]);
+            return [dic objectForKey:@"stime"];
+        }
     }
     
     return nil;
+}
+
+- (BOOL) isReadVoice:(NSIndexPath *) indexPath
+{
+    if (self.messages.count>0)
+    {
+        long index = self.messages.count-1-indexPath.row;
+        NSDictionary *dic = [self.messages objectAtIndex:index];
+        if ([dic objectForKey:@"text"])
+        {
+            return YES;
+        }
+        else if ([dic objectForKey:@"sound"])
+        {
+            NSNumber *isReadNum = [dic objectForKey:@"isRead"];
+            BOOL isRead = [isReadNum boolValue];
+            return isRead;
+        }
+    }
+    
+    return NO;
 }
 
 //- (NSDate *)timestampForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -1390,6 +1335,34 @@
                              message:@"您申请了试听课程,我们将以短信告知老师"
                             delegate:self
                    otherButtonTitles:@"确定",nil];
+        }
+        else if ([action isEqualToString:@"getMessages"])
+        {
+            NSArray *array = [resDic objectForKey:@"messages"];
+            if (array)
+            {
+                if (isNewData)
+                    [messages removeAllObjects];
+                
+                for (int i=0; i<array.count; i++)
+                {
+                    NSMutableDictionary *item = [[array objectAtIndex:i] mutableCopy];
+                    if ([item objectForKey:@"sound"])
+                    {
+                        [item setObject:[NSNumber numberWithBool:YES]
+                                 forKey:@"isRead"];
+                    }
+                    [messages addObject:item];
+                    CLog(@"sdhfushdfItem:%@", item);
+                    CLog(@"shdfsfhsudfhsufh:%d", [messages indexOfObject:item]);
+                }
+            }
+            
+            //刷新界面
+            [self finishSend];
+            
+            //消息查看更新
+            [self updateMessageZT];
         }
     }
     else

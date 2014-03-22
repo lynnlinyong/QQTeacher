@@ -113,7 +113,7 @@
     self.textView.keyboardAppearance = UIKeyboardAppearanceDefault;
     self.textView.keyboardType = UIKeyboardTypeDefault;
     self.textView.returnKeyType = UIReturnKeyDefault;
-    self.textView.layer.borderColor = [[UIColor grayColor] CGColor];
+    self.textView.layer.borderColor = [[UIColor lightGrayColor] CGColor];
     self.textView.layer.borderWidth = 1.f;
     self.textView.layer.cornerRadius = 0.0f;
     [self.textView.layer setMasksToBounds:YES];

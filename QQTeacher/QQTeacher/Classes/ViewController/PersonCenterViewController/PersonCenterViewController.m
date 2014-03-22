@@ -97,12 +97,12 @@
         }
         else
         {
-            NSString *errorMsg = [resDic objectForKey:@"message"];
-            [self showAlertWithTitle:@"提示"
-                                 tag:4
-                             message:[NSString stringWithFormat:@"错误码%@,%@",eerid,errorMsg]
-                            delegate:[MainViewController getNavigationViewController]
-                   otherButtonTitles:@"确定",nil];
+//            NSString *errorMsg = [resDic objectForKey:@"message"];
+//            [self showAlertWithTitle:@"提示"
+//                                 tag:4
+//                             message:[NSString stringWithFormat:@"错误码%@,%@",eerid,errorMsg]
+//                            delegate:[MainViewController getNavigationViewController]
+//                   otherButtonTitles:@"确定",nil];
         }
     }
     else

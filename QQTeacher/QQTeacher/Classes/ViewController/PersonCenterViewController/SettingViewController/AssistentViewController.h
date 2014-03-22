@@ -18,6 +18,13 @@
 }
 @end
 
+@interface CancelApplyPopInfoView : UIView
+{
+    UILabel *infoLab;
+}
+@property (nonatomic, retain) UILabel *infoLab;
+@end
+
 @interface AssistentViewController : UIViewController<
                                                     MBProgressHUDDelegate,
                                                     AssistentCellDelegate,

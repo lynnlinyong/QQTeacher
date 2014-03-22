@@ -56,7 +56,7 @@ typedef enum {
 
 #pragma mark - Message cell
 //add by lynn
-- (void) setVoiceImage;
+- (void) setVoiceImage:(BOOL) isRead;
 - (void) setTag:(int) tag;
 - (void) setIdImageViewHidden:(BOOL) isId;
 - (void)setMessage:(NSString *)msg;

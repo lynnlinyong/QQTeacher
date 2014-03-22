@@ -8,6 +8,58 @@
 
 #import "AssistentViewController.h"
 
+@implementation CancelApplyPopInfoView
+@synthesize infoLab;
+
+- (id) initWithFrame:(CGRect)frame
+{
+    self = [super initWithFrame:frame];
+    if (self)
+    {
+        self.backgroundColor = [UIColor blackColor];
+        
+        infoLab = [[UILabel alloc]init];
+        infoLab.textColor = [UIColor whiteColor];
+        infoLab.frame = CGRectMake(10, 10, frame.size.width-20, frame.size.height-20);
+        infoLab.backgroundColor = [UIColor clearColor];
+        infoLab.numberOfLines = 0;
+        infoLab.lineBreakMode = NSLineBreakByWordWrapping;
+        [self addSubview:infoLab];
+        
+        NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:1
+                                                          target:self
+                                                        selector:@selector(timeOut:)
+                                                        userInfo:nil
+                                                         repeats:YES];
+        [timer fire];
+    }
+    
+    return self;
+}
+
+- (void) timeOut:(id)sender
+{
+    NSTimer *timer = sender;
+    
+    static int second = 0;
+    second++;
+    if (second==3)
+    {
+        second=0;
+        self.hidden = YES;
+        
+        [timer invalidate];
+        timer = nil;
+    }
+}
+
+- (void) dealloc
+{
+    [infoLab release];
+    [super dealloc];
+}
+@end
+
 @interface AssistentViewController ()
 
 @end
@@ -119,6 +171,16 @@
                                              selector:@selector(assistentNotice:)
                                                  name:@"assistentNotice"
                                                object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(cancelApplyNotice:)
+                                                 name:@"cancelApplyNotice"
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(refreshNewApplyNotice:)
+                                                 name:@"refreshNewApplyNotice"
+                                               object:nil];
 }
 
 - (void)didReceiveMemoryWarning
@@ -153,6 +215,84 @@
 
 #pragma mark -
 #pragma mark - Notice
+- (void) refreshNewApplyNotice:(NSNotification *) notice
+{
+    [self getAssistentsMessage];
+}
+
+- (void) cancelApplyNotice:(NSNotification *) notice
+{
+    NSNumber *tagNum = [notice.userInfo objectForKey:@"TAG"];
+    switch (tagNum.intValue)
+    {
+        case 0:      //申请解约
+        {
+            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+            [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
+            
+            NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+            NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"sessid", nil];
+            NSArray *valuesArr = [NSArray arrayWithObjects:@"applyTermination", ssid, nil];
+            NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+                                                             forKeys:paramsArr];
+            NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
+            NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
+            ServerRequest *serverReq = [ServerRequest sharedServerRequest];
+            serverReq.delegate = self;
+            NSData *resVal   = [serverReq requestSyncWith:kServerPostRequest
+                                                 paramDic:pDic
+                                                   urlStr:url];
+            NSString *resStr = [[[NSString alloc]initWithData:resVal
+                                                     encoding:NSUTF8StringEncoding]autorelease];
+            NSDictionary *resDic = [resStr JSONFragmentValue];
+            CLog(@"resDic:%@", resDic);
+            if (resDic)
+            {
+                NSString *errorid = [resDic objectForKey:@"errorid"];
+                if (errorid.intValue==0)
+                {
+                    CLog(@"applyTermination Success!");
+                    
+                    CancelApplyPopInfoView *popInfoView = [[CancelApplyPopInfoView alloc]initWithFrame:CGRectMake(0, 0, 280, 60)];
+                    popInfoView.infoLab.text = @"解除申请已经提交,请耐心等待教学助理确认.";
+                    popInfoView.frame = CGRectMake(self.view.frame.size.width/2-140,
+                                                   self.view.frame.size.height/2-30-44, 280, 60);
+                    [self.view addSubview:popInfoView];
+                    [popInfoView release];
+                }
+                else
+                {
+                    CLog(@"applyTermination Failed!");
+                    CancelApplyPopInfoView *popInfoView = [[CancelApplyPopInfoView alloc]initWithFrame:CGRectMake(0, 0, 280, 60)];
+                    popInfoView.infoLab.text = @"解除申请提交失败,请重新提交.";
+                    popInfoView.frame = CGRectMake(self.view.frame.size.width/2-140,
+                                                   self.view.frame.size.height/2-30-44, 280, 60);
+                    [self.view addSubview:popInfoView];
+                    [popInfoView release];
+                }
+            }
+            else
+            {
+                CLog(@"applyTermination Failed!");
+                CancelApplyPopInfoView *popInfoView = [[CancelApplyPopInfoView alloc]initWithFrame:CGRectMake(0, 0, 280, 60)];
+                popInfoView.infoLab.text = @"解除申请提交失败,请重新提交.";
+                popInfoView.frame = CGRectMake(self.view.frame.size.width/2-140,
+                                               self.view.frame.size.height/2-30-44, 280, 60);
+                [self.view addSubview:popInfoView];
+                [popInfoView release];
+            }
+            
+            [MBProgressHUD hideHUDForView:nav.view animated:YES];
+            break;
+        }
+        default:
+            break;
+    }
+    
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+}
+
 - (void) assistentNotice:(NSNotification *) notice
 {
     NSDictionary *applyDic = [notice.userInfo objectForKey:@"ApplyDic"];
@@ -233,61 +373,7 @@
         }
         case 1:     //拒绝
         {
-            //删除Cell
-            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-            [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
-            
-            NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-            NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"id",@"sessid", nil];
-            NSArray *valuesArr = [NSArray arrayWithObjects:@"deleteApply",[applyDic objectForKey:@"id"],ssid, nil];
-            NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                             forKeys:paramsArr];
-            NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-            NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-            ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-            serverReq.delegate = self;
-            NSData *resVal   = [serverReq requestSyncWith:kServerPostRequest
-                                                 paramDic:pDic
-                                                   urlStr:url];
-            NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                     encoding:NSUTF8StringEncoding]autorelease];
-            NSDictionary *resDic = [resStr JSONFragmentValue];
-            if (resDic)
-            {
-                NSString *errorid = [resDic objectForKey:@"errorid"];
-                if (errorid.intValue==0)
-                {
-                    CLog(@"deleteApply Success!");
-                    
-                    NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
-                    Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
-                    
-                    //发送接受签约消息
-                    NSString *message   = [NSString stringWithFormat:@"老师[%@]拒绝了您的教学助理签约申请.", teacher.name];
-                    NSArray *paramsArr  = [NSArray arrayWithObjects:@"type",@"title",@"url",@"text",nil];
-                    NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_PUSHCC],@"教学助理签约申请",@"",message,nil];
-                    NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
-                                                                      forKeys:paramsArr];
-                    NSString *jsonMsg   = [pDic JSONFragment];
-                    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
-                    
-                    //发送消息
-                    NSString *deviceId  = [applyDic objectForKey:@"deviceId"];
-                    CLog(@"deviceIdsdfs:%@", deviceId);
-                    SingleMQTT *session = [SingleMQTT shareInstance];
-                    [session.session publishData:data
-                                         onTopic:deviceId];
-                    
-                    //刷新界面
-                    [self getAssistentsMessage];
-                }
-                else
-                    CLog(@"deleteApply Failed!");
-            }
-            else
-                CLog(@"deleteApply Failed!");
-            
-            [MBProgressHUD hideHUDForView:nav.view animated:YES];
+            [self refuseApply:applyDic];
             break;
         }
         default:
@@ -300,6 +386,73 @@
 
 #pragma mark -
 #pragma mark - Custom Action
+- (void) refuseApply:(NSDictionary *) applyDic
+{
+    //删除Cell
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
+    
+    NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+    NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"id",@"sessid", nil];
+    NSArray *valuesArr = [NSArray arrayWithObjects:@"deleteApply",[applyDic objectForKey:@"id"],ssid, nil];
+    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
+                                                     forKeys:paramsArr];
+    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
+    NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
+    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
+    serverReq.delegate = self;
+    NSData *resVal   = [serverReq requestSyncWith:kServerPostRequest
+                                         paramDic:pDic
+                                           urlStr:url];
+    NSString *resStr = [[[NSString alloc]initWithData:resVal
+                                             encoding:NSUTF8StringEncoding]autorelease];
+    NSDictionary *resDic = [resStr JSONFragmentValue];
+    if (resDic)
+    {
+        NSString *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue==0)
+        {
+            CLog(@"deleteApply Success!");
+            
+            NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+            Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
+            
+            //发送接受签约消息
+            NSString *message   = [NSString stringWithFormat:@"老师[%@]拒绝了您的教学助理签约申请.", teacher.name];
+            NSArray *paramsArr  = [NSArray arrayWithObjects:@"type",@"title",@"url",@"text",nil];
+            NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_PUSHCC],@"教学助理签约申请",@"",message,nil];
+            NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
+                                                              forKeys:paramsArr];
+            NSString *jsonMsg   = [pDic JSONFragment];
+            NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+            
+            //发送消息
+            NSString *deviceId  = [applyDic objectForKey:@"deviceId"];
+            CLog(@"deviceIdsdfs:%@", deviceId);
+            SingleMQTT *session = [SingleMQTT shareInstance];
+            [session.session publishData:data
+                                 onTopic:deviceId];
+            
+            //刷新界面
+            [self getAssistentsMessage];
+        }
+        else
+        {
+            //刷新界面
+            [self getAssistentsMessage];
+            CLog(@"deleteApply Failed!");
+        }
+    }
+    else
+    {
+        //刷新界面
+        [self getAssistentsMessage];
+        CLog(@"deleteApply Failed!");
+    }
+    
+    [MBProgressHUD hideHUDForView:nav.view animated:YES];
+}
+
 - (void) initUI
 {
     latlyTab = [[UITableView alloc]init];
@@ -494,41 +647,13 @@
         }
         case 1:   //解约
         {
+            
+            //解约提示
+            CancelApplyViewController *caVctr = [[CancelApplyViewController alloc]init];
+            caVctr.ccDic = ccDic;
             CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-            [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
+            [nav presentPopupViewController:caVctr animationType:MJPopupViewAnimationFade];
             
-            NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-            NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"sessid", nil];
-            NSArray *valuesArr = [NSArray arrayWithObjects:@"applyTermination", ssid, nil];
-            NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                             forKeys:paramsArr];
-            NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-            NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-            ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-            serverReq.delegate = self;
-            NSData *resVal   = [serverReq requestSyncWith:kServerPostRequest
-                                                paramDic:pDic
-                                                  urlStr:url];
-            NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                     encoding:NSUTF8StringEncoding]autorelease];
-            NSDictionary *resDic = [resStr JSONFragmentValue];
-            if (resDic)
-            {
-                NSString *errorid = [resDic objectForKey:@"errorid"];
-                if (errorid.intValue==0)
-                {
-                    CLog(@"applyTermination Success!");
-                    
-                    //刷新界面
-                    [self getAssistentsMessage];
-                }
-                else
-                    CLog(@"applyTermination Failed!");
-            }
-            else
-                CLog(@"applyTermination Failed!");
-            
-            [MBProgressHUD hideHUDForView:nav.view animated:YES];
             break;
         }
         default:
@@ -616,19 +741,25 @@
     return 80;
 }
 
+- (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+}
+
 - (UITableViewCell *) tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *idString    = @"idString";
-    CLog(@"sdjfisfjidjfsi");
+    
     int index = 0;
+    if (ccDic.count != 0)
+        index = 1;
+    
     if (indexPath.row == 0)  //显示助理信息
     {
-        UITableViewCell *cell = [[[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault
-                                                       reuseIdentifier:idString]autorelease];
+        UITableViewCell *cell = [[UITableViewCell alloc]initWithStyle:UITableViewCellStyleDefault
+                                                       reuseIdentifier:idString];
         if (ccDic.count != 0)
         {
-            index = 1;
-            
             UIImageView *flgImgView = [[UIImageView alloc]init];
             flgImgView.image = [UIImage imageNamed:@"stp_cc_flag"];
             flgImgView.frame = CGRectMake(5, 0, 40, 40);
@@ -715,8 +846,11 @@
 
 - (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (indexPath.row==0)
-        return NO;
+    if (ccDic.count!=0)
+    {
+        if (indexPath.row==0)
+            return NO;
+    }
     
     return YES;
 }
@@ -725,14 +859,13 @@
     
     if (editingStyle == UITableViewCellEditingStyleDelete) {
         
-//        NSDictionary *dic = [msgArray objectAtIndex:indexPath.row-1];
-//        [self deleteStudentFormChat:[(NSString *)[dic objectForKey:@"studentId"] copy]];
-//        [msgArray removeObjectAtIndex:indexPath.row-1];
+        int index = 0;
+        if (ccDic.count!=0)
+            index = 1;
         
-        // Delete the row from the data source.
-        [tableView deleteRowsAtIndexPaths:[NSArray arrayWithObject:indexPath]
-                         withRowAnimation:UITableViewRowAnimationFade];
-        
+        //拒绝
+        NSDictionary *applyDic = [applyArray objectAtIndex:indexPath.row-index];
+        [self refuseApply:applyDic];
     }
     else if (editingStyle == UITableViewCellEditingStyleInsert) {
         // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view.

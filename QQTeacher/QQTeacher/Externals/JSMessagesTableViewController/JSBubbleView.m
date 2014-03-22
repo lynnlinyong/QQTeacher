@@ -65,6 +65,7 @@ CGFloat const kJSAvatarSize = 50.0f;
 @synthesize selectedToShowCopyMenu;
 @synthesize msgType;
 @synthesize voiceImageView;
+@synthesize isRead;
 
 #pragma mark - Setup
 - (void)setup
@@ -126,8 +127,9 @@ CGFloat const kJSAvatarSize = 50.0f;
     [self setNeedsDisplay];
 }
 
-- (void) setVoiceImage
+- (void) setVoiceImage:(BOOL) tmpIsRead
 {
+    isRead = tmpIsRead;
     [self setNeedsDisplay];
 }
 
@@ -187,7 +189,7 @@ CGFloat const kJSAvatarSize = 50.0f;
     [super drawRect:frame];
     
 	UIImage *image = (self.selectedToShowCopyMenu) ? [self bubbleImageHighlighted] : [self bubbleImage];
-    if (self.msgType == PUSH_TYPE_TEXT)
+    if (self.msgType == PUSH_TYPE_TEXT)   //文本 add by lynn
     {
         CGRect bubbleFrame = [self bubbleFrame];
         [image drawInRect:bubbleFrame];
@@ -201,12 +203,13 @@ CGFloat const kJSAvatarSize = 50.0f;
                                       textSize.width,
                                       textSize.height);
         
+        [[UIColor colorWithHexString:@"#999999"] set];
         [self.text drawInRect:textFrame
                      withFont:[JSBubbleView font]
                 lineBreakMode:NSLineBreakByWordWrapping
                     alignment:NSTextAlignmentLeft];
     }
-    else
+    else         //语音
     {
         CGRect bubbleFrame = CGRectMake((self.type == JSBubbleMessageTypeOutgoing ? self.frame.size.width - 40 : 0.0f),
                                         kMarginTop,
@@ -221,10 +224,34 @@ CGFloat const kJSAvatarSize = 50.0f;
                                      20,
                                      20);
         
+        UIImageView *flagImgView =  [[UIImageView alloc]init];
+        flagImgView.image = [UIImage imageNamed:@"quanquan.png"];
+        if (isRead)
+            flagImgView.hidden = YES;
+        else
+            flagImgView.hidden = NO;
+        [self addSubview:flagImgView];
+        
+        UILabel *secondLab = [[UILabel alloc]init];
+        secondLab.text = [NSString stringWithFormat:@"%@\"", self.text];
+        secondLab.font = [UIFont systemFontOfSize:12.f];
+        secondLab.backgroundColor = [UIColor clearColor];
+        secondLab.textAlignment = NSTextAlignmentRight;
+        [self addSubview:secondLab];
+        
         //设置动画
         voiceImageView = [[UIImageView alloc]init];
         if (self.type == JSBubbleMessageTypeOutgoing)
         {
+            flagImgView.frame = CGRectMake(imageX-23,
+                                           kPaddingTop + kMarginTop-3,
+                                           10,
+                                           10);
+            secondLab.frame = CGRectMake(imageX-30,
+                                         kPaddingTop + kMarginTop+10,
+                                         20,
+                                         20);
+            
             voiceImageView.animationImages = [NSArray arrayWithObjects:
                                                [UIImage imageNamed:@"skin_aio_ptt_action_r_1.png"],
                                                [UIImage imageNamed:@"skin_aio_ptt_action_r_2.png"],
@@ -233,6 +260,16 @@ CGFloat const kJSAvatarSize = 50.0f;
         }
         else
         {
+            flagImgView.frame = CGRectMake(imageX+30,
+                                           kPaddingTop + kMarginTop-3,
+                                           10,
+                                           10);
+            secondLab.frame = CGRectMake(imageX+30,
+                                         kPaddingTop + kMarginTop+10,
+                                         20,
+                                         20);
+            secondLab.textAlignment = NSTextAlignmentLeft;
+            
             voiceImageView.animationImages = [NSArray arrayWithObjects:
                                               [UIImage imageNamed:@"skin_aio_ptt_action_l_1.png"],
                                               [UIImage imageNamed:@"skin_aio_ptt_action_l_2.png"],
@@ -243,6 +280,9 @@ CGFloat const kJSAvatarSize = 50.0f;
         [voiceImageView setAnimationRepeatCount:0];
         voiceImageView.frame = imgFrame;
         [self addSubview:voiceImageView];
+        
+        [flagImgView release];
+        [secondLab release];
     }
 }
 

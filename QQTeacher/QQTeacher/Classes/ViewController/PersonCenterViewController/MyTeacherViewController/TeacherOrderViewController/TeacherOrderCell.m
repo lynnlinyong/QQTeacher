@@ -28,6 +28,7 @@
     [bgLabImageView release];
 //    [noConfirmLab   release];
     [finishLab      release];
+    [spImgView release];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
     
@@ -38,7 +39,11 @@
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self)
-    {    
+    {
+        UIView *bgView = [[UIView alloc]init];
+        bgView.backgroundColor = [UIColor colorWithHexString:@"#686868"];
+        self.backgroundView  = bgView;
+        
         parentView = pView;
         studyPosLab = [[UILabel alloc]init];
         studyPosLab.textColor       = [UIColor whiteColor];
@@ -87,6 +92,13 @@
         commentImgView.frame = CGRectMake(75, 85, 20, 20);
         [self addSubview:commentImgView];
         
+        UIImage *spImg = [UIImage imageNamed:@"mtp_order_splite_line"];
+        spImgView = [[UIImageView alloc]init];
+        spImgView.image = spImg;
+        spImgView.frame = CGRectMake(0, 105,
+                                     320, spImg.size.height);
+        [self addSubview:spImgView];
+        
         orderDateLab = [[UILabel alloc]init];
         orderDateLab.font  = [UIFont systemFontOfSize:12.f];
         orderDateLab.frame = CGRectMake(210, 5, 100, 20);
@@ -129,10 +141,6 @@
                    action:@selector(doButtonClicked:)
          forControlEvents:UIControlEventTouchUpInside];
         [self addSubview:ctrBtn];
-        
-        UIView *bgView = [[UIView alloc]init];
-        bgView.backgroundColor = [UIColor colorWithHexString:@"#686868"];
-        self.backgroundView  = bgView;
         
         
         [[NSNotificationCenter defaultCenter] addObserver:self
@@ -199,10 +207,16 @@
                                       commentImgView.frame.size.width,
                                       commentImgView.frame.size.height);
     
+    spImgView.frame = CGRectMake(spImgView.frame.origin.x,
+                                 spImgView.frame.origin.y+offset,
+                                 spImgView.frame.size.width,
+                                 spImgView.frame.size.height);
+    
     ctrBtn.frame = CGRectMake(ctrBtn.frame.origin.x,
                               ctrBtn.frame.origin.y+offset,
                               ctrBtn.frame.size.width,
                               ctrBtn.frame.size.height);
+
 
 //    commentBtn.frame = CGRectMake(commentBtn.frame.origin.x,
 //                                  commentBtn.frame.origin.y+offset,

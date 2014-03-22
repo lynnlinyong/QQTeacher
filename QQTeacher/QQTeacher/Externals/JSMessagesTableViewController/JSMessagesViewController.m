@@ -113,7 +113,7 @@
     UIButton *sendButton = [self sendButton];
     sendButton.enabled = NO;
     sendButton.frame = CGRectMake(self.inputToolBarView.frame.size.width-65.0f,
-                                  8.0f, 49, 28);  //59.0f, 26.0f);
+                                  8.0f, 49, 28.5);  //59.0f, 26.0f);
     [sendButton addTarget:self
                    action:@selector(sendPressed:)
          forControlEvents:UIControlEventTouchUpInside];
@@ -361,7 +361,8 @@
     }
     else
     {
-        [cell setVoiceImage];
+        [cell setMessage:[self.dataSource textForRowAtIndexPath:indexPath]];
+        [cell setVoiceImage:[self.dataSource isReadVoice:indexPath]];
     }
     cell.tag = indexPath.row;
     [cell setBackgroundColor:tableView.backgroundColor];

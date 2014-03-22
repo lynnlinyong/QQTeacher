@@ -145,5 +145,6 @@
 #import "AssistentCell.h"
 #import "AssistentViewController.h"
 #import "AssistentPopViewController.h"
+#import "CancelApplyViewController.h"
 
 #endif

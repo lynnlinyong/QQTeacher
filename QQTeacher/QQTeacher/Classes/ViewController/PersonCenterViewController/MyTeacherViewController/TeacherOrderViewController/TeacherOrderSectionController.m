@@ -157,7 +157,6 @@
                                                               withParent:self.tableView]autorelease];
         cell.delegate       = self;
         cell.order          = order;
-//        cell.commView.idStr = [order.orderId retain];
         
         return cell;
     }

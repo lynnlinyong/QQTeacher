@@ -24,6 +24,7 @@
     UILabel  *orderPayMoneyLab;
     UILabel  *orderCommentLab;
     UIImageView *commentImgView;
+    UIImageView *spImgView;
 //    UILabel  *noConfirmLab;
     UILabel  *finishLab;
     
