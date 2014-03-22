@@ -177,7 +177,7 @@
     [self updateLoginStatus:1];
     
     //向微信注册
-    [WXApi registerApp:WeiXinAppID withDescription:@"QQ_Student_IOS v1.0"];
+    [WXApi registerApp:WeiXinAppID withDescription:@"QQ_TEACHER_IOS v1.0"];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(closeNoticeWall:)

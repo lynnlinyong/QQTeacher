@@ -82,10 +82,10 @@
 //策略服务器地址
 
 //测试服务器
-#define ServerAddress   @"http://app.changingedu.com:8085/Interfaces/app/"
+//#define ServerAddress   @"http://app.changingedu.com:8085/Interfaces/app/"
 
 //正式服务器
-//#define ServerAddress    @"http://app.changingedu.com/Interfaces/app/"
+#define ServerAddress    @"http://app.changingedu.com/Interfaces/app/"
 
 #define     MAP_API_KEY  @"513e60ac02ea80ee24943c1d383dc56c"
 
@@ -117,18 +117,18 @@ typedef enum _noticeType
 }NoticeType;
 
 //腾讯微博
-#define WiressSDKDemoAppKey     @"801443616"
-#define WiressSDKDemoAppSecret  @"ed6625d85bac645b213207a67dfb6b31"
+#define WiressSDKDemoAppKey     @"801443617"
+#define WiressSDKDemoAppSecret  @"bb1384bf8d1bdab626b189dfdaeecc44"
 #define REDIRECTURI             @"http://app.changingedu.com/"
 
 //sina微博
-#define kAppKey                 @"2935532134"
-#define kAppSecret              @"60229dfc252750a2ea2955fa14f0865d"
+#define kAppKey                 @"3909842123"
+#define kAppSecret              @"9594d445d8ed603f3eb5e9512346ae87"
 #define kAppRedirectURL         @"https://api.weibo.com/oauth2/default.html"
 
 //微信
-#define WeiXinAppID             @"wx6b649532e1431a06"
-#define WeiXinAppKey            @"868323d2e1985c15e6c19d5e5eab85b8"
+#define WeiXinAppID             @"wx355a19fe08cef22d"
+#define WeiXinAppKey            @"e17905ec29ec03142a18cffad8b48944"
 
 #define iPhone5 ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(640, 1136), [[UIScreen mainScreen] currentMode].size) : NO)
 #endif
