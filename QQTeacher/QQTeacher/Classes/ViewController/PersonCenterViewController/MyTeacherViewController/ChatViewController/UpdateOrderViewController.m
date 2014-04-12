@@ -488,8 +488,8 @@
         }
         case 3:
         {
-            SelectPosViewController *spVctr = [[SelectPosViewController alloc]init];
-            [nav pushViewController:spVctr animated:YES];
+//            SelectPosViewController *spVctr = [[SelectPosViewController alloc]init];
+//            [nav pushViewController:spVctr animated:YES];
             break;
         }
         default:

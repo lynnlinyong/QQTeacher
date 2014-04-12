@@ -1192,7 +1192,7 @@
     LatlyViewController *lVctr = [[LatlyViewController alloc]init];
     UINavigationController *navLVctr = [[UINavigationController alloc]initWithRootViewController:lVctr];
     
-    SearchTeacherViewController *sVctr = [[SearchTeacherViewController alloc]init];
+    UIViewController *sVctr = [[UIViewController alloc]init];
     UINavigationController *navSVctr = [[UINavigationController alloc]initWithRootViewController:sVctr];
     
     ShareViewController *shareVctr = [[ShareViewController alloc]initWithNibName:nil

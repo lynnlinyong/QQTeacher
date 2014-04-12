@@ -57,7 +57,7 @@
             LatlyViewController *lVctr = [[LatlyViewController alloc]init];
             UINavigationController *navLVctr = [[UINavigationController alloc]initWithRootViewController:lVctr];
             
-            SearchTeacherViewController *sVctr = [[SearchTeacherViewController alloc]init];
+            UIViewController *sVctr = [[UIViewController alloc]init];
             UINavigationController *navSVctr = [[UINavigationController alloc]initWithRootViewController:sVctr];
             
             ShareViewController *shareVctr   = [[ShareViewController alloc]initWithNibName:nil
@@ -169,12 +169,17 @@
     //初始化MQTT Server
     [self initMQTTServer];
 
-    
     //获取未读消息列表
     [self getPushMessage];
     
-    //上线更新
-    [self updateLoginStatus:1];
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        
+        //上线更新
+        [self updateLoginStatus:1];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+        });
+    });
     
     //向微信注册
     [WXApi registerApp:WeiXinAppID withDescription:@"QQ_TEACHER_IOS v1.0"];

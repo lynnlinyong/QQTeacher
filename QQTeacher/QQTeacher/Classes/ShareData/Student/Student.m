@@ -325,8 +325,8 @@
 + (void) getSalarys
 {
     NSArray *salaryList = [[NSUserDefaults standardUserDefaults] objectForKey:SALARY_LIST];
-    if (!salaryList)
-    {
+//    if (!salaryList)
+//    {
         if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
         {
             return;
@@ -375,7 +375,7 @@
             [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
             [AppDelegate popToMainViewController];
         }
-    }
+//    }
 }
 
 +(NSString *) searchSalaryID:(NSString *) salaryName
@@ -439,8 +439,8 @@
 + (void) getGradeList
 {
     NSArray *gradList = [[NSUserDefaults standardUserDefaults] objectForKey:GRADE_LIST];
-    if (!gradList)
-    {
+//    if (!gradList)
+//    {
         if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
         {
             return;
@@ -476,7 +476,7 @@
             [[NSUserDefaults standardUserDefaults] setObject:gradList
                                                       forKey:GRADE_LIST];
         }
-    }
+//    }
 }
 
 //根据性别ID,查询性别
@@ -516,8 +516,8 @@
     }
     
     NSArray *subArr   = [[NSUserDefaults standardUserDefaults] objectForKey:SUBJECT_LIST];
-    if (!subArr)
-    {
+//    if (!subArr)
+//    {
         NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
         NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"sessid", nil];
         NSArray *valuesArr = [NSArray arrayWithObjects:@"getsubjects",ssid, nil];
@@ -562,7 +562,7 @@
                 [AppDelegate popToMainViewController];
             }
         }
-    }
+//    }
 }
 
 //根据年级列表,名字查询ID

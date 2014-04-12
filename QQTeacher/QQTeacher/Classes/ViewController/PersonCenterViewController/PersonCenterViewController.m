@@ -107,11 +107,11 @@
     }
     else
     {
-        [self showAlertWithTitle:@"提示"
-                             tag:3
-                         message:@"获取数据失败!"
-                        delegate:[MainViewController getNavigationViewController]
-               otherButtonTitles:@"确定",nil];
+//        [self showAlertWithTitle:@"提示"
+//                             tag:3
+//                         message:@"获取数据失败!"
+//                        delegate:[MainViewController getNavigationViewController]
+//               otherButtonTitles:@"确定",nil];
     }
 }
 

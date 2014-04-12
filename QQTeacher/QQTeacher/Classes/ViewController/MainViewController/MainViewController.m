@@ -366,11 +366,15 @@ static NSMutableArray  *timerArray= nil;
     //初始化UI
     [self initUI];
     
-    //获取终端设置属性
-    [self setTerminalMapProperty];
-    
-    //获取教学助理
-    [self getJxzl];
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        //获取终端设置属性
+        [self setTerminalMapProperty];
+        
+        //获取教学助理
+        [self getJxzl];
+        dispatch_async(dispatch_get_main_queue(), ^{
+        });
+    });
 }
 
 - (void) viewDidDisappear:(BOOL)animated
@@ -609,7 +613,7 @@ static NSMutableArray  *timerArray= nil;
     LatlyViewController *lVctr = [[LatlyViewController alloc]init];
     UINavigationController *navLVctr = [[UINavigationController alloc]initWithRootViewController:lVctr];
     
-    SearchTeacherViewController *sVctr = [[SearchTeacherViewController alloc]init];
+    UIViewController *sVctr = [[UIViewController alloc]init];
     UINavigationController *navSVctr = [[UINavigationController alloc]initWithRootViewController:sVctr];
     
     ShareViewController *shareVctr = [[ShareViewController alloc]initWithNibName:nil
@@ -1195,7 +1199,12 @@ static NSMutableArray  *timerArray= nil;
         }
         else
         {
-            CLog(@"getWebAddress failed!");
+            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:nav.view
+                                                      withText:@"链接服务器失败"
+                                                      animated:YES
+                                                      delegate:NULL];
+            [hud hide:YES afterDelay:3];
         }
 //    }
 }

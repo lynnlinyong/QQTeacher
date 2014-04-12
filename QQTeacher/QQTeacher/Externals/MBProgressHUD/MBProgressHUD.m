@@ -262,9 +262,9 @@
                 MBProgressHUD *HUD = (MBProgressHUD *)viewToRemove;
                 HUD.removeFromSuperViewOnHide = YES;
                 [HUD hide:animated];
-                return YES;
+//                return YES;
             } else {
-                return NO;
+//                return NO;
             }
 		}
 	}
@@ -527,7 +527,11 @@
 }
 
 - (void)hideDelayed:(NSNumber *)animated {
-	[self hide:[animated boolValue]];
+	//[self hide:[animated boolValue]];
+    
+    //modify by lynn
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [MBProgressHUD hideHUDForView:nav.view animated:YES];
 }
 
 - (void)handleGraceTimer:(NSTimer *)theTimer {

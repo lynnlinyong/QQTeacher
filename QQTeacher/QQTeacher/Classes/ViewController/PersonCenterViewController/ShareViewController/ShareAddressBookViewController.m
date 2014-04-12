@@ -297,7 +297,9 @@
     if (selectArray.count>0)
     {
         NSDictionary *shareDic = [[NSUserDefaults standardUserDefaults] objectForKey:@"ShareContent"];
+        CLog(@"shareDic:%@", shareDic);
         NSDictionary *contactsDic = [shareDic objectForKey:@"contacts"];
+        CLog(@"contactsDic:%@", contactsDic);
         NSString *content = @"";
         if (contactsDic)
         {

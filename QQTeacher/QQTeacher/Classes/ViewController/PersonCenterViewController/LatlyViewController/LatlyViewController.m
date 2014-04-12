@@ -43,6 +43,9 @@
     [super viewDidAppear:animated];
     self.navigationController.navigationBarHidden = YES;
     
+    [latlyTab reloadData];
+    [self doneLoadingTableViewData];
+    
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(getMessageFromTeacher:)
                                                  name:@"MessageComing"
@@ -96,7 +99,7 @@
         {
             //ios7 iphone5
             CLog(@"It's is iphone5 IOS7");
-            latlyTab.frame = [UIView fitCGRect:CGRectMake(0, 44, 320, 480-44-44-44)
+            latlyTab.frame = [UIView fitCGRect:CGRectMake(0, 50, 320, 480-44-44-44)
                                     isBackView:YES];
         }
         else
@@ -337,6 +340,51 @@
             timeLab.textAlignment = NSTextAlignmentRight;
             timeLab.font  = [UIFont systemFontOfSize:12.f];
             timeLab.text  = [sysDic objectForKey:@"time"];
+            timeLab.backgroundColor = [UIColor clearColor];
+            timeLab.frame = CGRectMake(320-60-10, 12, 60, 20);
+            [cell addSubview:timeLab];
+            [timeLab release];
+            
+            cell.backgroundView = [[UIImageView alloc]initWithImage:[UIImage imageNamed:@"lp_sys_cell_bg"]];
+        }
+        else
+        {
+            UIImageView *flgImgView = [[UIImageView alloc]init];
+            flgImgView.image = [UIImage imageNamed:@"lp_sys_cell_title"];
+            flgImgView.frame = CGRectMake(5, 0, 40, 40);
+            [cell addSubview:flgImgView];
+            [flgImgView release];
+            
+            int num = ((NSNumber *)[sysDic objectForKey:@"allNumber"]).intValue;
+            if (num!=0)
+            {
+                NoticeNumberView *numView = [[NoticeNumberView alloc]initWithFrame:CGRectMake(flgImgView.frame.size.width-3, 5, 40, 40)];
+                [numView setTitle:[NSString stringWithFormat:@"%d", num]];
+                [flgImgView addSubview:numView];
+                [numView release];
+            }
+            
+            UILabel *titleLab  = [[UILabel alloc]init];
+            titleLab.text  = @"轻轻足迹";
+            titleLab.backgroundColor = [UIColor clearColor];
+            titleLab.font = [UIFont systemFontOfSize:14.f];
+            titleLab.textColor = [UIColor colorWithHexString:@"#ff6600"];
+            titleLab.frame = CGRectMake(50, 3, 100, 20);
+            [cell addSubview:titleLab];
+            [titleLab release];
+            
+            UILabel *sysMsgLab = [[UILabel alloc]init];
+            sysMsgLab.font = [UIFont systemFontOfSize:12.f];
+            sysMsgLab.text = @"";//[sysDic objectForKey:@"message"];
+            sysMsgLab.backgroundColor = [UIColor clearColor];
+            sysMsgLab.frame = CGRectMake(50, 20, 200, 20);
+            [cell addSubview:sysMsgLab];
+            [sysMsgLab release];
+            
+            UILabel *timeLab = [[UILabel alloc]init];
+            timeLab.textAlignment = NSTextAlignmentRight;
+            timeLab.font  = [UIFont systemFontOfSize:12.f];
+            timeLab.text  = @"";//[sysDic objectForKey:@"time"];
             timeLab.backgroundColor = [UIColor clearColor];
             timeLab.frame = CGRectMake(320-60-10, 12, 60, 20);
             [cell addSubview:timeLab];

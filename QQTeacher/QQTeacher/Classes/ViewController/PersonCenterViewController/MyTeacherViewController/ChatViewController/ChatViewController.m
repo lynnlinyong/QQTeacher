@@ -684,63 +684,58 @@
     [nav popViewControllerAnimated:YES];
 }
 
-- (void) doButtonClicked:(id)sender
-{
-    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
-    {
-        return;
-    }
-    
-    UIButton *btn = sender;
-    switch (btn.tag)
-    {
-        case 0:      //试听
-        {
-            NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
-            NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"phone",@"sessid", nil];
-            NSArray *valueArr  = [NSArray arrayWithObjects:@"setListening",student.phoneNumber,ssid,nil];
-            NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valueArr
-                                                             forKeys:paramsArr];
-            ServerRequest *request = [ServerRequest sharedServerRequest];
-            request.delegate       = self;
-            NSString *webAddress   = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-            NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER_INFO];
-            [request requestASyncWith:kServerPostRequest
-                             paramDic:pDic
-                               urlStr:url];
-            break;
-        }
-        case 1:      //聘请
-        {
-            //跳转到
-            if (order)
-            {
-                CustomNavigationViewController *nav     = (CustomNavigationViewController *)[MainViewController getNavigationViewController];
-                UpdateOrderViewController *upVctr = [[UpdateOrderViewController alloc]init];
-                upVctr.isEmploy = YES;
-                upVctr.order = order;
-                [nav pushViewController:upVctr
-                               animated:YES];
-                [upVctr release];
-            }
-            else
-            {
-                //新建订单
-//                 CustomNavigationViewController *nav     = (CustomNavigationViewController *)[MainViewController getNavigationViewController];
-//                 SearchConditionViewController *scVctr = [[SearchConditionViewController alloc]init];
-//                 scVctr.tObj = tObj;
-//                 [nav pushViewController:scVctr animated:YES];
-            }
-            break;
-        }
-        case 2:
-        {
-            break;
-        }
-        default:
-            break;
-    }
-}
+//- (void) doButtonClicked:(id)sender
+//{
+//    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+//    {
+//        return;
+//    }
+//    
+//    UIButton *btn = sender;
+//    switch (btn.tag)
+//    {
+//        case 0:      //试听
+//        {
+//            NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
+//            NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"phone",@"sessid", nil];
+//            NSArray *valueArr  = [NSArray arrayWithObjects:@"setListening",student.phoneNumber,ssid,nil];
+//            NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valueArr
+//                                                             forKeys:paramsArr];
+//            ServerRequest *request = [ServerRequest sharedServerRequest];
+//            request.delegate       = self;
+//            NSString *webAddress   = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
+//            NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER_INFO];
+//            [request requestASyncWith:kServerPostRequest
+//                             paramDic:pDic
+//                               urlStr:url];
+//            break;
+//        }
+//        case 1:      //聘请
+//        {
+//            //跳转到
+//            if (order)
+//            {
+//                CustomNavigationViewController *nav     = (CustomNavigationViewController *)[MainViewController getNavigationViewController];
+//                UpdateOrderViewController *upVctr = [[UpdateOrderViewController alloc]init];
+//                upVctr.isEmploy = YES;
+//                upVctr.order = order;
+//                [nav pushViewController:upVctr
+//                               animated:YES];
+//                [upVctr release];
+//            }
+//            else
+//            {
+//            }
+//            break;
+//        }
+//        case 2:
+//        {
+//            break;
+//        }
+//        default:
+//            break;
+//    }
+//}
 
 - (void) updateMessageZT
 {

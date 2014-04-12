@@ -57,7 +57,6 @@
 		BA8EC59218D0C5E300D1AA12 /* SystemMessageViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2B818D0C5E100D1AA12 /* SystemMessageViewController.m */; };
 		BA8EC59318D0C5E300D1AA12 /* ChatViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2BC18D0C5E100D1AA12 /* ChatViewController.m */; };
 		BA8EC59418D0C5E300D1AA12 /* ComplainViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2BE18D0C5E100D1AA12 /* ComplainViewController.m */; };
-		BA8EC59518D0C5E300D1AA12 /* UpdateOrderViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2C018D0C5E100D1AA12 /* UpdateOrderViewController.m */; };
 		BA8EC59618D0C5E300D1AA12 /* MyTeacherCell.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2C318D0C5E100D1AA12 /* MyTeacherCell.m */; };
 		BA8EC59718D0C5E300D1AA12 /* MyTeacherViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2C518D0C5E100D1AA12 /* MyTeacherViewController.m */; };
 		BA8EC59818D0C5E300D1AA12 /* TeacherDetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2C718D0C5E100D1AA12 /* TeacherDetailViewController.m */; };
@@ -68,8 +67,6 @@
 		BA8EC59D18D0C5E300D1AA12 /* TeacherOrderSectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2D218D0C5E100D1AA12 /* TeacherOrderSectionController.m */; };
 		BA8EC59E18D0C5E300D1AA12 /* PersonCenterViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2D418D0C5E100D1AA12 /* PersonCenterViewController.m */; };
 		BA8EC59F18D0C5E300D1AA12 /* SelectDateViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2D818D0C5E100D1AA12 /* SelectDateViewController.m */; };
-		BA8EC5A018D0C5E300D1AA12 /* SelectAreaViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2DB18D0C5E100D1AA12 /* SelectAreaViewController.m */; };
-		BA8EC5A118D0C5E300D1AA12 /* SelectPosViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2DD18D0C5E100D1AA12 /* SelectPosViewController.m */; };
 		BA8EC5A218D0C5E300D1AA12 /* SiteOtherView.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2DF18D0C5E100D1AA12 /* SiteOtherView.m */; };
 		BA8EC5A318D0C5E300D1AA12 /* SiteOtherViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2E118D0C5E100D1AA12 /* SiteOtherViewController.m */; };
 		BA8EC5A418D0C5E300D1AA12 /* SalaryAndFlagView.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2E418D0C5E100D1AA12 /* SalaryAndFlagView.m */; };
@@ -77,9 +74,6 @@
 		BA8EC5A618D0C5E300D1AA12 /* SelectSexViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2E818D0C5E100D1AA12 /* SelectSexViewController.m */; };
 		BA8EC5A718D0C5E300D1AA12 /* SelectSubjectViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2EA18D0C5E100D1AA12 /* SelectSubjectViewController.m */; };
 		BA8EC5A818D0C5E300D1AA12 /* SelectTimesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2EC18D0C5E100D1AA12 /* SelectTimesViewController.m */; };
-		BA8EC5A918D0C5E300D1AA12 /* SearchConditionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2EE18D0C5E100D1AA12 /* SearchConditionViewController.m */; };
-		BA8EC5AA18D0C5E300D1AA12 /* SearchTeacherViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2F018D0C5E100D1AA12 /* SearchTeacherViewController.m */; };
-		BA8EC5AB18D0C5E300D1AA12 /* WaitConfirmViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2F218D0C5E100D1AA12 /* WaitConfirmViewController.m */; };
 		BA8EC5AC18D0C5E300D1AA12 /* WaitMaskView.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2F418D0C5E100D1AA12 /* WaitMaskView.m */; };
 		BA8EC5AD18D0C5E300D1AA12 /* AboutSoftwareViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2F718D0C5E100D1AA12 /* AboutSoftwareViewController.m */; };
 		BA8EC5AE18D0C5E300D1AA12 /* SettingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BA8EC2F918D0C5E100D1AA12 /* SettingViewController.m */; };
@@ -649,8 +643,6 @@
 		BA8EC2BC18D0C5E100D1AA12 /* ChatViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ChatViewController.m; sourceTree = "<group>"; };
 		BA8EC2BD18D0C5E100D1AA12 /* ComplainViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ComplainViewController.h; sourceTree = "<group>"; };
 		BA8EC2BE18D0C5E100D1AA12 /* ComplainViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ComplainViewController.m; sourceTree = "<group>"; };
-		BA8EC2BF18D0C5E100D1AA12 /* UpdateOrderViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UpdateOrderViewController.h; sourceTree = "<group>"; };
-		BA8EC2C018D0C5E100D1AA12 /* UpdateOrderViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UpdateOrderViewController.m; sourceTree = "<group>"; };
 		BA8EC2C218D0C5E100D1AA12 /* MyTeacherCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyTeacherCell.h; sourceTree = "<group>"; };
 		BA8EC2C318D0C5E100D1AA12 /* MyTeacherCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MyTeacherCell.m; sourceTree = "<group>"; };
 		BA8EC2C418D0C5E100D1AA12 /* MyTeacherViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyTeacherViewController.h; sourceTree = "<group>"; };
@@ -671,10 +663,6 @@
 		BA8EC2D418D0C5E100D1AA12 /* PersonCenterViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PersonCenterViewController.m; sourceTree = "<group>"; };
 		BA8EC2D718D0C5E100D1AA12 /* SelectDateViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectDateViewController.h; sourceTree = "<group>"; };
 		BA8EC2D818D0C5E100D1AA12 /* SelectDateViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectDateViewController.m; sourceTree = "<group>"; };
-		BA8EC2DA18D0C5E100D1AA12 /* SelectAreaViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectAreaViewController.h; sourceTree = "<group>"; };
-		BA8EC2DB18D0C5E100D1AA12 /* SelectAreaViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectAreaViewController.m; sourceTree = "<group>"; };
-		BA8EC2DC18D0C5E100D1AA12 /* SelectPosViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectPosViewController.h; sourceTree = "<group>"; };
-		BA8EC2DD18D0C5E100D1AA12 /* SelectPosViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectPosViewController.m; sourceTree = "<group>"; };
 		BA8EC2DE18D0C5E100D1AA12 /* SiteOtherView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SiteOtherView.h; sourceTree = "<group>"; };
 		BA8EC2DF18D0C5E100D1AA12 /* SiteOtherView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SiteOtherView.m; sourceTree = "<group>"; };
 		BA8EC2E018D0C5E100D1AA12 /* SiteOtherViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SiteOtherViewController.h; sourceTree = "<group>"; };
@@ -689,12 +677,6 @@
 		BA8EC2EA18D0C5E100D1AA12 /* SelectSubjectViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectSubjectViewController.m; sourceTree = "<group>"; };
 		BA8EC2EB18D0C5E100D1AA12 /* SelectTimesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SelectTimesViewController.h; sourceTree = "<group>"; };
 		BA8EC2EC18D0C5E100D1AA12 /* SelectTimesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SelectTimesViewController.m; sourceTree = "<group>"; };
-		BA8EC2ED18D0C5E100D1AA12 /* SearchConditionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchConditionViewController.h; sourceTree = "<group>"; };
-		BA8EC2EE18D0C5E100D1AA12 /* SearchConditionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchConditionViewController.m; sourceTree = "<group>"; };
-		BA8EC2EF18D0C5E100D1AA12 /* SearchTeacherViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SearchTeacherViewController.h; sourceTree = "<group>"; };
-		BA8EC2F018D0C5E100D1AA12 /* SearchTeacherViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SearchTeacherViewController.m; sourceTree = "<group>"; };
-		BA8EC2F118D0C5E100D1AA12 /* WaitConfirmViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WaitConfirmViewController.h; sourceTree = "<group>"; };
-		BA8EC2F218D0C5E100D1AA12 /* WaitConfirmViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WaitConfirmViewController.m; sourceTree = "<group>"; };
 		BA8EC2F318D0C5E100D1AA12 /* WaitMaskView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WaitMaskView.h; sourceTree = "<group>"; };
 		BA8EC2F418D0C5E100D1AA12 /* WaitMaskView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WaitMaskView.m; sourceTree = "<group>"; };
 		BA8EC2F618D0C5E100D1AA12 /* AboutSoftwareViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AboutSoftwareViewController.h; sourceTree = "<group>"; };
@@ -1604,8 +1586,6 @@
 				BA8EC2BC18D0C5E100D1AA12 /* ChatViewController.m */,
 				BA8EC2BD18D0C5E100D1AA12 /* ComplainViewController.h */,
 				BA8EC2BE18D0C5E100D1AA12 /* ComplainViewController.m */,
-				BA8EC2BF18D0C5E100D1AA12 /* UpdateOrderViewController.h */,
-				BA8EC2C018D0C5E100D1AA12 /* UpdateOrderViewController.m */,
 			);
 			path = ChatViewController;
 			sourceTree = "<group>";
@@ -1646,12 +1626,6 @@
 			isa = PBXGroup;
 			children = (
 				BA8EC2D618D0C5E100D1AA12 /* ConditionViewController */,
-				BA8EC2ED18D0C5E100D1AA12 /* SearchConditionViewController.h */,
-				BA8EC2EE18D0C5E100D1AA12 /* SearchConditionViewController.m */,
-				BA8EC2EF18D0C5E100D1AA12 /* SearchTeacherViewController.h */,
-				BA8EC2F018D0C5E100D1AA12 /* SearchTeacherViewController.m */,
-				BA8EC2F118D0C5E100D1AA12 /* WaitConfirmViewController.h */,
-				BA8EC2F218D0C5E100D1AA12 /* WaitConfirmViewController.m */,
 				BA8EC2F318D0C5E100D1AA12 /* WaitMaskView.h */,
 				BA8EC2F418D0C5E100D1AA12 /* WaitMaskView.m */,
 			);
@@ -1678,10 +1652,6 @@
 		BA8EC2D918D0C5E100D1AA12 /* SelectPosViewController */ = {
 			isa = PBXGroup;
 			children = (
-				BA8EC2DA18D0C5E100D1AA12 /* SelectAreaViewController.h */,
-				BA8EC2DB18D0C5E100D1AA12 /* SelectAreaViewController.m */,
-				BA8EC2DC18D0C5E100D1AA12 /* SelectPosViewController.h */,
-				BA8EC2DD18D0C5E100D1AA12 /* SelectPosViewController.m */,
 				BA8EC2DE18D0C5E100D1AA12 /* SiteOtherView.h */,
 				BA8EC2DF18D0C5E100D1AA12 /* SiteOtherView.m */,
 				BA8EC2E018D0C5E100D1AA12 /* SiteOtherViewController.h */,
@@ -3476,8 +3446,6 @@
 				BA8EC59818D0C5E300D1AA12 /* TeacherDetailViewController.m in Sources */,
 				BA8EC64318D0C5E300D1AA12 /* UILongPressButton.m in Sources */,
 				BA8EC59218D0C5E300D1AA12 /* SystemMessageViewController.m in Sources */,
-				BA8EC5A118D0C5E300D1AA12 /* SelectPosViewController.m in Sources */,
-				BA8EC59518D0C5E300D1AA12 /* UpdateOrderViewController.m in Sources */,
 				BA8EC58D18D0C5E300D1AA12 /* TTCustomAnnotationView.m in Sources */,
 				BAC73F3918D1014400B97CC6 /* VPImageCropperViewController.m in Sources */,
 				BA50D6D518D1346000CCE95C /* SetTimePeriodViewController.m in Sources */,
@@ -3506,21 +3474,18 @@
 				BA8EC5B518D0C5E300D1AA12 /* BoundTecentViewController.m in Sources */,
 				BA8EC63C18D0C5E300D1AA12 /* TTURLRequestQueue.m in Sources */,
 				BA8EC62E18D0C5E300D1AA12 /* SinaWeibo.m in Sources */,
-				BA8EC5A018D0C5E300D1AA12 /* SelectAreaViewController.m in Sources */,
 				BA8EC62318D0C5E300D1AA12 /* NSObject+SBJSON.m in Sources */,
 				BA8EC5B218D0C5E300D1AA12 /* UpdatePhoneInfoViewController.m in Sources */,
 				BA8EC5E818D0C5E300D1AA12 /* JSDismissiveTextView.m in Sources */,
 				BA8EC58E18D0C5E300D1AA12 /* DownloadInfoViewController.m in Sources */,
 				BA8EC5B318D0C5E300D1AA12 /* UpdatePhoneViewController.m in Sources */,
 				BABE4F8E18D7B368000FF967 /* AssistentPopViewController.m in Sources */,
-				BA8EC5A918D0C5E300D1AA12 /* SearchConditionViewController.m in Sources */,
 				BA8EC62F18D0C5E300D1AA12 /* SinaWeiboAuthorizeView.m in Sources */,
 				BA8EC5D718D0C5E300D1AA12 /* FMDatabase.m in Sources */,
 				BA8EC64618D0C5E300D1AA12 /* UIStartsImageView.m in Sources */,
 				BA8EC57E18D0C5E300D1AA12 /* AppDelegate.m in Sources */,
 				BA8EC5AD18D0C5E300D1AA12 /* AboutSoftwareViewController.m in Sources */,
 				BA8EC61218D0C5E300D1AA12 /* LeveyTabBar.m in Sources */,
-				BA8EC5AA18D0C5E300D1AA12 /* SearchTeacherViewController.m in Sources */,
 				BA8EC64418D0C5E300D1AA12 /* UINavigationBar+CustomImage.m in Sources */,
 				BA8EC64718D0C5E300D1AA12 /* UIViewController+MoveView.m in Sources */,
 				BA8EC61A18D0C5E300D1AA12 /* NoticePopView.m in Sources */,
@@ -3557,7 +3522,6 @@
 				BA8EC5AF18D0C5E300D1AA12 /* SuggestViewController.m in Sources */,
 				BA8EC5AE18D0C5E300D1AA12 /* SettingViewController.m in Sources */,
 				BA8EC61118D0C5E300D1AA12 /* LBorderView.m in Sources */,
-				BA8EC5AB18D0C5E300D1AA12 /* WaitConfirmViewController.m in Sources */,
 				BA8EC5A718D0C5E300D1AA12 /* SelectSubjectViewController.m in Sources */,
 				BA8EC5DA18D0C5E300D1AA12 /* FMDatabaseQueue.m in Sources */,
 				BA8EC5EA18D0C5E300D1AA12 /* JSMessageSoundEffect.m in Sources */,
@@ -3710,6 +3674,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				CODE_SIGN_IDENTITY = "iPhone Distribution: EDU Consulting Group (P3VS79FF2M)";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution: EDU Consulting Group (P3VS79FF2M)";
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					/Users/lynn/Documents/Project/QQTeacher/QQTeacher/QQTeacher/Externals,
