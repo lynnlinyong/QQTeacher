@@ -10,8 +10,6 @@
 
 @interface UploadCertificateViewController : UIViewController<
                                                             UIScrollViewDelegate,
-                                                            TTImageViewDelegate,
-                                                            ServerRequestDelegate,
                                                             UIImagePickerControllerDelegate,
                                                             UINavigationControllerDelegate,
                                                             VPImageCropperDelegate>

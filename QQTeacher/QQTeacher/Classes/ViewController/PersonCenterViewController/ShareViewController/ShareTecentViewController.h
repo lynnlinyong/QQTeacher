@@ -11,7 +11,7 @@
 @interface ShareTecentViewController : UIViewController<
                                                     WeiboRequestDelegate>
 {
-    TTImageView  *shareImgView;
+    UIImageView  *shareImgView;
     UITextView   *shareContentFld;
 }
 @end

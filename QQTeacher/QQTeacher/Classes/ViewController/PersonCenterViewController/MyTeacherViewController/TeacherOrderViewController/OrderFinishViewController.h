@@ -12,7 +12,7 @@
                                                     UITextFieldDelegate,
                                                     UIGridViewDelegate,
                                                     MBProgressHUDDelegate,
-                                                    ServerRequestDelegate>
+                                                    ASIHTTPRequestDelegate>
 {
     UIGridView    *finishOrderTab;
     UILabel       *payLab;

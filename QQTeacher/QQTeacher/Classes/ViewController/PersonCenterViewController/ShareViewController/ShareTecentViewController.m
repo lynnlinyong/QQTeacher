@@ -83,7 +83,7 @@
     [self.view addSubview:bgImgView];
 
     
-    shareImgView = [[TTImageView alloc]init];
+    shareImgView = [[UIImageView alloc]init];
     [self.view addSubview:shareImgView];
     
     shareContentFld = [[UITextView alloc]init];
@@ -148,7 +148,7 @@
     {
         NSDictionary *studentDic = [shareDic objectForKey:@"teacher"];
         shareContentFld.text     = [studentDic objectForKey:@"text"];
-        shareImgView.URL         = [studentDic objectForKey:@"image"];
+        [shareImgView setImageWithURL:[NSURL URLWithString:[studentDic objectForKey:@"image"]]];
         CLog(@"URL:%@", [studentDic objectForKey:@"image"]);
     }
 }
@@ -166,9 +166,11 @@
 #pragma mark - Control Event
 - (void) doShareBtnClicked:(id)sender
 {
+    NSDictionary *shareDic = [[NSUserDefaults standardUserDefaults] objectForKey:@"ShareContent"];
+    NSDictionary *studentDic = [shareDic objectForKey:@"teacher"];
     NSMutableDictionary *params = [[NSMutableDictionary alloc]initWithObjectsAndKeys:@"json",@"format",
                                    shareContentFld.text, @"content",
-                                   shareImgView.URL,@"pic_url",
+                                   [studentDic objectForKey:@"image"],@"pic_url",
                                    nil];
     CLog(@"params:%@", params);
     SingleTCWeibo *tcWbApi = [SingleTCWeibo shareInstance];

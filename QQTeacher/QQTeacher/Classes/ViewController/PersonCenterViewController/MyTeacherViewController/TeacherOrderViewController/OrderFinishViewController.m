@@ -668,13 +668,29 @@
     NSArray *valuesArr = [NSArray arrayWithObjects:@"submitApply",order.orderId,payFld.text,
                                                   [NSString stringWithFormat:@"%f", backMoney],ssid, nil];
     CLog(@"values:%@", valuesArr);
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate = self;
-    [request requestASyncWith:kServerPostRequest
-                     paramDic:pDic
-                       urlStr:url];
+    
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+    [request setDidFailSelector:@selector(requestAsyncFailed:)];
+    for (int i=0; i<paramsArr.count; i++)
+    {
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startAsynchronous];
 }
 
 #pragma mark -
@@ -701,42 +717,46 @@
     [MBProgressHUD hideHUDForView:nav.view animated:YES];
     
     NSData   *resVal = [request responseData];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]autorelease];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+    if (resVal )
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    
-    NSNumber *errorid = [resDic objectForKey:@"errorid"];
-    if (errorid.intValue == 0)
-    {
-        CLog(@"Submit Order Success!");
-        
-        //返回上一页
-        [self.navigationController popViewControllerAnimated:YES];
-    }
-    else
-    {
-        NSString *errorMsg = [resDic objectForKey:@"message"];
-        [self showAlertWithTitle:@"提示"
-                             tag:0
-                         message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
-                        delegate:self
-               otherButtonTitles:@"确定",nil];
-        
-        //重复登录
-        if (errorid.intValue==2)
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
         {
-            //清除sessid,清除登录状态,回到地图页
-            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-            [AppDelegate popToMainViewController];
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
+        }
+        CLog(@"***********Result****************");
+        
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
+        {
+            CLog(@"Submit Order Success!");
+            
+            //返回上一页
+            [self.navigationController popViewControllerAnimated:YES];
+        }
+        else
+        {
+            NSString *errorMsg = [resDic objectForKey:@"message"];
+            [self showAlertWithTitle:@"提示"
+                                 tag:0
+                             message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
+                            delegate:self
+                   otherButtonTitles:@"确定",nil];
+            
+            //重复登录
+            if (errorid.intValue==2)
+            {
+                //清除sessid,清除登录状态,回到地图页
+                [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+                [AppDelegate popToMainViewController];
+            }
         }
     }
 }

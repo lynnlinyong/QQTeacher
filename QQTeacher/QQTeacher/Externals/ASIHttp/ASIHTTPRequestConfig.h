@@ -11,7 +11,11 @@
 // Debug output configuration options
 // ======
 
-#define DEBUG_FORM_DATA_REQUEST 1
+// If defined will use the specified function for debug logging
+// Otherwise use NSLog
+#ifndef ASI_DEBUG_LOG
+    #define ASI_DEBUG_LOG NSLog
+#endif
 
 // When set to 1 ASIHTTPRequests will print information about what a request is doing
 #ifndef DEBUG_REQUEST_STATUS
@@ -31,4 +35,9 @@
 // When set to 1, ASIHTTPRequests will print information about persistent connections to the console
 #ifndef DEBUG_PERSISTENT_CONNECTIONS
 	#define DEBUG_PERSISTENT_CONNECTIONS 0
+#endif
+
+// When set to 1, ASIHTTPRequests will print information about HTTP authentication (Basic, Digest or NTLM) to the console
+#ifndef DEBUG_HTTP_AUTHENTICATION
+    #define DEBUG_HTTP_AUTHENTICATION 0
 #endif

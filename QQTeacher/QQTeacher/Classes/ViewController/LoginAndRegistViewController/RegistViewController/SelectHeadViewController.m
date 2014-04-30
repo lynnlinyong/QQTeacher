@@ -66,16 +66,19 @@
     infoView.backgroundColor = [UIColor whiteColor];
     [self.view addSubview:infoView];
     
-    headImageView = [[TTImageView alloc]init];
-    headImageView.delegate = self;
-    headImageView.defaultImage = [UIImage imageNamed:@"s_boy"];
+    headImageView = [[UIImageView alloc]init];
     if (headUrl.length>0)
     {
-        headImageView.URL = headUrl;
+        [headImageView setImageWithURL:[NSURL URLWithString:headUrl]
+                      placeholderImage:[UIImage imageNamed:@"s_boy"]
+                             completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+                             }];
     }
+    else
+        [headImageView setImage:[UIImage imageNamed:@"s_boy"]];
+    
     headImageView.frame = CGRectMake(51, 20, 180, 180);
     [infoView addSubview:headImageView];
-    [infoView release];
     
     UIImage *bgImg  = [UIImage imageNamed:@"normal_btn"];
     UIButton *phontoBtn = [UIButton buttonWithType:UIButtonTypeCustom];
@@ -237,22 +240,38 @@
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"edittime",@"uptype",@"sessid",UPLOAD_FILE, nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"uploadfile",
                           timeSp,@"image",ssid,[NSDictionary dictionaryWithObjectsAndKeys:headPath,@"file", nil],nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
+
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
     NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    for (int i=0; i<paramsArr.count; i++)
+    {
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    NSData *resVal = [request responseData];
     
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    NSData *resVal = [request requestSyncWith:kServerPostRequest
-                                     paramDic:pDic
-                                       urlStr:url];
     assert(resVal);
     NSString *curHeadUrl = @"";
-    if (resVal)
+    if (resVal )
     {
-        NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                 encoding:NSUTF8StringEncoding]autorelease];
-        NSDictionary *resDic  = [resStr JSONValue];
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
         CLog(@"resDic;%@", resDic);
         NSString *action = [resDic objectForKey:@"action"];
         if ([action isEqualToString:@"uploadfile"])

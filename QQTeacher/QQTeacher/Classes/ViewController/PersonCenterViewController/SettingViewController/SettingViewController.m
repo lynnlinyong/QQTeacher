@@ -213,56 +213,80 @@
     NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"viewstatus",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"getJxzl",@"1",ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    NSData   *resVal = [request requestSyncWith:kServerPostRequest
-                                       paramDic:pDic
-                                         urlStr:url];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]autorelease];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+
+    NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    for (int i=0; i<paramsArr.count; i++)
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    
-    NSNumber *errorid = [resDic objectForKey:@"errorid"];
-    if (errorid.intValue == 0)
-    {
-        NSDictionary *ccDic = [[resDic objectForKey:@"cc"] copy];
-        if (ccDic.count!=0)     //已签约
+        CLog(@"value:%@", [valuesArr objectAtIndex:i]);
+        CLog(@"param:%@", [paramsArr objectAtIndex:i]);
+        
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
         {
-            ccResDic = [resDic copy];
-            
-            [[NSUserDefaults standardUserDefaults] setObject:ccResDic
-                                                      forKey:@"AssistentData"];
-            
-            [setTab reloadData];
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+        //                [request setTimeOutSeconds:10];
+    }
+    [request setRequestMethod:@"POST"];
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    [request setDelegate:self];
+    NSData *resVal = [request responseData];
+    if (resVal )
+    {
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
+        {
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
+        }
+        CLog(@"***********Result****************");
+        
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
+        {
+            NSDictionary *ccDic = [[resDic objectForKey:@"cc"] copy];
+            if (ccDic.count!=0)     //已签约
+            {
+                ccResDic = [resDic copy];
+                
+                [[NSUserDefaults standardUserDefaults] setObject:ccResDic
+                                                          forKey:@"AssistentData"];
+                
+                [setTab reloadData];
+            }
+            else
+            {
+                ccResDic = nil;
+                [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"AssistentData"];
+                
+                [setTab reloadData];
+            }
         }
         else
         {
-            ccResDic = nil;
-            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"AssistentData"];
-            
-            [setTab reloadData];
-        }
-    }
-    else
-    {
-        //重复登录
-        if (errorid.intValue==2)
-        {
-            //清除sessid,清除登录状态,回到地图页
-            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-            [AppDelegate popToMainViewController];
+            //重复登录
+            if (errorid.intValue==2)
+            {
+                //清除sessid,清除登录状态,回到地图页
+                [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+                [AppDelegate popToMainViewController];
+            }
         }
     }
 }
@@ -308,22 +332,39 @@
                                teacher.timePeriod,teacher.info,teacher.certArray,nil];
     NSDictionary *infosDic  = [NSDictionary dictionaryWithObjects:infosValuesArr
                                                           forKeys:infosParamsArr];
-    NSString *infosJson = [infosDic JSONFragment];
+//    NSString *infosJson = [infosDic JSONFragment];
+    NSData *ccData = [NSJSONSerialization dataWithJSONObject:infosDic
+                                                     options:NSJSONWritingPrettyPrinted
+                                                       error:nil];
+    NSString *infosJson = [[NSString alloc]initWithData:ccData encoding:NSUTF8StringEncoding];
     
     NSString *ssid   = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"infos",@"sessid",nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"upinfos",infosJson, ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    CLog(@"Dic:%@", pDic);
-    
-    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-    serverReq.delegate   = self;
-    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-    [serverReq requestASyncWith:kServerPostRequest
-                       paramDic:pDic
-                         urlStr:url];
+    NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+    [request setDidFailSelector:@selector(requestAsyncFailed:)];
+    for (int i=0; i<paramsArr.count; i++)
+    {
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startAsynchronous];
 }
 
 - (BOOL) isSetTimePeriod
@@ -348,15 +389,30 @@
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"text",@"sessid",nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"submitProposal",content,ssid, nil];
     
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-    serverReq.delegate   = self;
-    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-    [serverReq requestASyncWith:kServerPostRequest
-                       paramDic:pDic
-                         urlStr:url];
+    NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+    [request setDidFailSelector:@selector(requestAsyncFailed:)];
+    for (int i=0; i<paramsArr.count; i++)
+    {
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startAsynchronous];
 }
 
 #pragma mark -
@@ -553,6 +609,7 @@
 {
     CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
     [nav dismissPopupViewControllerWithanimationType:MJPopupViewAnimationFade];
+    
     int tag = ((NSNumber *)[notice.userInfo objectForKey:@"TAG"]).intValue;
     switch (tag)
     {
@@ -924,10 +981,9 @@
                             NSString *url = [teacher.certArray objectAtIndex:i];
                             NSString *certUrl = [NSString stringWithFormat:@"%@%@", webAdd, url];
                             
-                            TTImageView *certImgView = [[TTImageView alloc]init];
-                            certImgView.delegate = self;
-                            certImgView.defaultImage = [UIImage imageNamed:@"s_boy"];
-                            certImgView.URL   = certUrl;
+                            UIImageView *certImgView = [[UIImageView alloc]init];
+                            [certImgView setImageWithURL:[NSURL URLWithString:certUrl]
+                                        placeholderImage:[UIImage imageNamed:@"s_boy"]];
                             certImgView.frame = CGRectMake(320-50-25*i, 15, 20, 20);
                             [cell addSubview:certImgView];
                             [certImgView release];
@@ -963,13 +1019,13 @@
                     [cell addSubview:photoLab];
                     [photoLab release];
                     
-                    headImgView = [[TTImageView alloc]init];
-                    headImgView.delegate = self;
-                    headImgView.frame  = CGRectMake(320-60, 15, 20, 20);
-                    headImgView.defaultImage = [UIImage imageNamed:@"s_boy"];
-                    CLog(@"headUrl:%@", teacher.headUrl);
                     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-                    headImgView.URL  = [NSString stringWithFormat:@"%@%@",webAdd,teacher.headUrl];
+                    NSString *url    = [NSString stringWithFormat:@"%@%@",webAdd,teacher.headUrl];
+                    
+                    headImgView = [[UIImageView alloc]init];
+                    headImgView.frame  = CGRectMake(320-60, 15, 20, 20);
+                    [headImgView setImageWithURL:[NSURL URLWithString:url]
+                                placeholderImage:[UIImage imageNamed:@"s_boy"]];
                     [cell addSubview:headImgView];
                     
                     cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
@@ -1336,60 +1392,63 @@
 - (void) requestAsyncSuccessed:(ASIHTTPRequest *)request
 {
     NSData   *resVal = [request responseData];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]autorelease];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+    if (resVal )
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    
-    NSNumber *errorid = [resDic objectForKey:@"errorid"];
-    if (errorid.intValue == 0)
-    {
-        NSString *action = [resDic objectForKey:@"action"];
-        if ([action isEqualToString:@"submitProposal"])
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
         {
-            CLog(@"upload suggest success!");
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
         }
-        else if ([action isEqualToString:@"upinfos"])
-        {
-            CLog(@"update infomation success!");
-            
-            //更新本地个人信息
-            NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:teacher];
-            [[NSUserDefaults standardUserDefaults] setObject:teacherData
-                                                      forKey:TEACHER_INFO];
-            
-            if ((updateType==EmailUpdate) || (updateType==PhoneUpdate))
-            {
-                //退出回到登录页面
-                [self doLogoutBtnClicked:nil];
-            }
-            
-            [setTab reloadData];
-        }
-    }
-    else
-    {
-//        NSString *errorMsg = [resDic objectForKey:@"message"];
-//        [self showAlertWithTitle:@"提示"
-//                             tag:0
-//                         message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
-//                        delegate:self
-//               otherButtonTitles:@"确定",nil];
+        CLog(@"***********Result****************");
         
-        //重复登录
-        if (errorid.intValue==2)
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
         {
-            //清除sessid,清除登录状态,回到地图页
-            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-            [AppDelegate popToMainViewController];
+            NSString *action = [resDic objectForKey:@"action"];
+            if ([action isEqualToString:@"submitProposal"])
+            {
+                CLog(@"upload suggest success!");
+            }
+            else if ([action isEqualToString:@"upinfos"])
+            {
+                CLog(@"update infomation success!");
+                
+                //更新本地个人信息
+                NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:teacher];
+                [[NSUserDefaults standardUserDefaults] setObject:teacherData
+                                                          forKey:TEACHER_INFO];
+                
+                if ((updateType==EmailUpdate) || (updateType==PhoneUpdate))
+                {
+                    //退出回到登录页面
+                    [self doLogoutBtnClicked:nil];
+                }
+                
+                [setTab reloadData];
+            }
+        }
+        else
+        {
+    //        NSString *errorMsg = [resDic objectForKey:@"message"];
+    //        [self showAlertWithTitle:@"提示"
+    //                             tag:0
+    //                         message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
+    //                        delegate:self
+    //               otherButtonTitles:@"确定",nil];
+            
+            //重复登录
+            if (errorid.intValue==2)
+            {
+                //清除sessid,清除登录状态,回到地图页
+                [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+                [AppDelegate popToMainViewController];
+            }
         }
     }
 }

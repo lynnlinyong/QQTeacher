@@ -9,12 +9,11 @@
 #import <UIKit/UIKit.h>
 
 @interface SelectHeadViewController : UIViewController<
-                                                    TTImageViewDelegate,
                                                     UIImagePickerControllerDelegate,
                                                     UINavigationControllerDelegate,
                                                     VPImageCropperDelegate>
 {
-    TTImageView *headImageView;
+    UIImageView *headImageView;
 }
 
 @property (nonatomic, retain) NSString *headUrl;

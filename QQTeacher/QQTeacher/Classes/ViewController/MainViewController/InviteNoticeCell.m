@@ -263,50 +263,67 @@
         NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
         NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"text",@"mp3",@"sessid", nil];
         NSArray *valuesArr = [NSArray arrayWithObjects:@"speakUri",otherTxt,@"1", ssid, nil];
-        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                         forKeys:paramsArr];
-        
-        NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-        NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-        ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-        NSData *resVal     = [serverReq requestSyncWith:kServerPostRequest
-                                               paramDic:pDic
-                                                 urlStr:url];
-        NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                 encoding:NSUTF8StringEncoding]autorelease];
-        NSDictionary *resDic  = [resStr JSONValue];
-        if (resDic)
+        NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
+        ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+        [request setDelegate:self];
+        for (int i=0; i<paramsArr.count; i++)
         {
-            NSString *errorid = [resDic objectForKey:@"errorid"];
-            if (errorid.intValue==0)
+            if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
             {
-                //下载语音播报
-                if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+                NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+                NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+                NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+                [request setFile:filePath forKey:fileParam];
+                continue;
+            }
+            
+            [request setPostValue:[valuesArr objectAtIndex:i]
+                           forKey:[paramsArr objectAtIndex:i]];
+        }
+        [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+        [request addRequestHeader:@"Content-Type"
+                            value:@"text/xml; charset=utf-8"];
+        [request startSynchronous];
+        NSData *resVal = [request responseData];
+        if (resVal )
+        {
+            NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                     options:NSJSONReadingMutableLeaves
+                                                                       error:nil];
+            if (resDic)
+            {
+                NSString *errorid = [resDic objectForKey:@"errorid"];
+                if (errorid.intValue==0)
                 {
-                    return;
+                    //下载语音播报
+                    if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+                    {
+                        return;
+                    }
+                    
+                    NSString *downPath  = [[ChatViewController getRecordURL] retain];
+                    
+                    NSString *webAdd    = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+                    NSString *soundPath = [NSString stringWithFormat:@"%@%@", webAdd, [resDic objectForKey:@"uri"]];
+                    
+                    //下载音频文件
+                    ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:soundPath]];
+                    [request setDelegate:self];
+                    [request setDownloadProgressDelegate:self];
+                    [request setDownloadDestinationPath:downPath];
+                    [request startAsynchronous];
+                    
                 }
-                
-                NSString *downPath  = [[ChatViewController getRecordURL] retain];
-                
-                NSString *webAdd    = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-                NSString *soundPath = [NSString stringWithFormat:@"%@%@", webAdd, [resDic objectForKey:@"uri"]];
-                
-                //下载音频文件
-                ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:soundPath]];
-                [request setDelegate:self];
-                [request setDownloadProgressDelegate:self];
-                [request setDownloadDestinationPath:downPath];
-                [request startAsynchronous];
-                
+                else
+                {
+                    CLog(@"speakUri failed!");
+                }
             }
             else
             {
-                CLog(@"speakUri failed!");
+                CLog(@"speark failed!")
             }
-        }
-        else
-        {
-            CLog(@"speark failed!")
         }
     }
 }

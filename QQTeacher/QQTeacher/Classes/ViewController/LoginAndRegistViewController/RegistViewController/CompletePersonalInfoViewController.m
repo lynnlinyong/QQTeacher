@@ -724,21 +724,41 @@
     NSArray *infosValuesArr = [NSArray arrayWithObjects:phoneValLab.text,emailValLab.text,nameValLab.text,headUrl,[Student searchSubjectID:subValLab.text],[Student searchGenderID:sexValLab.text],idNumLab.text,salaryLab.text,timePeriod,myInfoLab.text,nil];
     NSDictionary *infosDic  = [NSDictionary dictionaryWithObjects:infosValuesArr
                                                           forKeys:infosParamsArr];
-    NSString *jsonInfos = [infosDic JSONFragment];
+//    NSString *jsonInfos = [infosDic JSONFragment];
+    NSData *ccData = [NSJSONSerialization dataWithJSONObject:infosDic
+                                                     options:NSJSONWritingPrettyPrinted
+                                                       error:nil];
+    NSString *jsonInfos = [[NSString alloc]initWithData:ccData encoding:NSUTF8StringEncoding];
     
     //更新个人资料
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"infos",@"sessid",nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"upinfo",jsonInfos,ssid,nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    CLog(@"updateInfo:%@", pDic);
-    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-    serverReq.delegate   = self;
-    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-    [serverReq requestASyncWith:kServerPostRequest
-                       paramDic:pDic
-                         urlStr:url];
+    
+    NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+    [request setDidFailSelector:@selector(requestAsyncFailed:)];
+    for (int i=0; i<paramsArr.count; i++)
+    {
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startAsynchronous];
+
     [timePeriod release];
 }
 
@@ -1131,47 +1151,50 @@
 - (void) requestAsyncSuccessed:(ASIHTTPRequest *)request
 {
     NSData   *resVal = [request responseData];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]autorelease];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+    if (resVal )
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    
-    NSNumber *errorid = [resDic objectForKey:@"errorid"];
-    if (errorid.intValue == 0)
-    {
-        NSDictionary *teacherDic = [resDic objectForKey:@"teacherInfo"];
-        
-        Teacher *tObj = [Teacher setTeacherProperty:teacherDic];
-        NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:tObj];
-        
-        [[NSUserDefaults standardUserDefaults] setObject:teacherData
-                                                  forKey:TEACHER_INFO];
-        
-        //返回登陆
-        [self gotoLoginView];
-    }
-    else
-    {
-        NSString *errorMsg = [resDic objectForKey:@"message"];
-        [self showAlertWithTitle:@"提示"
-                             tag:0
-                         message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
-                        delegate:self
-               otherButtonTitles:@"确定",nil];
-        //重复登录
-        if (errorid.intValue==2)
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
         {
-            //清除sessid,清除登录状态,回到地图页
-            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-            [AppDelegate popToMainViewController];
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
+        }
+        CLog(@"***********Result****************");
+        
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
+        {
+            NSDictionary *teacherDic = [resDic objectForKey:@"teacherInfo"];
+            
+            Teacher *tObj = [Teacher setTeacherProperty:teacherDic];
+            NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:tObj];
+            
+            [[NSUserDefaults standardUserDefaults] setObject:teacherData
+                                                      forKey:TEACHER_INFO];
+            
+            //返回登陆
+            [self gotoLoginView];
+        }
+        else
+        {
+            NSString *errorMsg = [resDic objectForKey:@"message"];
+            [self showAlertWithTitle:@"提示"
+                                 tag:0
+                             message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
+                            delegate:self
+                   otherButtonTitles:@"确定",nil];
+            //重复登录
+            if (errorid.intValue==2)
+            {
+                //清除sessid,清除登录状态,回到地图页
+                [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+                [AppDelegate popToMainViewController];
+            }
         }
     }
 }

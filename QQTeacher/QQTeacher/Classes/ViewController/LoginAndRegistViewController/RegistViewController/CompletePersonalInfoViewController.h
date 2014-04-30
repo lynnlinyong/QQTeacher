@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface CompletePersonalInfoViewController : UIViewController<
-                                                                ServerRequestDelegate,
+                                                                ASIHTTPRequestDelegate,
                                                                 UITableViewDelegate,
                                                                 UITableViewDataSource,
                                                                 UIActionSheetDelegate>

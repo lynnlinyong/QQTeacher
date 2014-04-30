@@ -88,14 +88,20 @@
 - (void) Dialog:(NSString *) title
 {
     CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-    [MBProgressHUD showHUDAddedTo:nav.view
-                         withText:title
-                         animated:YES
-                         delegate:self];
+    MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
+    hud.delegate  = self;
+    hud.labelText = title;
+    hud.square = YES;
+    [hud show:YES];
+    
+    UIGestureRecognizer *tapGre = [[UIGestureRecognizer alloc]initWithTarget:self
+                                                                      action:@selector(tapGestureResponse:)];
+    [hud addGestureRecognizer:tapGre];
+    [tapGre release];
 }
 
 - (void) showAlert:(NSString *) title
-{   
+{
     //显示3秒，自动消失
     __block LBorderView *alertView = [[LBorderView alloc]initWithFrame:CGRectMake(self.view.frame.size.width/2-140, self.view.frame.size.height/2-25,
                                                              280, 50)];

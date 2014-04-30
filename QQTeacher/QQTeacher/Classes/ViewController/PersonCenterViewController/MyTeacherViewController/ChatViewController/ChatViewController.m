@@ -16,8 +16,6 @@
 @synthesize student;
 @synthesize messages;
 @synthesize order;
-//@synthesize listenBtn;
-//@synthesize employBtn;
 @synthesize isFromSearchCondition;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -197,15 +195,29 @@
     NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArray = [NSArray arrayWithObjects:@"action",@"audio",@"sessid", nil];
     NSArray *valuesArray = [NSArray arrayWithObjects:@"amrToMp3", audioURL, ssid, nil];
-    NSDictionary *pDic   = [NSDictionary dictionaryWithObjects:valuesArray
-                                                     forKeys:paramsArray];
-    CLog(@"PDIC:%@", pDic);
-    NSString *webAdd     = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url        = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    NSData *resVal   = [request requestSyncWith:kServerPostRequest
-                                       paramDic:pDic
-                                         urlStr:url];
+    NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    for (int i=0; i<paramsArray.count; i++)
+    {
+        if ([[paramsArray objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArray objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArray objectAtIndex:i]
+                       forKey:[paramsArray objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    NSData *resVal = [request responseData];
     if (resVal)
     {
         RecordAudio *audio = [[RecordAudio alloc]init];
@@ -267,21 +279,39 @@
     NSArray *infosValuesArr = [NSArray arrayWithObjects:listenNum,nil];
     NSDictionary *infosDic  = [NSDictionary dictionaryWithObjects:infosValuesArr
                                                           forKeys:infosParamsArr];
-    NSString *infosJson = [infosDic JSONFragment];
+//    NSString *infosJson = [infosDic JSONFragment];
+    NSData *data = [NSJSONSerialization dataWithJSONObject:infosDic
+                                                   options:NSJSONWritingPrettyPrinted
+                                                     error:nil];
+    NSString *infosJson = [[NSString alloc]initWithData:data
+                                               encoding:NSUTF8StringEncoding];
     
     NSString *ssid   = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"infos",@"sessid",nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"upinfos",infosJson, ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    CLog(@"sdfsDic:%@", pDic);
-    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-    serverReq.delegate   = self;
-    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-    NSData *resVal = [serverReq requestSyncWith:kServerPostRequest
-                       paramDic:pDic
-                         urlStr:url];
+    NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    for (int i=0; i<paramsArr.count; i++)
+    {
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    NSData *resVal = [request responseData];
     if (resVal)
     {
         CLog(@"upload listen status susscess!");
@@ -295,8 +325,11 @@
         NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_LISTENING_CHANG],teacher.phoneNums, nil];
         NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
                                                           forKeys:paramsArr];
-        NSString *jsonMsg   = [pDic JSONFragment];
-        NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+//        NSString *jsonMsg   = [pDic JSONFragment];
+//        NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *data = [NSJSONSerialization dataWithJSONObject:pDic
+                                                       options:NSJSONWritingPrettyPrinted
+                                                         error:nil];
         
         //发送消息
         SingleMQTT *session = [SingleMQTT shareInstance];
@@ -338,16 +371,30 @@
         NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
         NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"messageId",@"phone",@"sessid", nil];
         NSArray *valuesArr = [NSArray arrayWithObjects:@"getMessages",[item objectForKey:@"messageId"],student.phoneNumber,ssid, nil];
-        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                         forKeys:paramsArr];
-        
-        ServerRequest *request = [ServerRequest sharedServerRequest];
-        request.delegate = self;
         NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
-        [request requestASyncWith:kServerPostRequest
-                         paramDic:pDic
-                           urlStr:url];
+        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+        ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+        [request setDelegate:self];
+        [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+        [request setDidFailSelector:@selector(requestAsyncFailed:)];
+        for (int i=0; i<paramsArr.count; i++)
+        {
+            if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+            {
+                NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+                NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+                NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+                [request setFile:filePath forKey:fileParam];
+                continue;
+            }
+            
+            [request setPostValue:[valuesArr objectAtIndex:i]
+                           forKey:[paramsArr objectAtIndex:i]];
+        }
+        [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+        [request addRequestHeader:@"Content-Type"
+                            value:@"text/xml; charset=utf-8"];
+        [request startAsynchronous];
     }
 }
 
@@ -469,15 +516,30 @@
     NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"messageId",@"phone",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"getMessages",@"0",student.phoneNumber, ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate = self;
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-    [request requestASyncWith:kServerPostRequest
-                                       paramDic:pDic
-                                         urlStr:url];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+    [request setDidFailSelector:@selector(requestAsyncFailed:)];
+    for (int i=0; i<paramsArr.count; i++)
+    {
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startAsynchronous];
 }
 
 + (NSString *) getRecordURL
@@ -549,23 +611,37 @@
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"edittime",@"uptype",@"sessid",UPLOAD_FILE, nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"uploadfile",
                           timeSp,@"audio",ssid,[NSDictionary dictionaryWithObjectsAndKeys:path,@"file", nil],nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
     
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
     NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
     
     //上传录音文件
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate = self;
-    NSData *resVal   = [request requestSyncWith:kServerPostRequest
-                                       paramDic:pDic
-                                         urlStr:url];
-    if (resVal)
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    for (int i=0; i<paramsArr.count; i++)
     {
-        NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                 encoding:NSUTF8StringEncoding]autorelease];
-        NSDictionary *resDic  = [resStr JSONValue];
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    NSData *resVal = [request responseData];
+    if (resVal )
+    {
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
         NSString *action = [resDic objectForKey:@"action"];
         if ([action isEqualToString:@"uploadfile"])
         {
@@ -583,8 +659,12 @@
             NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
                                                               forKeys:paramsArr];
             //发送消息
-            NSString *jsonMsg   = [pDic JSONFragment];
-            NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+//            NSString *jsonMsg   = [pDic JSONFragment];
+//            NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+            NSData *data = [NSJSONSerialization dataWithJSONObject:pDic
+                                                           options:NSJSONWritingPrettyPrinted
+                                                             error:nil];
+            NSString *jsonMsg   = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
             SingleMQTT *session = [SingleMQTT shareInstance];
             [session.session publishData:data
                                  onTopic:student.deviceId];
@@ -599,8 +679,11 @@
                     NSArray *ccValuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_AUDIO],teacher.phoneNums,teacher.name,path,[NSNumber numberWithInt:voiceTimes],timeSp,[ccDic objectForKey:@"cc_phone"],[SingleMQTT getCurrentDevTopic],student.phoneNumber,nil];
                     NSDictionary *ccPDic  = [NSDictionary dictionaryWithObjects:ccValuesArr
                                                                         forKeys:ccParamsArr];
-                    NSString *ccJsonMsg = [ccPDic JSONFragment];
-                    NSData *ccData      = [ccJsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+//                    NSString *ccJsonMsg = [ccPDic JSONFragment];
+//                    NSData *ccData      = [ccJsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+                    NSData *ccData = [NSJSONSerialization dataWithJSONObject:ccPDic
+                                                                     options:NSJSONWritingPrettyPrinted
+                                                                       error:nil];
                     CLog(@"ccPic:%@, deviceId:%@", ccPDic, [ccDic objectForKey:@"deviceId"]);
                     [session.session publishData:ccData onTopic:[ccDic objectForKey:@"deviceId"]];
                 }
@@ -755,36 +838,52 @@
                           @"sendTime",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"updateMessageZT",student.phoneNumber,
                           timeSp,ssid,nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate     = self;
-    NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-    NSData *resVal = [request requestSyncWith:kServerPostRequest
-                                     paramDic:pDic
-                                       urlStr:url];
-    NSString *resStr = [[NSString alloc]initWithData:resVal
-                                            encoding:NSUTF8StringEncoding];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSNumber *errorid = [resDic objectForKey:@"errorid"];
-    if (errorid.intValue == 0)
+    NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    for (int i=0; i<paramsArr.count; i++)
     {
-        NSString *action = [resDic objectForKey:@"action"];
-        if ([action isEqualToString:@"submitMessage"])
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
         {
-            CLog(@"Upload Message Success!");
-            [self getChatRecords];
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
         }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
     }
-    else
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    NSData *resVal = [request responseData];
+    if (resVal )
     {
-        [self showAlertWithTitle:@"提示"
-                             tag:0
-                         message:@"上传信息失败"
-                        delegate:self
-               otherButtonTitles:@"确定",nil];
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
+        {
+            NSString *action = [resDic objectForKey:@"action"];
+            if ([action isEqualToString:@"submitMessage"])
+            {
+                CLog(@"Upload Message Success!");
+                [self getChatRecords];
+            }
+        }
+        else
+        {
+            [self showAlertWithTitle:@"提示"
+                                 tag:0
+                             message:@"上传信息失败"
+                            delegate:self
+                   otherButtonTitles:@"确定",nil];
+        }
     }
 }
 
@@ -802,36 +901,52 @@
                                                    @"phone",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"submitMessage",msg,
                                                    student.phoneNumber,ssid,nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate       = self;
-    NSString *webAddress   = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-    NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-    NSData *resVal = [request requestSyncWith:kServerPostRequest
-                                     paramDic:pDic
-                                       urlStr:url];
-    NSString *resStr = [[NSString alloc]initWithData:resVal
-                                            encoding:NSUTF8StringEncoding];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSNumber *errorid = [resDic objectForKey:@"errorid"];
-    if (errorid.intValue == 0)
+    NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    for (int i=0; i<paramsArr.count; i++)
     {
-        NSString *action = [resDic objectForKey:@"action"];
-        if ([action isEqualToString:@"submitMessage"])
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
         {
-            CLog(@"Upload Message Success!");
-            [self getChatRecords];
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
         }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
     }
-    else
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    NSData *resVal = [request responseData];
+    if (resVal )
     {
-        [self showAlertWithTitle:@"提示"
-                             tag:0
-                         message:@"上传信息失败"
-                        delegate:self
-               otherButtonTitles:@"确定",nil];
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
+        {
+            NSString *action = [resDic objectForKey:@"action"];
+            if ([action isEqualToString:@"submitMessage"])
+            {
+                CLog(@"Upload Message Success!");
+                [self getChatRecords];
+            }
+        }
+        else
+        {
+            [self showAlertWithTitle:@"提示"
+                                 tag:0
+                             message:@"上传信息失败"
+                            delegate:self
+                   otherButtonTitles:@"确定",nil];
+        }
     }
 }
 
@@ -955,21 +1070,34 @@
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"student_phone",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"callPhone",student.phoneNumber, ssid, nil];
     
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
     NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate = self;
-    NSData *resVal = [request requestSyncWith:kServerPostRequest
-                                     paramDic:pDic
-                                       urlStr:url];
-    if (resVal)
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    for (int i=0; i<paramsArr.count; i++)
     {
-        NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                 encoding:NSUTF8StringEncoding]autorelease];
-        NSDictionary *resDic  = [resStr JSONValue];
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    NSData *resVal = [request responseData];
+    if (resVal )
+    {
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
         NSString *errorid = [resDic objectForKey:@"errorid"];
         if (errorid.integerValue==0)
         {
@@ -1003,8 +1131,12 @@
                                                       forKeys:paramsArr];
     
     //发送消息
-    NSString *jsonMsg   = [pDic JSONFragment];
-    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+//    NSString *jsonMsg   = [pDic JSONFragment];
+//    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *data = [NSJSONSerialization dataWithJSONObject:pDic
+                                                   options:NSJSONWritingPrettyPrinted
+                                                     error:nil];
+    NSString *jsonMsg = [[NSString alloc]initWithData:data encoding:NSUTF8StringEncoding];
     SingleMQTT *session = [SingleMQTT shareInstance];
     [session.session publishData:data
                          onTopic:student.deviceId];
@@ -1020,8 +1152,11 @@
             NSArray *ccValuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_TEXT],teacher.phoneNums,teacher.name,teacher.headUrl,text,timeSp,[ccDic objectForKey:@"cc_phone"],[SingleMQTT getCurrentDevTopic],student.phoneNumber,nil];
             NSDictionary *ccPDic  = [NSDictionary dictionaryWithObjects:ccValuesArr
                                                               forKeys:ccParamsArr];
-            NSString *ccJsonMsg = [ccPDic JSONFragment];
-            NSData *ccData      = [ccJsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+//            NSString *ccJsonMsg = [ccPDic JSONFragment];
+//            NSData *ccData      = [ccJsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+            NSData *ccData = [NSJSONSerialization dataWithJSONObject:ccPDic
+                                                             options:NSJSONWritingPrettyPrinted
+                                                               error:nil];
             CLog(@"ccPic:%@, deviceId:%@", ccPDic, [ccDic objectForKey:@"deviceId"]);
             [session.session publishData:ccData onTopic:[ccDic objectForKey:@"deviceId"]];
         }
@@ -1306,69 +1441,72 @@
     //聊天记录刷新完成
     [self doneLoadingTableViewData];
     
-    NSData   *resVal = [[request responseData] retain];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                            encoding:NSUTF8StringEncoding]retain];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+    NSData   *resVal = [request responseData];
+    if (resVal )
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    
-    NSNumber *errorid = [resDic objectForKey:@"errorid"];
-    if (errorid.intValue == 0)
-    {
-        NSString *action = [resDic objectForKey:@"action"];
-        if ([action isEqualToString:@"setListening"])
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
         {
-            [self showAlertWithTitle:@"提示"
-                                 tag:0
-                             message:@"您申请了试听课程,我们将以短信告知老师"
-                            delegate:self
-                   otherButtonTitles:@"确定",nil];
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
         }
-        else if ([action isEqualToString:@"getMessages"])
+        CLog(@"***********Result****************");
+        
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
         {
-            NSArray *array = [resDic objectForKey:@"messages"];
-            if (array)
+            NSString *action = [resDic objectForKey:@"action"];
+            if ([action isEqualToString:@"setListening"])
             {
-                if (isNewData)
-                    [messages removeAllObjects];
-                
-                for (int i=0; i<array.count; i++)
-                {
-                    NSMutableDictionary *item = [[array objectAtIndex:i] mutableCopy];
-                    if ([item objectForKey:@"sound"])
-                    {
-                        [item setObject:[NSNumber numberWithBool:YES]
-                                 forKey:@"isRead"];
-                    }
-                    [messages addObject:item];
-                    CLog(@"sdhfushdfItem:%@", item);
-                    CLog(@"shdfsfhsudfhsufh:%d", [messages indexOfObject:item]);
-                }
+                [self showAlertWithTitle:@"提示"
+                                     tag:0
+                                 message:@"您申请了试听课程,我们将以短信告知老师"
+                                delegate:self
+                       otherButtonTitles:@"确定",nil];
             }
-            
-            //刷新界面
-            [self finishSend];
-            
-            //消息查看更新
-            [self updateMessageZT];
+            else if ([action isEqualToString:@"getMessages"])
+            {
+                NSArray *array = [resDic objectForKey:@"messages"];
+                if (array)
+                {
+                    if (isNewData)
+                        [messages removeAllObjects];
+                    
+                    for (int i=0; i<array.count; i++)
+                    {
+                        NSMutableDictionary *item = [[array objectAtIndex:i] mutableCopy];
+                        if ([item objectForKey:@"sound"])
+                        {
+                            [item setObject:[NSNumber numberWithBool:YES]
+                                     forKey:@"isRead"];
+                        }
+                        [messages addObject:item];
+                        CLog(@"sdhfushdfItem:%@", item);
+                        CLog(@"shdfsfhsudfhsufh:%d", [messages indexOfObject:item]);
+                    }
+                }
+                
+                //刷新界面
+                [self finishSend];
+                
+                //消息查看更新
+                [self updateMessageZT];
+            }
         }
-    }
-    else
-    {
-        //重复登录
-        if (errorid.intValue==2)
+        else
         {
-            //清除sessid,清除登录状态,回到地图页
-            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-            [AppDelegate popToMainViewController];
+            //重复登录
+            if (errorid.intValue==2)
+            {
+                //清除sessid,清除登录状态,回到地图页
+                [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+                [AppDelegate popToMainViewController];
+            }
         }
     }
 }

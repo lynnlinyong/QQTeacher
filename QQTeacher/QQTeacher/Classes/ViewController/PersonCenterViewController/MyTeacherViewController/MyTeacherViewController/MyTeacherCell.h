@@ -7,7 +7,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "TTImageView.h"
 
 @class MyTeacherCell;
 @protocol MyTeacherCellDelegate <NSObject>
@@ -17,16 +16,13 @@
 @class Order;
 @class Teacher;
 @class UIStartsImageView;
-@interface MyTeacherCell : UITableViewCell<TTImageViewDelegate>
+@interface MyTeacherCell : UITableViewCell
 {
     UIButton            *headBtn;
     UILabel *nameLab;
     UILabel             *introduceLab;
     UIButton            *commBtn;
     UIButton            *compBtn;
-//    UIButton            *recommBtn;
-//    UIStartsImageView   *starImageView;
-//    UIImageView *idImageView;
 }
 
 @property (nonatomic, copy) Order    *order;

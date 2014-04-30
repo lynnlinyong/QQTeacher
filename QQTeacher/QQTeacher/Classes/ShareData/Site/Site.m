@@ -70,7 +70,7 @@
 
 - (id) copyWithZone:(NSZone *)zone
 {
-    Site *sObj = NSCopyObject(self, 0, zone);
+    Site *sObj = [[[self class]allocWithZone:zone]init];//NSCopyObject(self, 0, zone);
     if (sObj)
     {
         sObj.address = [address copy];
@@ -94,7 +94,7 @@
 
 - (id) mutableCopyWithZone:(NSZone *)zone
 {
-    Site *sObj = NSCopyObject(self, 0, zone);
+    Site *sObj = [[[self class] allocWithZone:zone]init];//NSCopyObject(self, 0, zone);
     if (sObj)
     {
         sObj.address = [address copy];

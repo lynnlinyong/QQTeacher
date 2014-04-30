@@ -12,7 +12,7 @@
                                                     SinaWeiboDelegate,
                                                     SinaWeiboRequestDelegate>
 {
-    TTImageView  *shareImgView;
+    UIImageView  *shareImgView;
     UITextView   *shareContentFld;
 }
 @end

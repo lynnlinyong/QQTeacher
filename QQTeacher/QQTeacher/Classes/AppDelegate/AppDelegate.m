@@ -19,6 +19,9 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     CLog(@"%s", __func__);
+    
+    NSSetUncaughtExceptionHandler(&cauchchException);
+    
     //注册设备推送通知
     [[UIApplication sharedApplication]registerForRemoteNotificationTypes:
                                                          (UIRemoteNotificationTypeAlert |
@@ -132,6 +135,12 @@
     return YES;
 }
 
+void cauchchException(NSException *exception)
+{
+    NSLog(@"Crash:%@", exception);
+    NSLog(@"Stack TRace:%@", [exception callStackSymbols]);
+}
+
 - (void)applicationWillResignActive:(UIApplication *)application
 {
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
@@ -225,73 +234,102 @@
         NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
         NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"orderid",@"sessid", nil];
         NSArray *valuesArr = [NSArray arrayWithObjects:@"orderConfirm",order.orderId,ssid, nil];
-        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                         forKeys:paramsArr];
-        CLog(@"sdfshdfushdfu:%@", pDic);
+        
         NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
         NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-        ServerRequest *request = [ServerRequest sharedServerRequest];
-        NSData *resVal = [request requestSyncWith:kServerPostRequest
-                                         paramDic:pDic
-                                           urlStr:url];
-        NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                 encoding:NSUTF8StringEncoding]autorelease];
-        NSDictionary *resDic   = [resStr JSONFragmentValue];
-        CLog(@"resDic:%@", resDic);
-        NSNumber *errorid = [resDic objectForKey:@"errorid"];
-        if (errorid.intValue == 0)
+        ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+        for (int i=0; i<paramsArr.count; i++)
         {
-            NSString *action = [resDic objectForKey:@"action"];
-            if ([action isEqualToString:@"orderConfirm"])
+            CLog(@"value:%@", [valuesArr objectAtIndex:i]);
+            CLog(@"param:%@", [paramsArr objectAtIndex:i]);
+            
+            if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
             {
-                CLog(@"OrderConfirm Susscess!");
-                
-                NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
-                Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
-                
-                NSNumber *numEmploy = [notice.userInfo objectForKey:@"IsEmploy"];
-                BOOL isEmploy = [numEmploy boolValue];
-                if (!isEmploy)   //修改订单消息
-                {
-                    //发出确认消息
-                    NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"icon",
-                                           @"orderid",@"taPhone",@"deviceId",nil];
-                    NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_CONFIRM_SUCCESS],teacher.phoneNums,teacher.name,teacher.headUrl,order.orderId,order.student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
-                    NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
-                                                                      forKeys:paramsArr];
-                    
-                    //发送消息
-                    NSString *jsonMsg   = [pDic JSONFragment];
-                    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
-                    SingleMQTT *session = [SingleMQTT shareInstance];
-                    [session.session publishData:data
-                                         onTopic:order.student.deviceId];
-                }
-                else            //发起聘请消息
-                {
-                    //发出确认消息
-                    NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"icon",
-                                           @"orderid",@"taPhone",@"deviceId",nil];
-                    NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_EDIT_SUCCESS],teacher.phoneNums,teacher.name,teacher.headUrl,order.orderId,order.student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
-                    NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
-                                                                      forKeys:paramsArr];
-                    
-                    //发送消息
-                    NSString *jsonMsg   = [pDic JSONFragment];
-                    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
-                    SingleMQTT *session = [SingleMQTT shareInstance];
-                    [session.session publishData:data
-                                         onTopic:order.student.deviceId];
-                }
+                NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+                NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+                NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+                [request setFile:filePath forKey:fileParam];
+                continue;
             }
             
-            //通知界面更新
-            [[NSNotificationCenter defaultCenter] postNotificationName:@"refreshOrders"
-                                                                object:nil];
+            [request setPostValue:[valuesArr objectAtIndex:i]
+                           forKey:[paramsArr objectAtIndex:i]];
+            //                [request setTimeOutSeconds:10];
         }
-        else
+        [request setRequestMethod:@"POST"];
+        [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+        [request addRequestHeader:@"Content-Type"
+                            value:@"text/xml; charset=utf-8"];
+        [request startSynchronous];
+        [request setDelegate:self];
+        NSData *resVal = [request responseData];
+        if (resVal)
         {
-            CLog(@"OrderConfirm Failed!");
+            NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                     options:NSJSONReadingMutableLeaves
+                                                                       error:nil];
+            CLog(@"resDic:%@", resDic);
+            NSNumber *errorid = [resDic objectForKey:@"errorid"];
+            if (errorid.intValue == 0)
+            {
+                NSString *action = [resDic objectForKey:@"action"];
+                if ([action isEqualToString:@"orderConfirm"])
+                {
+                    CLog(@"OrderConfirm Susscess!");
+                    
+                    NSData *teacherData  = [[NSUserDefaults standardUserDefaults] valueForKey:TEACHER_INFO];
+                    Teacher *teacher = [NSKeyedUnarchiver unarchiveObjectWithData:teacherData];
+                    
+                    NSNumber *numEmploy = [notice.userInfo objectForKey:@"IsEmploy"];
+                    BOOL isEmploy = [numEmploy boolValue];
+                    if (!isEmploy)   //修改订单消息
+                    {
+                        //发出确认消息
+                        NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"icon",
+                                               @"orderid",@"taPhone",@"deviceId",nil];
+                        NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_CONFIRM_SUCCESS],teacher.phoneNums,teacher.name,teacher.headUrl,order.orderId,order.student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
+                        NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
+                                                                          forKeys:paramsArr];
+                        
+                        //发送消息
+    //                    NSString *jsonMsg   = [pDic JSONFragment];
+    //                    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+                        NSData *data = [NSJSONSerialization dataWithJSONObject:pDic
+                                                                       options:NSJSONWritingPrettyPrinted
+                                                                         error:nil];
+                        SingleMQTT *session = [SingleMQTT shareInstance];
+                        [session.session publishData:data
+                                             onTopic:order.student.deviceId];
+                    }
+                    else            //发起聘请消息
+                    {
+                        //发出确认消息
+                        NSArray *paramsArr  = [NSArray arrayWithObjects:@"type", @"phone", @"nickname", @"icon",
+                                               @"orderid",@"taPhone",@"deviceId",nil];
+                        NSArray *valuesArr  = [NSArray arrayWithObjects:[NSNumber numberWithInt:PUSH_TYPE_ORDER_EDIT_SUCCESS],teacher.phoneNums,teacher.name,teacher.headUrl,order.orderId,order.student.phoneNumber,[SingleMQTT getCurrentDevTopic], nil];
+                        NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
+                                                                          forKeys:paramsArr];
+                        
+                        //发送消息
+    //                    NSString *jsonMsg   = [pDic JSONFragment];
+    //                    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+                        NSData *data = [NSJSONSerialization dataWithJSONObject:pDic
+                                                                       options:NSJSONWritingPrettyPrinted
+                                                                         error:nil];
+                        SingleMQTT *session = [SingleMQTT shareInstance];
+                        [session.session publishData:data
+                                             onTopic:order.student.deviceId];
+                    }
+                }
+                
+                //通知界面更新
+                [[NSNotificationCenter defaultCenter] postNotificationName:@"refreshOrders"
+                                                                    object:nil];
+            }
+            else
+            {
+                CLog(@"OrderConfirm Failed!");
+            }
         }
     }
     
@@ -324,14 +362,29 @@
         NSArray *paramsArray = [NSArray arrayWithObjects:@"action",@"sessid", nil];
         NSArray *valuesArray = [NSArray arrayWithObjects:@"getPushMessage",ssid,nil];
         
-        NSDictionary *pDic     = [NSDictionary dictionaryWithObjects:valuesArray
-                                                             forKeys:paramsArray];
-        ServerRequest *request = [ServerRequest sharedServerRequest];
-        request.delegate = self;
         NSString *url = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
-        [request requestASyncWith:kServerPostRequest
-                         paramDic:pDic
-                           urlStr:url];
+        ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+        [request setDelegate:self];
+        [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+        [request setDidFailSelector:@selector(requestAsyncFailed:)];
+        for (int i=0; i<paramsArray.count; i++)
+        {
+            if ([[paramsArray objectAtIndex:i] isEqual:UPLOAD_FILE])
+            {
+                NSDictionary *fileDic = [valuesArray objectAtIndex:i];
+                NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+                NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+                [request setFile:filePath forKey:fileParam];
+                continue;
+            }
+            
+            [request setPostValue:[valuesArray objectAtIndex:i]
+                           forKey:[paramsArray objectAtIndex:i]];
+        }
+        [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+        [request addRequestHeader:@"Content-Type"
+                            value:@"text/xml; charset=utf-8"];
+        [request startAsynchronous];
     }
 }
 
@@ -348,20 +401,40 @@
     {
         NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"online",@"sessid", nil];
         NSArray *valusArr  = [NSArray arrayWithObjects:@"updateLoginStatus",[NSNumber numberWithInt:isBackgroud],ssid, nil];
-        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valusArr
-                                                         forKeys:paramsArr];
         
-        ServerRequest *request = [ServerRequest sharedServerRequest];
-        NSString *webAddress   = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
-        NSString *url  = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-        NSData *resVal = [request requestSyncWith:kServerPostRequest
-                                         paramDic:pDic
-                                           urlStr:url];
+        NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+        NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+        ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+        for (int i=0; i<paramsArr.count; i++)
+        {
+            CLog(@"value:%@", [valusArr objectAtIndex:i]);
+            CLog(@"param:%@", [paramsArr objectAtIndex:i]);
+            
+            if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+            {
+                NSDictionary *fileDic = [valusArr objectAtIndex:i];
+                NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+                NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+                [request setFile:filePath forKey:fileParam];
+                continue;
+            }
+            
+            [request setPostValue:[valusArr objectAtIndex:i]
+                           forKey:[paramsArr objectAtIndex:i]];
+            //                [request setTimeOutSeconds:10];
+        }
+        [request setRequestMethod:@"POST"];
+        [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+        [request addRequestHeader:@"Content-Type"
+                            value:@"text/xml; charset=utf-8"];
+        [request startSynchronous];
+        [request setDelegate:self];
+        NSData *resVal = [request responseData];
         if (resVal)
         {
-            NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                     encoding:NSUTF8StringEncoding]autorelease];
-            NSDictionary *resDic  = [resStr JSONValue];
+            NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                     options:NSJSONReadingMutableLeaves
+                                                                       error:nil];
             CLog(@"updateLoginStatus:%@", resDic);
             NSString *action = [resDic objectForKey:@"action"];
             if ([action isEqualToString:@"updateLoginStatus"])
@@ -415,12 +488,14 @@
     if (!isExistenceNetwork && animated)
     {
         if (!isCan)
-        {
+        {   
+            AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
             CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:nav.view
-                                                      withText:@"当前网络不可用"
-                                                      animated:YES
-                                                      delegate:NULL];
+            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
+            hud.delegate  = appDelegate;
+            hud.labelText = @"当前网络不可用";
+            hud.square = YES;
+            [hud show:YES];
             [hud hide:YES afterDelay:3];
         }
         return NO;
@@ -729,44 +804,47 @@
 - (void) requestAsyncSuccessed:(ASIHTTPRequest *)request
 {
     NSData   *resVal = [request responseData];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]autorelease];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+    if (resVal)
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    
-    NSString *errorid = (NSString *)[[resDic objectForKey:@"errorid"] copy];
-    if (errorid.intValue == 0)
-    {
-        NSString *action = [[resDic objectForKey:@"action"] copy];
-        if ([action isEqualToString:@"getPushMessage"])
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
         {
-            //处理未处理消息
-            NSArray *messageArr = [resDic objectForKey:@"messages"];
-            if (messageArr.count>0)
-            {
-                NSDictionary *msgDic = [messageArr objectAtIndex:messageArr.count-1];
-                [AppDelegate dealWithMessage:msgDic
-                                 isPlayVoice:YES];
-            }
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
         }
-        [action release];
+        CLog(@"***********Result****************");
+        
+        NSString *errorid = (NSString *)[[resDic objectForKey:@"errorid"] copy];
+        if (errorid.intValue == 0)
+        {
+            NSString *action = [[resDic objectForKey:@"action"] copy];
+            if ([action isEqualToString:@"getPushMessage"])
+            {
+                //处理未处理消息
+                NSArray *messageArr = [resDic objectForKey:@"messages"];
+                if (messageArr.count>0)
+                {
+                    NSDictionary *msgDic = [messageArr objectAtIndex:messageArr.count-1];
+                    [AppDelegate dealWithMessage:msgDic
+                                     isPlayVoice:YES];
+                }
+            }
+            [action release];
+        }
+        //重复登录
+        else if (errorid.intValue==2)
+        {
+            //清除sessid,清除登录状态,回到地图页
+            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+            [AppDelegate popToMainViewController];
+        }
+        [errorid release];
     }
-    //重复登录
-    else if (errorid.intValue==2)
-    {
-        //清除sessid,清除登录状态,回到地图页
-        [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-        [AppDelegate popToMainViewController];
-    }
-    [errorid release];
 }
 
 #pragma mark - MQtt Callback methods
@@ -776,10 +854,10 @@
 {
     NSDictionary *pDic = nil;
     CLog(@"new message, %lu bytes, topic=%@", (unsigned long)[data length], topic);
-    NSString *payloadString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-    if (payloadString)
+    if (data)
     {
-        pDic = [[payloadString JSONValue] retain];
+        pDic = [NSJSONSerialization JSONObjectWithData:data
+                                               options:NSJSONReadingMutableLeaves error:nil];
         CLog(@"DIC:%@", pDic);
     }
     
@@ -853,6 +931,15 @@
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo
 {
     CLog(@"New APNS Message:%@", userInfo);
+}
+
+#pragma mark -
+#pragma mark MBProgressHUDDelegate methods
+
+- (void)hudWasHidden:(MBProgressHUD *)hud
+{
+    CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+    [MBProgressHUD hideAllHUDsForView:nav.view animated:YES];
 }
 
 #pragma mark -

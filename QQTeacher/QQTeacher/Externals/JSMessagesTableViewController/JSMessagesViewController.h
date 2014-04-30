@@ -56,7 +56,7 @@ typedef enum {
 
 
 @protocol JSMessagesViewDelegate <NSObject>
-@required
+@optional
 - (void)buttonPressed:(UIButton *)sender;
 - (void)sendPressed:(UIButton *)sender withText:(NSString *)text;
 - (void)clickedMessageForRowAtIndexPath:(NSIndexPath *) indexPath;
@@ -67,7 +67,7 @@ typedef enum {
 - (JSAvatarStyle)avatarStyle;
 - (JSAvatarStyle) outgoingAvatarStyle;
 - (JSAvatarStyle) incomingAvatarStyle;
-@optional
+
 - (BOOL)hasTimestampForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
@@ -75,7 +75,7 @@ typedef enum {
 
 
 @protocol JSMessagesViewDataSource <NSObject>
-@required
+@optional
 - (BOOL) isReadVoice:(NSIndexPath *) indexPath;
 - (NSString *)textForRowAtIndexPath:(NSIndexPath *)indexPath;
 - (NSDate *)timestampForRowAtIndexPath:(NSIndexPath *)indexPath;

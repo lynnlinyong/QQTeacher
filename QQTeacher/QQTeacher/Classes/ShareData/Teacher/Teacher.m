@@ -334,7 +334,7 @@
 
 - (id) copyWithZone:(NSZone *)zone
 {
-    Teacher *tObj = NSCopyObject(self, 0, zone);
+    Teacher *tObj = [[[self class]allocWithZone:zone]init];//NSCopyObject(self, 0, zone);
     if (tObj)
     {
         tObj.email     = [email copy];
@@ -376,7 +376,7 @@
 
 - (id) mutableCopyWithZone:(NSZone *)zone
 {
-    Teacher *tObj = NSCopyObject(self, 0, zone);
+    Teacher *tObj = [[[self class]allocWithZone:zone]init];//NSCopyObject(self, 0, zone);
     if (tObj)
     {
         tObj.email   = [email copy];

@@ -28,8 +28,7 @@
 @interface AssistentViewController : UIViewController<
                                                     MBProgressHUDDelegate,
                                                     AssistentCellDelegate,
-                                                    TTImageViewDelegate,
-                                                    ServerRequestDelegate,
+                                                    ASIHTTPRequestDelegate,
                                                     EGORefreshTableHeaderDelegate,
                                                     UITableViewDelegate,
                                                     UITableViewDataSource>

@@ -7,6 +7,7 @@
 //
 
 #import "MainViewController.h"
+#import "MBProgressHUD.h"
 
 #define IOS7_OR_LATER   ( [[[UIDevice currentDevice] systemVersion] compare:@"7.0"] != NSOrderedAscending )
 
@@ -288,9 +289,9 @@ static NSMutableArray  *timerArray= nil;
         count = 0;
         self.hidden = YES;
         
-        NSTimer *timer = sender;
-        [timer invalidate];
-        timer = nil;
+        NSTimer *ttimer = sender;
+        [ttimer invalidate];
+        ttimer = nil;
         
         if (type == kWaitPopInfoType)
         {
@@ -419,6 +420,16 @@ static NSMutableArray  *timerArray= nil;
 
 #pragma mark -
 #pragma mark - Custom Action
+- (void) view:(TeacherPropertyView *)view clickedView:(id)clickView
+{
+    
+}
+
+- (void) RecordStatus:(int)status
+{
+    
+}
+
 - (void) confirmOrderNotice:(NSNotification *) notice
 {
     popInfoView.hidden = YES;
@@ -500,6 +511,7 @@ static NSMutableArray  *timerArray= nil;
 
 - (void) addInviteNotice:(NSDictionary *)dic
 {
+    NSLog(@"dic:%@", dic);
     if (!inviteMsgArray)
         inviteMsgArray = [[NSMutableArray alloc]init];
     
@@ -727,8 +739,11 @@ static NSMutableArray  *timerArray= nil;
     NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valuesArr
                                                       forKeys:paramsArr];
     NSLog(@"sdfjsidfjsidfjDic:%@", pDic);
-    NSString *jsonMsg   = [pDic JSONFragment];
-    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *data = [NSJSONSerialization dataWithJSONObject:pDic
+                                                   options:NSJSONWritingPrettyPrinted
+                                                     error:nil];
+//    NSString *jsonMsg   = [pDic JSONFragment];
+//    NSData *data        = [jsonMsg dataUsingEncoding:NSUTF8StringEncoding];
     
     //发送消息
     NSString *deviceId  = [inviteDic objectForKey:@"deviceId"];
@@ -952,50 +967,68 @@ static NSMutableArray  *timerArray= nil;
     NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"viewstatus",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"getJxzl",@"1",ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    NSData   *resVal = [request requestSyncWith:kServerPostRequest
-                                       paramDic:pDic
-                                         urlStr:url];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]autorelease];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    for (int i=0; i<paramsArr.count; i++)
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    
-    NSNumber *errorid = [resDic objectForKey:@"errorid"];
-    if (errorid.intValue == 0)
-    {
-        NSDictionary *ccDic = [[resDic objectForKey:@"cc"] copy];
-        if (ccDic.count!=0)     //已签约
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
         {
-            NSDictionary *ccResDic = [resDic copy];
-            [[NSUserDefaults standardUserDefaults] setObject:ccResDic forKey:@"AssistentData"];
-            [ccResDic release];
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    NSData *resVal = [request responseData];
+    if (resVal )
+    {
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
+        {
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
+        }
+        CLog(@"***********Result****************");
+        
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
+        {
+            NSDictionary *ccDic = [[resDic objectForKey:@"cc"] copy];
+            if (ccDic.count!=0)     //已签约
+            {
+                NSDictionary *ccResDic = [resDic copy];
+                [[NSUserDefaults standardUserDefaults] setObject:ccResDic forKey:@"AssistentData"];
+                [ccResDic release];
+            }
+            else
+            {
+                [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"AssistentData"];
+            }
         }
         else
         {
-            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"AssistentData"];
-        }
-    }
-    else
-    {
-        //重复登录
-        if (errorid.intValue==2)
-        {
-            //清除sessid,清除登录状态,回到地图页
-            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-            [AppDelegate popToMainViewController];
+            //重复登录
+            if (errorid.intValue==2)
+            {
+                //清除sessid,清除登录状态,回到地图页
+                [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+                [AppDelegate popToMainViewController];
+            }
         }
     }
 }
@@ -1016,50 +1049,68 @@ static NSMutableArray  *timerArray= nil;
     NSString *ssid     = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"text",@"mp3",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"speakUri",msgCnt,@"1", ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
     
-    NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-    NSData *resVal     = [serverReq requestSyncWith:kServerPostRequest
-                                           paramDic:pDic
-                                             urlStr:url];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]autorelease];
-    NSDictionary *resDic  = [resStr JSONValue];
-    if (resDic)
+    NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    for (int i=0; i<paramsArr.count; i++)
     {
-        NSString *errorid = [resDic objectForKey:@"errorid"];
-        if (errorid.intValue==0)
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
         {
-            //下载语音播报
-            if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    NSData *resVal = [request responseData];
+    if (resVal )
+    {
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        if (resDic)
+        {
+            NSString *errorid = [resDic objectForKey:@"errorid"];
+            if (errorid.intValue==0)
             {
-                return;
+                //下载语音播报
+                if (![AppDelegate isConnectionAvailable:YES withGesture:NO])
+                {
+                    return;
+                }
+                
+                NSString *downPath  = [[ChatViewController getRecordURL] retain];
+                
+                NSString *webAdd    = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+                NSString *soundPath = [NSString stringWithFormat:@"%@%@", webAdd, [resDic objectForKey:@"uri"]];
+                
+                //下载音频文件
+                ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:soundPath]];
+                [request setDelegate:self];
+                [request setDownloadProgressDelegate:self];
+                [request setDownloadDestinationPath:downPath];
+                [request startAsynchronous];
+                
             }
-            
-            NSString *downPath  = [[ChatViewController getRecordURL] retain];
-            
-            NSString *webAdd    = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-            NSString *soundPath = [NSString stringWithFormat:@"%@%@", webAdd, [resDic objectForKey:@"uri"]];
-            
-            //下载音频文件
-            ASIHTTPRequest *request = [ASIHTTPRequest requestWithURL:[NSURL URLWithString:soundPath]];
-            [request setDelegate:self];
-            [request setDownloadProgressDelegate:self];
-            [request setDownloadDestinationPath:downPath];
-            [request startAsynchronous];
-            
+            else
+            {
+                CLog(@"speakUri failed!");
+            }
         }
         else
         {
-            CLog(@"speakUri failed!");
+            CLog(@"speark failed!")
         }
-    }
-    else
-    {
-        CLog(@"speark failed!")
     }
 }
 
@@ -1075,41 +1126,59 @@ static NSMutableArray  *timerArray= nil;
     {
         NSArray *paramsArr = [NSArray arrayWithObjects:@"action", nil];
         NSArray *valuesArr = [NSArray arrayWithObjects:@"getMapZoom", nil];
-        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                         forKeys:paramsArr];
         
-        NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-        NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-        ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-        NSData *resVal     = [serverReq requestSyncWith:kServerPostRequest
-                                               paramDic:pDic
-                                                 urlStr:url];
-        NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                 encoding:NSUTF8StringEncoding]autorelease];
-        NSDictionary *resDic  = [resStr JSONValue];
-        if (resDic)
+        NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
+        NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
+        ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+        [request setDelegate:self];
+        for (int i=0; i<paramsArr.count; i++)
         {
-            CLog(@"Map ResDic:%@", resDic);
+            if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+            {
+                NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+                NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+                NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+                [request setFile:filePath forKey:fileParam];
+                continue;
+            }
             
-            //保存终端设置
-            [[NSUserDefaults standardUserDefaults] setObject:resDic
-                                                      forKey:@"TERMINAL_PROPERTY"];
-            
-            //显示默认中心
-            NSString *lg = [tpDic objectForKey:@"longitude"];
-            NSString *la = [tpDic objectForKey:@"latitude"];
-            self.mapView.centerCoordinate = CLLocationCoordinate2DMake(la.floatValue,
-                                                                       lg.floatValue);
-            //更新个人位置服务器
-            [self searchReGeocode:self.mapView.centerCoordinate];
-            meAnn.coordinate = self.mapView.centerCoordinate;
-            
-            //搜索附近老师
-            [self searchNearStudent];
+            [request setPostValue:[valuesArr objectAtIndex:i]
+                           forKey:[paramsArr objectAtIndex:i]];
         }
-        else
+        [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+        [request addRequestHeader:@"Content-Type"
+                            value:@"text/xml; charset=utf-8"];
+        [request startSynchronous];
+        NSData *resVal = [request responseData];
+        if (resVal )
         {
-            CLog(@"setTerminalProperty failed!");
+            NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                     options:NSJSONReadingMutableLeaves
+                                                                       error:nil];
+            if (resDic)
+            {
+                CLog(@"Map ResDic:%@", resDic);
+                
+                //保存终端设置
+                [[NSUserDefaults standardUserDefaults] setObject:resDic
+                                                          forKey:@"TERMINAL_PROPERTY"];
+                
+                //显示默认中心
+                NSString *lg = [tpDic objectForKey:@"longitude"];
+                NSString *la = [tpDic objectForKey:@"latitude"];
+                self.mapView.centerCoordinate = CLLocationCoordinate2DMake(la.floatValue,
+                                                                           lg.floatValue);
+                //更新个人位置服务器
+                [self searchReGeocode:self.mapView.centerCoordinate];
+                meAnn.coordinate = self.mapView.centerCoordinate;
+                
+                //搜索附近老师
+                [self searchNearStudent];
+            }
+            else
+            {
+                CLog(@"setTerminalProperty failed!");
+            }
         }
     }
     else
@@ -1139,7 +1208,7 @@ static NSMutableArray  *timerArray= nil;
         titleLab.font            = [UIFont systemFontOfSize:18.f];
         titleLab.textColor       = [UIColor colorWithHexString:@"#009f66"];
         titleLab.backgroundColor = [UIColor clearColor];
-        titleLab.textAlignment = UITextAlignmentCenter;
+        titleLab.textAlignment = NSTextAlignmentCenter;
         titleLab.text = title;
         [nav.navigationBar addSubview:titleLab];
         [titleLab release];
@@ -1151,6 +1220,7 @@ static NSMutableArray  *timerArray= nil;
     AppDelegate *app = (AppDelegate *)[UIApplication sharedApplication].delegate;
     return (CustomNavigationViewController *)app.window.rootViewController;
 }
+
 
 + (void) getWebServerAddress
 {
@@ -1165,18 +1235,32 @@ static NSMutableArray  *timerArray= nil;
 //    {
         NSArray *paramsArr = [NSArray arrayWithObjects:@"action", nil];
         NSArray *valuesArr = [NSArray arrayWithObjects:@"lb", nil];
-        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                         forKeys:paramsArr];
-        
-        ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-        NSData *resVal     = [serverReq requestSyncWith:kServerPostRequest
-                                               paramDic:pDic
-                                                 urlStr:ServerAddress];
+        ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:ServerAddress]];
+        [request setDelegate:self];
+        for (int i=0; i<paramsArr.count; i++)
+        {
+            if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+            {
+                NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+                NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+                NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+                [request setFile:filePath forKey:fileParam];
+                continue;
+            }
+            
+            [request setPostValue:[valuesArr objectAtIndex:i]
+                           forKey:[paramsArr objectAtIndex:i]];
+        }
+        [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+        [request addRequestHeader:@"Content-Type"
+                            value:@"text/xml; charset=utf-8"];
+        [request startSynchronous];
+        NSData *resVal = [request responseData];
         if (resVal)
         {
-            NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                     encoding:NSUTF8StringEncoding]autorelease];
-            NSDictionary *resDic  = [resStr JSONValue];
+            NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                     options:NSJSONReadingMutableLeaves
+                                                                       error:nil];
             if (resDic)
             {
                 NSString *webAddress  = [resDic objectForKey:@"web"];
@@ -1199,22 +1283,23 @@ static NSMutableArray  *timerArray= nil;
         }
         else
         {
+            AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
             CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:nav.view
-                                                      withText:@"链接服务器失败"
-                                                      animated:YES
-                                                      delegate:NULL];
+            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
+            hud.delegate  = appDelegate;
+            hud.labelText = @"链接服务器失败";
+            hud.square = YES;
+            [hud show:YES];
             [hud hide:YES afterDelay:3];
         }
-//    }
 }
 
 + (NSString *) getPushAddress:(NSString *) str
 {
-    NSRange start = [str rangeOfRegex:@"//"];
+    NSRange start = [str rangeOfString:@"//"];
 //    CLog(@"start:%d %d", start.location, start.length);
     NSString *subStr = [str substringFromIndex:start.location];
-    NSRange end = [subStr rangeOfRegex:@":"];
+    NSRange end = [subStr rangeOfString:@":"];
     
     NSString *pushAddress = [str substringWithRange:NSMakeRange(start.location+2, end.location-2)];
 //    CLog(@"pushAddress:%@", pushAddress);
@@ -1224,10 +1309,10 @@ static NSMutableArray  *timerArray= nil;
 
 + (NSString *) getPort:(NSString *) str
 {
-    NSRange start = [str rangeOfRegex:@"//"];
+    NSRange start = [str rangeOfString:@"//"];
     //    CLog(@"start:%d %d", start.location, start.length);
     NSString *subStr = [str substringFromIndex:start.location];
-    NSRange end = [subStr rangeOfRegex:@":"];
+    NSRange end = [subStr rangeOfString:@":"];
     NSString *port = [subStr substringFromIndex:end.location+1];
     
     return port;
@@ -1252,15 +1337,31 @@ static NSMutableArray  *timerArray= nil;
                               @"acode",@"address",@"sessid", nil];
         NSArray *valuesArr = [NSArray arrayWithObjects:@"uplocation",log,la,
                               @"0755",posName,ssid, nil];
-        NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                         forKeys:paramsArr];
+        
         NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
         NSString *url = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-        ServerRequest *request = [ServerRequest sharedServerRequest];
-        request.delegate = self;
-        [request requestASyncWith:kServerPostRequest
-                         paramDic:pDic
-                           urlStr:url];
+        ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+        [request setDelegate:self];
+        [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+        [request setDidFailSelector:@selector(requestAsyncFailed:)];
+        for (int i=0; i<paramsArr.count; i++)
+        {
+            if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+            {
+                NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+                NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+                NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+                [request setFile:filePath forKey:fileParam];
+                continue;
+            }
+            
+            [request setPostValue:[valuesArr objectAtIndex:i]
+                           forKey:[paramsArr objectAtIndex:i]];
+        }
+        [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+        [request addRequestHeader:@"Content-Type"
+                            value:@"text/xml; charset=utf-8"];
+        [request startAsynchronous];
     }
 }
 
@@ -1291,18 +1392,33 @@ static NSMutableArray  *timerArray= nil;
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"latitude",@"longitude", @"zoom",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"findNearbyStudent",la,log,
                                                    [NSNumber numberWithFloat:self.mapView.zoomLevel],ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
     
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
     NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
     
     dispatch_async(dispatch_get_global_queue(0, 0), ^{
-        ServerRequest *request = [ServerRequest sharedServerRequest];
-        request.delegate = self;
-        [request requestASyncWith:kServerPostRequest
-                         paramDic:pDic
-                           urlStr:url];
+        ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+        [request setDelegate:self];
+        [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+        [request setDidFailSelector:@selector(requestAsyncFailed:)];
+        for (int i=0; i<paramsArr.count; i++)
+        {
+            if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+            {
+                NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+                NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+                NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+                [request setFile:filePath forKey:fileParam];
+                continue;
+            }
+            
+            [request setPostValue:[valuesArr objectAtIndex:i]
+                           forKey:[paramsArr objectAtIndex:i]];
+        }
+        [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+        [request addRequestHeader:@"Content-Type"
+                            value:@"text/xml; charset=utf-8"];
+        [request startAsynchronous];
         dispatch_async(dispatch_get_main_queue(), ^{
             
         });
@@ -1364,64 +1480,67 @@ static NSMutableArray  *timerArray= nil;
 
 - (void) requestAsyncSuccessed:(ASIHTTPRequest *)request
 {
-    NSData   *resVal = [[request responseData] retain];
-    NSString *resStr = [[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+    NSData   *resVal = [request responseData];
+    if (resVal )
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    
-    NSNumber *errorid = [resDic objectForKey:@"errorid"];
-    if (errorid.intValue == 0)
-    {
-        NSString *action = [resDic objectForKey:@"action"];
-        if ([action isEqualToString:@"findNearbyStudent"])
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
         {
-            NSArray *items = [resDic objectForKey:@"students"];
-            for (NSDictionary *item in items)
-            {
-                //设置老师属性
-                Student *student = [Student setPropertyStudent:item];
-                [studentArray addObject:student];
-            }
-            
-            //添加老师地图标注
-            [self initTeachersAnnotation];
-            
-            //删除我的位置标注
-            if (self.mapView.overlays.count>0)
-            {
-                [self.mapView removeAnnotation:self.mapView.userLocation];
-                [self.mapView removeOverlay:self.mapView.overlays[0]];
-            }
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
         }
-        else if ([action isEqualToString:@"uplocation"])
-        {
-            CLog(@"Upload Location Success!");
-        }
-    }
-    else
-    {
-        NSString *errorMsg = [resDic objectForKey:@"message"];
-        [self showAlertWithTitle:@"提示"
-                             tag:0
-                         message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
-                        delegate:self
-               otherButtonTitles:@"确定",nil];
+        CLog(@"***********Result****************");
         
-        //重复登录
-        if (errorid.intValue==2)
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
         {
-            //清除sessid,清除登录状态,回到地图页
-            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-            [AppDelegate popToMainViewController];
+            NSString *action = [resDic objectForKey:@"action"];
+            if ([action isEqualToString:@"findNearbyStudent"])
+            {
+                NSArray *items = [resDic objectForKey:@"students"];
+                for (NSDictionary *item in items)
+                {
+                    //设置老师属性
+                    Student *student = [Student setPropertyStudent:item];
+                    [studentArray addObject:student];
+                }
+                
+                //添加老师地图标注
+                [self initTeachersAnnotation];
+                
+                //删除我的位置标注
+                if (self.mapView.overlays.count>0)
+                {
+                    [self.mapView removeAnnotation:self.mapView.userLocation];
+                    [self.mapView removeOverlay:self.mapView.overlays[0]];
+                }
+            }
+            else if ([action isEqualToString:@"uplocation"])
+            {
+                CLog(@"Upload Location Success!");
+            }
+        }
+        else
+        {
+            NSString *errorMsg = [resDic objectForKey:@"message"];
+            [self showAlertWithTitle:@"提示"
+                                 tag:0
+                             message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
+                            delegate:self
+                   otherButtonTitles:@"确定",nil];
+            
+            //重复登录
+            if (errorid.intValue==2)
+            {
+                //清除sessid,清除登录状态,回到地图页
+                [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+                [AppDelegate popToMainViewController];
+            }
         }
     }
 }

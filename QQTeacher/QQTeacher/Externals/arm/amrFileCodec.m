@@ -142,7 +142,7 @@ int caclAMRFrameSize(unsigned char frameHeader)
 int ReadAMRFrameFirstData(char* fpamr,int pos,int maxLen, unsigned char frameBuffer[], int* stdFrameSize, unsigned char* stdFrameHeader)
 {
     int nPos = 0;
-	memset(frameBuffer, 0, sizeof(frameBuffer));
+	memset(frameBuffer, 0, sizeof((char *)frameBuffer));
 	
 	// 先读帧头
 	//fread(stdFrameHeader, 1, sizeof(unsigned char), fpamr);
@@ -175,11 +175,11 @@ int ReadAMRFrameFirstData(char* fpamr,int pos,int maxLen, unsigned char frameBuf
 // 返回值: 0-出错; 1-正确
 int ReadAMRFrameData(char* fpamr,int pos,int maxLen, unsigned char frameBuffer[], int stdFrameSize, unsigned char stdFrameHeader)
 {
-	int bytes = 0;
+//	int bytes = 0;
     int nPos = 0;
 	unsigned char frameHeader; // 帧头
 	
-	memset(frameBuffer, 0, sizeof(frameBuffer));
+	memset(frameBuffer, 0, sizeof((char *)frameBuffer));
 	
 	// 读帧头
 	// 如果是坏帧(不是标准帧头)，则继续读下一个字节，直到读到标准帧头
@@ -302,7 +302,7 @@ NSData* DecodeAMRToWAVE(NSData* data) {
 	memset(pcmFrame, 0, sizeof(pcmFrame));
 	//ReadAMRFrameFirst(fpamr, amrFrame, &stdFrameSize, &stdFrameHeader);
     
-    nTemp = ReadAMRFrameFirstData(rfile,pos,maxLen, amrFrame, &stdFrameSize, &stdFrameHeader);
+    nTemp = ReadAMRFrameFirstData((char *)rfile,pos,maxLen, amrFrame, &stdFrameSize, &stdFrameHeader);
     if (nTemp==0) {
         Decoder_Interface_exit(destate);
         return data;
@@ -322,7 +322,7 @@ NSData* DecodeAMRToWAVE(NSData* data) {
 		memset(amrFrame, 0, sizeof(amrFrame));
 		memset(pcmFrame, 0, sizeof(pcmFrame));
 		//if (!ReadAMRFrame(fpamr, amrFrame, stdFrameSize, stdFrameHeader)) break;
-        nTemp = ReadAMRFrameData(rfile,pos,maxLen, amrFrame, stdFrameSize, stdFrameHeader);
+        nTemp = ReadAMRFrameData((char *)rfile,pos,maxLen, amrFrame, stdFrameSize, stdFrameHeader);
         if (!nTemp) {bErr = 1;break;}
         pos += nTemp;
 		
@@ -361,7 +361,7 @@ int ReadPCMFrameData(short speech[], char* fpwave, int nChannels, int nBitsPerSa
 {
 	int nRead = 0;
 	int x = 0, y=0;
-	unsigned short ush1=0, ush2=0, ush=0;
+//	unsigned short ush1=0, ush2=0, ush=0;
 	
 	// 原始PCM音频帧数据
 	unsigned char  pcmFrame_8b1[PCM_FRAME_SIZE];
@@ -519,9 +519,9 @@ int SkipCaffHead(char* buf){
     }
     buf+=4;
     
-    u16 mFileVersion = readUInt16(buf);
+//    u16 mFileVersion = readUInt16(buf);
     buf+=2;
-    u16 mFileFlags = readUInt16(buf);
+//    u16 mFileFlags = readUInt16(buf);
     buf+=2;
     
     //desc free data
@@ -532,7 +532,7 @@ int SkipCaffHead(char* buf){
             return 0;
         }
         
-        u32 mChunkSize = readSint64(buf);buf+=8;
+        s64 mChunkSize = readSint64(buf);buf+=8;
         if (mChunkSize<=0) {
             return 0;
         }
@@ -554,7 +554,7 @@ NSData* EncodeWAVEToAMR(NSData* data, int nChannels, int nBitsPerSample)
 {
     NSArray *paths               = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
     NSString *documentPath       = [paths objectAtIndex:0];
-    NSString *wavFile        = [documentPath stringByAppendingPathComponent:[NSString stringWithFormat:@"11.caf"]];
+//    NSString *wavFile        = [documentPath stringByAppendingPathComponent:[NSString stringWithFormat:@"11.caf"]];
     NSLog(@"documentPath=%@", documentPath);
     
     if (data==nil){
@@ -563,9 +563,8 @@ NSData* EncodeWAVEToAMR(NSData* data, int nChannels, int nBitsPerSample)
     }
     
     int nPos  = 0;
-    char* buf = [data bytes];
+    char* buf = (char *)[data bytes];
     int maxLen = [data length];
-    
 
     nPos += SkipCaffHead(buf);
     if (nPos>=maxLen) {

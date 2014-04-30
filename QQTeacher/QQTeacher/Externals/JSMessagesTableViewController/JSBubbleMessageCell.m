@@ -43,7 +43,7 @@
 
 @property (strong, nonatomic) JSBubbleView *bubbleView;
 @property (strong, nonatomic) UILabel      *timestampLabel;
-@property (strong, nonatomic) TTImageView  *avatarImageView;
+@property (strong, nonatomic) UIImageView  *avatarImageView;
 @property (nonatomic, strong) UIImageView  *idImageView;
 @property (assign, nonatomic) JSAvatarStyle avatarImageStyle;
 
@@ -200,8 +200,6 @@
     self.idImageView = nil;
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
-    [super dealloc];
 }
 
 #pragma mark - Setters
@@ -246,8 +244,7 @@
 
 - (void) setWebAvatarImage:(NSString *) imagePath
 {
-    self.avatarImageView.defaultImage = [UIImage imageNamed:@""];
-    self.avatarImageView.URL = imagePath;
+    [self.avatarImageView setImageWithURL:[NSURL URLWithString:imagePath]];
 }
 
 - (void) setIdImageViewHidden:(BOOL) isId

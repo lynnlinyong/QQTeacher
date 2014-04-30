@@ -11,8 +11,7 @@
 @interface LatlyViewController : UIViewController<
                                                 MBProgressHUDDelegate,
                                                 LatlyViewCellDelegate,
-                                                TTImageViewDelegate,
-                                                ServerRequestDelegate,
+                                                ASIHTTPRequestDelegate,
                                                 EGORefreshTableHeaderDelegate,
                                                 UITableViewDelegate,
                                                 UITableViewDataSource>

@@ -87,15 +87,33 @@
         NSString *idString  = [SingleMQTT getCurrentDevTopic];
         NSArray *paramsArr  = [NSArray arrayWithObjects:@"action",@"deviceId", nil];
         NSArray *valusArr   = [NSArray arrayWithObjects:@"getCSPhone",idString,nil];
-        NSDictionary *pDic  = [NSDictionary dictionaryWithObjects:valusArr
-                                                          forKeys:paramsArr];
-        ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-        serverReq.delegate = self;
+        
+        
         NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
         NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-        [serverReq requestASyncWith:kServerPostRequest
-                           paramDic:pDic
-                             urlStr:url];
+        NSLog(@"url:%@", url);
+        ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+        [request setDelegate:self];
+        [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+        [request setDidFailSelector:@selector(requestAsyncFailed:)];
+        for (int i=0; i<paramsArr.count; i++)
+        {
+            if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+            {
+                NSDictionary *fileDic = [valusArr objectAtIndex:i];
+                NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+                NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+                [request setFile:filePath forKey:fileParam];
+                continue;
+            }
+            
+            [request setPostValue:[valusArr objectAtIndex:i]
+                           forKey:[paramsArr objectAtIndex:i]];
+        }
+        [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+        [request addRequestHeader:@"Content-Type"
+                            value:@"text/xml; charset=utf-8"];
+        [request startAsynchronous];
     }
 }
 
@@ -375,13 +393,13 @@
         return NO;
     }
     
-    BOOL isEmailType = [userNameFld.text isMatchedByRegex:@"\\b([a-zA-Z0-9%_.+\\-]+)@([a-zA-Z0-9.\\-]+?\\.[a-zA-Z]{2,6})\\b"];
+    BOOL isEmailType = [NSString validateEmail:userNameFld.text];//[userNameFld.text isMatchedByRegex:@"\\b([a-zA-Z0-9%_.+\\-]+)@([a-zA-Z0-9.\\-]+?\\.[a-zA-Z]{2,6})\\b"];
     if (!isEmailType)
     {
         return NO;
     }
     
-    BOOL isPhone = [phoneFld.text isMatchedByRegex:@"^(13[0-9]|15[0-9]|18[0-9])\\d{8}$"];
+    BOOL isPhone =[NSString validateMobile:phoneFld.text];//[phoneFld.text isMatchedByRegex:@"^(13[0-9]|15[0-9]|18[0-9])\\d{8}$"];
     if (!isPhone)
     {
         return NO;
@@ -451,14 +469,32 @@
     NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
                                                      forKeys:paramsArr];
     CLog(@"LoginPic:%@", pDic);
-    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-    serverReq.delegate = self;
+    
     NSString *webAddress = [[NSUserDefaults standardUserDefaults] valueForKey:WEBADDRESS];
     NSString *url = [NSString stringWithFormat:@"%@%@", webAddress,TEACHER];
-    CLog(@"url:%@", url);
-    [serverReq requestASyncWith:kServerPostRequest
-                       paramDic:pDic
-                         urlStr:url];
+    
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+    [request setDidFailSelector:@selector(requestAsyncFailed:)];
+    for (int i=0; i<paramsArr.count; i++)
+    {
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startAsynchronous];
 }
 
 - (void) doHpBtnClicked:(id)sender
@@ -553,23 +589,22 @@
     [MBProgressHUD hideHUDForView:nav.view animated:YES];
     
     NSData   *resVal = [request responseData];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]autorelease];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+    if (resVal )
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    
-    NSNumber *errorid = [[resDic objectForKey:@"errorid"] copy];
-    if (errorid.intValue == 0)
-    {        
-        NSString *ssid = [[resDic objectForKey:@"sessid"] retain];
-        if (ssid)
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
+        {
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
+        }
+        CLog(@"***********Result****************");
+        
+        NSNumber *errorid = [[resDic objectForKey:@"errorid"] copy];
+        if (errorid.intValue == 0)
         {
             NSString *action = [resDic objectForKey:@"action"];
             if ([action isEqualToString:@"getCSPhone"])
@@ -579,156 +614,164 @@
                 [[NSUserDefaults standardUserDefaults] setObject:helpPhone
                                                           forKey:HELP_PHONE];
             }
-            else if ([action isEqualToString:@"login"])
+            
+            NSString *ssid = [[resDic objectForKey:@"sessid"] retain];
+            if (ssid)
             {
-                [[NSUserDefaults standardUserDefaults] setObject:ssid
-                                                          forKey:SSID];
-                CLog(@"ssid:%@", ssid);
-                
-                NSString *preCurDeviceId = [resDic objectForKey:@"fDeviceId"];
-                NSString *curDeviceId = [SingleMQTT getCurrentDevTopic];
-                if (![preCurDeviceId isEqualToString:curDeviceId])
+                if ([action isEqualToString:@"login"])
                 {
-                    //本次登录和上次登录手机不同,通知上次手机下线
-                    NSDictionary *offlineDic = [NSDictionary dictionaryWithObjectsAndKeys:@"9999",@"type", nil];
-                    NSString *jsonStr   = [offlineDic JSONFragment];
-                    NSData *data        = [jsonStr dataUsingEncoding:NSUTF8StringEncoding];
-                    SingleMQTT *session = [SingleMQTT shareInstance];
-                    [session.session publishData:data
-                                         onTopic:preCurDeviceId];
+                    [[NSUserDefaults standardUserDefaults] setObject:ssid
+                                                              forKey:SSID];
+                    CLog(@"ssid:%@", ssid);
+                    
+                    NSString *preCurDeviceId = [resDic objectForKey:@"fDeviceId"];
+                    NSString *curDeviceId = [SingleMQTT getCurrentDevTopic];
+                    if (![preCurDeviceId isEqualToString:curDeviceId])
+                    {
+                        //本次登录和上次登录手机不同,通知上次手机下线
+                        NSDictionary *offlineDic = [NSDictionary dictionaryWithObjectsAndKeys:@"9999",@"type", nil];
+    //                    NSString *jsonStr   = [offlineDic JSONFragment];
+    //                    NSData *data        = [jsonStr dataUsingEncoding:NSUTF8StringEncoding];
+                        NSData *data = [NSJSONSerialization dataWithJSONObject:offlineDic
+                                                                       options:NSJSONWritingPrettyPrinted
+                                                                         error:nil];
+                        SingleMQTT *session = [SingleMQTT shareInstance];
+                        [session.session publishData:data
+                                             onTopic:preCurDeviceId];
+                    }
+                    
+                    //获得Teacher
+                    NSDictionary *teacherDic = [resDic objectForKey:@"teacherInfo"];
+                    CLog(@"teacherDic:%@", teacherDic);
+                    
+                    Teacher *tObj       = [Teacher setTeacherProperty:teacherDic];
+                    NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:tObj];
+                    [[NSUserDefaults standardUserDefaults] setObject:teacherData
+                                                              forKey:TEACHER_INFO];
+                    CLog(@"sdfjsdfsdfi:%@", tObj.timePeriod);
+                    //判断用户是否完善个人资料
+                    if (!tObj.isInfoComplete)
+                    {
+                        //跳转到完善个人资料页
+                        CompletePersonalInfoViewController *cpVctr = [[[CompletePersonalInfoViewController alloc]init]autorelease];
+                        [self.navigationController pushViewController:cpVctr
+                                                             animated:YES];
+                    }
+                    else
+                    {
+                        //写入登录成功标识
+                        [[NSUserDefaults standardUserDefaults] setBool:YES
+                                                                forKey:LOGINE_SUCCESS];
+                        
+                        //跳转个人中心
+                        
+                        MyTeacherViewController *mVctr = [[MyTeacherViewController alloc]init];
+                        UINavigationController *navMvctr = [[UINavigationController alloc]initWithRootViewController:mVctr];
+                        
+                        LatlyViewController *lVctr = [[LatlyViewController alloc]init];
+                        UINavigationController *navLVctr = [[UINavigationController alloc]initWithRootViewController:lVctr];
+                        
+                        UIViewController *sVctr = [[UIViewController alloc]init];
+                        UINavigationController *navSVctr = [[UINavigationController alloc]initWithRootViewController:sVctr];
+                        
+                        ShareViewController *shareVctr = [[ShareViewController alloc]initWithNibName:nil
+                                                                                              bundle:nil];
+                        UINavigationController *navShareVctr = [[UINavigationController alloc]initWithRootViewController:shareVctr];
+                        
+                        SettingViewController *setVctr = [[SettingViewController alloc]initWithNibName:nil
+                                                                                                bundle:nil];
+                        UINavigationController *navSetVctr = [[UINavigationController alloc]initWithRootViewController:setVctr];
+                        
+                        NSMutableDictionary *imgDic = [NSMutableDictionary dictionaryWithCapacity:3];
+                        [imgDic setObject:[UIImage imageNamed:@"s_1_1"]
+                                   forKey:@"Default"];
+                        [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
+                                   forKey:@"Highlighted"];
+                        [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
+                                   forKey:@"Seleted"];
+                        NSMutableDictionary *imgDic2 = [NSMutableDictionary dictionaryWithCapacity:3];
+                        [imgDic2 setObject:[UIImage imageNamed:@"s_2_1"]
+                                    forKey:@"Default"];
+                        [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
+                                    forKey:@"Highlighted"];
+                        [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
+                                    forKey:@"Seleted"];
+                        NSMutableDictionary *imgDic3 = [NSMutableDictionary dictionaryWithCapacity:3];
+                        [imgDic3 setObject:[UIImage imageNamed:@"s_3_1"]
+                                    forKey:@"Default"];
+                        [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
+                                    forKey:@"Highlighted"];
+                        [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
+                                    forKey:@"Seleted"];
+                        NSMutableDictionary *imgDic4 = [NSMutableDictionary dictionaryWithCapacity:3];
+                        [imgDic4 setObject:[UIImage imageNamed:@"s_4_1"]
+                                    forKey:@"Default"];
+                        [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
+                                    forKey:@"Highlighted"];
+                        [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
+                                    forKey:@"Seleted"];
+                        NSMutableDictionary *imgDic5 = [NSMutableDictionary dictionaryWithCapacity:3];
+                        [imgDic5 setObject:[UIImage imageNamed:@"s_5_1"]
+                                    forKey:@"Default"];
+                        [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
+                                    forKey:@"Highlighted"];
+                        [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
+                                    forKey:@"Seleted"];
+                        
+                        NSMutableArray *ctrlArr = [NSMutableArray arrayWithObjects:navMvctr,navLVctr,navSVctr,
+                                                                                   navShareVctr,navSetVctr,nil];
+                        NSArray *imgArr = [NSArray arrayWithObjects:imgDic,imgDic3,imgDic2,
+                                                                    imgDic4,imgDic5,nil];
+                        PersonCenterViewController *pcVctr    = [[PersonCenterViewController alloc]
+                                                                             initWithViewControllers:ctrlArr imageArray:imgArr];
+                        CustomNavigationViewController *nav   = [[CustomNavigationViewController alloc]initWithRootViewController:pcVctr];
+                        AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+                        appDelegate.window.rootViewController = nav;
+                        [pcVctr release];
+                        
+                        MainViewController *mainVctr     = [[MainViewController alloc]init];
+                        [nav pushViewController:mainVctr animated:NO];
+                        [mainVctr release];
+                    }
                 }
-                
-                //获得Teacher
-                NSDictionary *teacherDic = [resDic objectForKey:@"teacherInfo"];
-                CLog(@"teacherDic:%@", teacherDic);
-                
-                Teacher *tObj       = [Teacher setTeacherProperty:teacherDic];
-                NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:tObj];
-                [[NSUserDefaults standardUserDefaults] setObject:teacherData
-                                                          forKey:TEACHER_INFO];
-                CLog(@"sdfjsdfsdfi:%@", tObj.timePeriod);
-                //判断用户是否完善个人资料
-                if (!tObj.isInfoComplete)
+                else if ([action isEqualToString:@"register"])   //系统查询到没有该用户则相当于注册成功
                 {
-                    //跳转到完善个人资料页
-                    CompletePersonalInfoViewController *cpVctr = [[[CompletePersonalInfoViewController alloc]init]autorelease];
+                    NSString *ssid = [resDic objectForKey:@"sessid"];
+                    [[NSUserDefaults standardUserDefaults] setObject:ssid
+                                                              forKey:SSID];
+                    
+                    //获得Teacher
+                    NSDictionary *teacherDic = [resDic objectForKey:@"teacherInfo"];
+                    Teacher *tObj       = [Teacher setTeacherProperty:teacherDic];
+                    NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:tObj];
+                    [[NSUserDefaults standardUserDefaults] setObject:teacherData
+                                                              forKey:TEACHER_INFO];
+                    
+                    //注册完成,跳转完成个人信息
+                    CompletePersonalInfoViewController *cpVctr = [[CompletePersonalInfoViewController alloc]init];
                     [self.navigationController pushViewController:cpVctr
                                                          animated:YES];
+                    [cpVctr release];
                 }
-                else
-                {
-                    //写入登录成功标识
-                    [[NSUserDefaults standardUserDefaults] setBool:YES
-                                                            forKey:LOGINE_SUCCESS];
-                    
-                    //跳转个人中心
-                    
-                    MyTeacherViewController *mVctr = [[MyTeacherViewController alloc]init];
-                    UINavigationController *navMvctr = [[UINavigationController alloc]initWithRootViewController:mVctr];
-                    
-                    LatlyViewController *lVctr = [[LatlyViewController alloc]init];
-                    UINavigationController *navLVctr = [[UINavigationController alloc]initWithRootViewController:lVctr];
-                    
-                    UIViewController *sVctr = [[UIViewController alloc]init];
-                    UINavigationController *navSVctr = [[UINavigationController alloc]initWithRootViewController:sVctr];
-                    
-                    ShareViewController *shareVctr = [[ShareViewController alloc]initWithNibName:nil
-                                                                                          bundle:nil];
-                    UINavigationController *navShareVctr = [[UINavigationController alloc]initWithRootViewController:shareVctr];
-                    
-                    SettingViewController *setVctr = [[SettingViewController alloc]initWithNibName:nil
-                                                                                            bundle:nil];
-                    UINavigationController *navSetVctr = [[UINavigationController alloc]initWithRootViewController:setVctr];
-                    
-                    NSMutableDictionary *imgDic = [NSMutableDictionary dictionaryWithCapacity:3];
-                    [imgDic setObject:[UIImage imageNamed:@"s_1_1"]
-                               forKey:@"Default"];
-                    [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
-                               forKey:@"Highlighted"];
-                    [imgDic setObject:[UIImage imageNamed:@"s_1_2"]
-                               forKey:@"Seleted"];
-                    NSMutableDictionary *imgDic2 = [NSMutableDictionary dictionaryWithCapacity:3];
-                    [imgDic2 setObject:[UIImage imageNamed:@"s_2_1"]
-                                forKey:@"Default"];
-                    [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
-                                forKey:@"Highlighted"];
-                    [imgDic2 setObject:[UIImage imageNamed:@"s_2_2"]
-                                forKey:@"Seleted"];
-                    NSMutableDictionary *imgDic3 = [NSMutableDictionary dictionaryWithCapacity:3];
-                    [imgDic3 setObject:[UIImage imageNamed:@"s_3_1"]
-                                forKey:@"Default"];
-                    [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
-                                forKey:@"Highlighted"];
-                    [imgDic3 setObject:[UIImage imageNamed:@"s_3_2"]
-                                forKey:@"Seleted"];
-                    NSMutableDictionary *imgDic4 = [NSMutableDictionary dictionaryWithCapacity:3];
-                    [imgDic4 setObject:[UIImage imageNamed:@"s_4_1"]
-                                forKey:@"Default"];
-                    [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
-                                forKey:@"Highlighted"];
-                    [imgDic4 setObject:[UIImage imageNamed:@"s_4_2"]
-                                forKey:@"Seleted"];
-                    NSMutableDictionary *imgDic5 = [NSMutableDictionary dictionaryWithCapacity:3];
-                    [imgDic5 setObject:[UIImage imageNamed:@"s_5_1"]
-                                forKey:@"Default"];
-                    [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
-                                forKey:@"Highlighted"];
-                    [imgDic5 setObject:[UIImage imageNamed:@"s_5_2"]
-                                forKey:@"Seleted"];
-                    
-                    NSMutableArray *ctrlArr = [NSMutableArray arrayWithObjects:navMvctr,navLVctr,navSVctr,
-                                                                               navShareVctr,navSetVctr,nil];
-                    NSArray *imgArr = [NSArray arrayWithObjects:imgDic,imgDic3,imgDic2,
-                                                                imgDic4,imgDic5,nil];
-                    PersonCenterViewController *pcVctr    = [[PersonCenterViewController alloc]
-                                                                         initWithViewControllers:ctrlArr imageArray:imgArr];
-                    CustomNavigationViewController *nav   = [[CustomNavigationViewController alloc]initWithRootViewController:pcVctr];
-                    AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-                    appDelegate.window.rootViewController = nav;
-                    [pcVctr release];
-                    
-                    MainViewController *mainVctr     = [[MainViewController alloc]init];
-                    [nav pushViewController:mainVctr animated:NO];
-                    [mainVctr release];
-                }
-            }
-            else if ([action isEqualToString:@"register"])   //系统查询到没有该用户则相当于注册成功
-            {
-                NSString *ssid = [resDic objectForKey:@"sessid"];
-                [[NSUserDefaults standardUserDefaults] setObject:ssid
-                                                          forKey:SSID];
-                
-                //获得Teacher
-                NSDictionary *teacherDic = [resDic objectForKey:@"teacherInfo"];
-                Teacher *tObj       = [Teacher setTeacherProperty:teacherDic];
-                NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:tObj];
-                [[NSUserDefaults standardUserDefaults] setObject:teacherData
-                                                          forKey:TEACHER_INFO];
-                
-                //注册完成,跳转完成个人信息
-                CompletePersonalInfoViewController *cpVctr = [[CompletePersonalInfoViewController alloc]init];
-                [self.navigationController pushViewController:cpVctr
-                                                     animated:YES];
-                [cpVctr release];
             }
         }
-    }
-    else
-    {
-        NSString *errorMsg = [resDic objectForKey:@"message"];
-        [self showAlertWithTitle:@"提示"
-                             tag:0
-                         message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
-                        delegate:self
-               otherButtonTitles:@"确定",nil];
-        
-        //重复登录
-        if (errorid.intValue==2)
+        else
         {
-            //清除sessid,清除登录状态,回到地图页
-            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-            [AppDelegate popToMainViewController];
+            NSString *errorMsg = [resDic objectForKey:@"message"];
+            [self showAlertWithTitle:@"提示"
+                                 tag:0
+                             message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
+                            delegate:self
+                   otherButtonTitles:@"确定",nil];
+            
+            //重复登录
+            if (errorid.intValue==2)
+            {
+                //清除sessid,清除登录状态,回到地图页
+                [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+                [AppDelegate popToMainViewController];
+            }
         }
     }
 }

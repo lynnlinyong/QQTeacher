@@ -19,7 +19,7 @@
 - (void) shareClicked:(WaitMaskView *) view;
 @end
 
-@interface WaitMaskView : UIView <TTImageViewDelegate>
+@interface WaitMaskView : UIView
 {
     //top
 //    TTImageView *headImgView;

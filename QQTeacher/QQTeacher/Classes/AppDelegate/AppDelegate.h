@@ -10,9 +10,10 @@
 #import "MQTTSession.h"
 
 @interface AppDelegate : UIResponder <
+                                    MBProgressHUDDelegate,
                                     UIApplicationDelegate,
                                     WXApiDelegate,
-                                    ServerRequestDelegate>
+                                    ASIHTTPRequestDelegate>
 @property (strong, nonatomic) UIWindow *window;
 
 + (BOOL) isInView:(NSString *) vctrName;

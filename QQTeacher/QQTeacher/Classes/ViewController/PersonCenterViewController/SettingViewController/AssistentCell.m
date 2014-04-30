@@ -11,15 +11,15 @@
 @implementation AssistentCell
 @synthesize applyDic;
 @synthesize delegate;
+@synthesize headImgView;
 
 - (id)initWithStyle:(UITableViewCellStyle)style reuseIdentifier:(NSString *)reuseIdentifier
 {
     self = [super initWithStyle:style reuseIdentifier:reuseIdentifier];
     if (self)
     {
-        headImgView = [[TTImageView alloc]init];
-        headImgView.delegate = self;
-        headImgView.defaultImage = [UIImage imageNamed:@"s_girl"];
+        headImgView = [[UIImageView alloc]init];
+        headImgView.image = [UIImage imageNamed:@"s_girl"];
         headImgView.frame = CGRectMake(5, 15, 50, 50);
         [self addSubview:headImgView];
         
@@ -89,26 +89,17 @@
     infoLab.text  = @"向您发出一条申请助教请求";
 
     NSString *webAdd  = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    headImgView.URL   = [NSString stringWithFormat:@"%@%@",webAdd,[dic objectForKey:@"cc_icon"]];
+    NSString *url     = [NSString stringWithFormat:@"%@%@",webAdd,[dic objectForKey:@"cc_icon"]];
+    __block AssistentCell *acellSelf = self;
+    [headImgView setImageWithURL:[NSURL URLWithString:url] completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+        acellSelf.headImgView.image =  [UIImage circleImage:image
+                                                  withParam:0
+                                                  withColor:[UIColor orangeColor]];
+    }];
     
     timeLab.text  = [dic objectForKey:@"apply_time"];
     
     applyDic = [dic copy];
-}
-
-#pragma mark -
-#pragma mark - TTImageViewDelegate
-- (void)imageView:(TTImageView*)imageView didLoadImage:(UIImage*)image
-{
-    headImgView.defaultImage = [UIImage circleImage:image
-                                          withParam:0
-                                          withColor:[UIColor orangeColor]];
-    headImgView.URL = @"";
-}
-
-- (void)imageView:(TTImageView*)imageView didFailLoadWithError:(NSError*)error
-{
-    
 }
 
 - (void) tapGestureRecongnizer:(id)sender

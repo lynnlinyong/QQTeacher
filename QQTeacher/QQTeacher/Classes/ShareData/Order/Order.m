@@ -82,7 +82,7 @@
 
 - (id) copyWithZone:(NSZone *)zone
 {
-    Order *order = NSCopyObject(self, 0, zone);
+    Order *order = [[[self class]allocWithZone:zone]init];//NSCopyObject(self, 0, zone);
     if (order)
     {
         order.orderId         = [orderId copy];
@@ -114,7 +114,7 @@
 
 - (id) mutableCopyWithZone:(NSZone *)zone
 {
-    Order *order = NSCopyObject(self, 0, zone);
+    Order *order = [[[self class]allocWithZone:zone]init];//NSCopyObject(self, 0, zone);
     if (order)
     {
         order.orderId = [orderId copy];

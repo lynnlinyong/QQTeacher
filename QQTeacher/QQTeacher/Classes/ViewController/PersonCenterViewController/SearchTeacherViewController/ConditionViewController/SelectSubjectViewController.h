@@ -9,7 +9,6 @@
 #import <UIKit/UIKit.h>
 
 @interface SelectSubjectViewController : UIViewController<
-                                                        ServerRequestDelegate,
                                                         UIGridViewDelegate,
                                                         QRadioButtonDelegate>
 {

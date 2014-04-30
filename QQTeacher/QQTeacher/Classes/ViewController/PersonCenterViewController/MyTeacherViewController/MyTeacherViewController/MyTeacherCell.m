@@ -7,7 +7,6 @@
 //
 
 #import "MyTeacherCell.h"
-#import "TTImageView.h"
 @implementation MyTeacherCell
 @synthesize delegate;
 @synthesize order;

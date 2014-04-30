@@ -16,8 +16,7 @@ typedef enum _tagUpdateType
 }UpdateType;
 
 @interface SettingViewController : UIViewController<
-                                                    TTImageViewDelegate,
-                                                    ServerRequestDelegate,
+                                                    ASIHTTPRequestDelegate,
                                                     UITableViewDataSource,
                                                     UITableViewDelegate,
                                                     CustomNavigationDataSource>
@@ -43,7 +42,7 @@ typedef enum _tagUpdateType
     
     BOOL       isSetTimeStatus;
     NSMutableArray *setTimeArray;
-    TTImageView   *headImgView;
+    UIImageView    *headImgView;
     
     UpdateType    updateType;
 }

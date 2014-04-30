@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 
 @interface SystemMessageViewController : UIViewController<
-UITableViewDelegate,UITableViewDataSource,ServerRequestDelegate>
+UITableViewDelegate,UITableViewDataSource,ASIHTTPRequestDelegate>
 {
     UITableView     *systemMsgTab;
     NSMutableArray  *systemMsgArray;

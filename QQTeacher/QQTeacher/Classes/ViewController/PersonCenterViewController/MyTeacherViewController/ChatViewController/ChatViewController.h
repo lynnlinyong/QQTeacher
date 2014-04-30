@@ -10,13 +10,11 @@
 
 @interface ChatViewController : JSMessagesViewController<
                                                         RecordAudioDelegate,
-                                                        ServerRequestDelegate,
+                                                        ASIHTTPRequestDelegate,
                                                         EGORefreshTableHeaderDelegate,
                                                         JSMessagesViewDelegate,
                                                         JSMessagesViewDataSource,CustomNavigationDataSource>
 {
-//    UIButton   *listenBtn;
-//    UIButton   *employBtn;
     
     EGORefreshTableHeaderView *_refreshHeaderView;
 	BOOL _reloading;
@@ -29,6 +27,7 @@
     UIView      *listenView;
     UISwitch    *listenSwitch;
     BOOL isNewData;
+    RecordAudio *audio;
 }
 @property (nonatomic, assign) BOOL     isFromSearchCondition;
 @property (nonatomic, copy)   Order    *order;

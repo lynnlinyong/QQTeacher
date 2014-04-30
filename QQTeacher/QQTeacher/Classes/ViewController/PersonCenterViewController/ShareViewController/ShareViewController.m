@@ -130,16 +130,30 @@
     NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"getShareSet",ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    
     NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
     NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-    serverReq.delegate = self;
-    [serverReq requestASyncWith:kServerPostRequest
-                       paramDic:pDic
-                         urlStr:url];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+    [request setDidFailSelector:@selector(requestAsyncFailed:)];
+    for (int i=0; i<paramsArr.count; i++)
+    {
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startAsynchronous];
 }
 
 - (void) setCellBgImage:(UIImage *)bgImg sender:(id)sender
@@ -499,9 +513,9 @@
 }
 
 #pragma mark -
-#pragma mark - ServerRequestDelegate
+#pragma mark - ASIHTTPRequestDelegate
 #pragma mark -
-#pragma mark - ServerRequestDelegate
+#pragma mark - ASIHTTPRequestDelegate
 - (void) requestAsyncFailed:(ASIHTTPRequest *)request
 {
     [self showAlertWithTitle:@"提示"
@@ -518,31 +532,34 @@
 - (void) requestAsyncSuccessed:(ASIHTTPRequest *)request
 {
     NSData   *resVal = [request responseData];
-    NSString *resStr = [[NSString alloc]initWithData:resVal
-                                            encoding:NSUTF8StringEncoding];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+    if (resVal )
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    
-    NSNumber *errorid = [resDic objectForKey:@"errorid"];
-    if (errorid.intValue == 0)
-    {
-        CLog(@"shareContent:%@", resDic);
-        [[NSUserDefaults standardUserDefaults] setObject:resDic
-                                                  forKey:@"ShareContent"];
-    }
-    else if (errorid.intValue==2)
-    {
-        //清除sessid,清除登录状态,回到地图页
-        [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-        [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-        [AppDelegate popToMainViewController];
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
+        {
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
+        }
+        CLog(@"***********Result****************");
+        
+        NSNumber *errorid = [resDic objectForKey:@"errorid"];
+        if (errorid.intValue == 0)
+        {
+            CLog(@"shareContent:%@", resDic);
+            [[NSUserDefaults standardUserDefaults] setObject:resDic
+                                                      forKey:@"ShareContent"];
+        }
+        else if (errorid.intValue==2)
+        {
+            //清除sessid,清除登录状态,回到地图页
+            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+            [AppDelegate popToMainViewController];
+        }
     }
 }
 

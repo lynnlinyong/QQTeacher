@@ -11,7 +11,7 @@
 @interface ComplainViewController : UIViewController<
                                                     UITextFieldDelegate,
                                                     QRadioButtonDelegate,
-                                                    ServerRequestDelegate,
+                                                    ASIHTTPRequestDelegate,
                                                     UITableViewDelegate,
                                                     UITableViewDataSource>
 {

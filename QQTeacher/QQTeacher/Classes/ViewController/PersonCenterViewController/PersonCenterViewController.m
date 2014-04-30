@@ -69,49 +69,71 @@
     NSString *ssid = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"sessid", nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"updatelogin",ssid, nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
-    
     NSString *webAdd   = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
     NSString *url      = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
-    ServerRequest *serverReq = [ServerRequest sharedServerRequest];
-    NSData *resVal     = [serverReq requestSyncWith:kServerPostRequest
-                                           paramDic:pDic
-                                             urlStr:url];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]autorelease];
-    NSDictionary *resDic  = [[resStr JSONValue] retain];
-    NSString *eerid = [[resDic objectForKey:@"errorid"] copy];
-    if (resDic)
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    for (int i=0; i<paramsArr.count; i++)
     {
-        if (eerid.intValue==0)
+        CLog(@"value:%@", [valuesArr objectAtIndex:i]);
+        CLog(@"param:%@", [paramsArr objectAtIndex:i]);
+        
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
         {
-            //获得最新个人信息
-            CLog(@"get New Info:%@", resDic);
-            NSDictionary *teacherDic = [resDic objectForKey:@"teacherInfo"];
-            Teacher *teacher = [Teacher setTeacherProperty:teacherDic];
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+        //                [request setTimeOutSeconds:10];
+    }
+    [request setRequestMethod:@"POST"];
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    [request setDelegate:self];
+    NSData *resVal = [request responseData];
+    if (resVal )
+    {
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSString *eerid = [[resDic objectForKey:@"errorid"] copy];
+        if (resDic)
+        {
+            if (eerid.intValue==0)
+            {
+                //获得最新个人信息
+                CLog(@"get New Info:%@", resDic);
+                NSDictionary *teacherDic = [resDic objectForKey:@"teacherInfo"];
+                Teacher *teacher = [Teacher setTeacherProperty:teacherDic];
 
-            NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:teacher];
-            [[NSUserDefaults standardUserDefaults] setObject:teacherData
-                                                      forKey:TEACHER_INFO];
+                NSData *teacherData = [NSKeyedArchiver archivedDataWithRootObject:teacher];
+                [[NSUserDefaults standardUserDefaults] setObject:teacherData
+                                                          forKey:TEACHER_INFO];
+            }
+            else
+            {
+    //            NSString *errorMsg = [resDic objectForKey:@"message"];
+    //            [self showAlertWithTitle:@"提示"
+    //                                 tag:4
+    //                             message:[NSString stringWithFormat:@"错误码%@,%@",eerid,errorMsg]
+    //                            delegate:[MainViewController getNavigationViewController]
+    //                   otherButtonTitles:@"确定",nil];
+            }
         }
         else
         {
-//            NSString *errorMsg = [resDic objectForKey:@"message"];
-//            [self showAlertWithTitle:@"提示"
-//                                 tag:4
-//                             message:[NSString stringWithFormat:@"错误码%@,%@",eerid,errorMsg]
-//                            delegate:[MainViewController getNavigationViewController]
-//                   otherButtonTitles:@"确定",nil];
+    //        [self showAlertWithTitle:@"提示"
+    //                             tag:3
+    //                         message:@"获取数据失败!"
+    //                        delegate:[MainViewController getNavigationViewController]
+    //               otherButtonTitles:@"确定",nil];
         }
-    }
-    else
-    {
-//        [self showAlertWithTitle:@"提示"
-//                             tag:3
-//                         message:@"获取数据失败!"
-//                        delegate:[MainViewController getNavigationViewController]
-//               otherButtonTitles:@"确定",nil];
     }
 }
 

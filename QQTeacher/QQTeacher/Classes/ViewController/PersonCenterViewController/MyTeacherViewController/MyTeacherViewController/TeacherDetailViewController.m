@@ -14,6 +14,9 @@
 
 @implementation TeacherDetailViewController
 @synthesize tObj;
+@synthesize certImgView;
+@synthesize bgImgView;
+@synthesize bgScroll;
 
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
@@ -105,9 +108,23 @@
     headImageView.frame = CGRectMake(110, 30, 100, 100);
     [bgScroll addSubview:headImageView];
     
-    TTImageView *hImageView = [[TTImageView alloc]init];
-    hImageView.delegate = self;
-    hImageView.URL   = [NSString stringWithFormat:@"%@%@", webAdd,tObj.headUrl];
+    NSString *url = [NSString stringWithFormat:@"%@%@", webAdd,tObj.headUrl];
+    UIImageView *hImageView = [[UIImageView alloc]init];
+    [hImageView setImageWithURL:[NSURL URLWithString:url]
+               placeholderImage:nil
+                      completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+                          if (error.code == 0)
+                          {
+                              if (tObj.sex==1)
+                                  headImageView.image = [UIImage circleImage:image
+                                                                   withParam:0
+                                                                   withColor:[UIColor greenColor]];
+                              else
+                                  headImageView.image = [UIImage circleImage:image
+                                                                   withParam:0
+                                                                   withColor:[UIColor orangeColor]];
+                          }
+                      }];
     
     UIImage *bgImg = [UIImage imageNamed:@"tdp_bg"];
     bgImgView = [[UIImageView alloc]initWithImage:bgImg];
@@ -270,12 +287,30 @@
             NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
             url = [NSString stringWithFormat:@"%@%@", webAdd,url];
             
-            TTImageView *certImgView = [[TTImageView alloc]init];
-            certImgView.tag      = 1111;
-            certImgView.delegate = self;
-            certImgView.URL      = url;
-            UIImage *defaultImg  = [UIImage imageNamed:@"tdp_cert_default_bg"];
-            certImgView.defaultImage = defaultImg;
+            certImgView = [[UIImageView alloc]init];
+            __block TeacherDetailViewController *blockSelf = self;
+            [certImgView setImageWithURL:[NSURL URLWithString:url]
+                        placeholderImage:[UIImage imageNamed:@"tdp_cert_default_bg"]
+                               completed:^(UIImage *image, NSError *error, SDImageCacheType cacheType) {
+                                   if(error.code == 0)
+                                   {
+                                       //修改certImgView的高度
+                                       blockSelf.certImgView.frame = CGRectMake(blockSelf.certImgView.frame.origin.x,
+                                                                                blockSelf.certImgView.frame.origin.y,
+                                                                                blockSelf.certImgView.frame.size.width, 80);
+                                       
+                                       //修改背景高度
+                                       CGRect rect = CGRectMake(blockSelf.bgImgView.frame.origin.x,
+                                                                150,
+                                                                blockSelf.bgImgView.frame.size.width,
+                                                                blockSelf.bgImgView.frame.size.height);
+                                       blockSelf.bgImgView.frame = rect;
+                                       
+                                       blockSelf.bgScroll.contentSize = CGSizeMake(blockSelf.bgScroll.contentSize.width,
+                                                                                   blockSelf.bgScroll.contentSize.height);
+                                   }
+                               }];
+
             if (i==0)
                 certImgView.frame = CGRectMake(40,
                                               bmImgView.frame.origin.y+bmImgView.frame.size.height+40,
@@ -314,55 +349,31 @@
     NSString *ssid      = [[NSUserDefaults standardUserDefaults] objectForKey:SSID];
     NSArray  *paramsArr = [NSArray arrayWithObjects:@"action",@"teacher_phone",@"sessid",nil];
     NSArray  *valuesArr = [NSArray arrayWithObjects:@"getTeacher",tObj.phoneNums,ssid,nil];
-    NSDictionary  *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                      forKeys:paramsArr];
+
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
-    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, STUDENT];
-    
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate = self;
-    [request requestASyncWith:kServerPostRequest
-                     paramDic:pDic
-                       urlStr:url];
-}
-
-#pragma mark - 
-#pragma mark - TTImageViewDelegate
-- (void) imageView:(TTImageView *)imageView didLoadImage:(UIImage *)image
-{
-    if (imageView.tag == 1111)
+    NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, TEACHER];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    [request setDidFinishSelector:@selector(requestAsyncSuccessed:)];
+    [request setDidFailSelector:@selector(requestAsyncFailed:)];
+    for (int i=0; i<paramsArr.count; i++)
     {
-        //修改TTImageView的高度
-        imageView.frame = CGRectMake(imageView.frame.origin.x,
-                                     imageView.frame.origin.y,
-                                     imageView.frame.size.width, 80);
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
         
-        //修改背景高度
-        CGRect rect = CGRectMake(bgImgView.frame.origin.x,
-                                 150,
-                                 bgImgView.frame.size.width,
-                                 bgImgView.frame.size.height);
-        bgImgView.frame = rect;
-    
-        bgScroll.contentSize = CGSizeMake(bgScroll.contentSize.width,
-                                          bgScroll.contentSize.height);
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
     }
-    else
-    {
-        if (tObj.sex==1)
-            headImageView.image = [UIImage circleImage:image
-                                             withParam:0
-                                             withColor:[UIColor greenColor]];
-        else
-            headImageView.image = [UIImage circleImage:image
-                                             withParam:0
-                                             withColor:[UIColor orangeColor]];
-    }
-}
-
-- (void) imageView:(TTImageView *)imageView didFailLoadWithError:(NSError *)error
-{
-    
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startAsynchronous];
 }
 
 #pragma mark -
@@ -389,43 +400,46 @@
     [MBProgressHUD hideHUDForView:nav.view animated:YES];
     
     NSData   *resVal = [request responseData];
-    NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                             encoding:NSUTF8StringEncoding]autorelease];
-    NSDictionary *resDic   = [resStr JSONValue];
-    NSArray      *keysArr  = [resDic allKeys];
-    NSArray      *valsArr  = [resDic allValues];
-    CLog(@"***********Result****************");
-    for (int i=0; i<keysArr.count; i++)
+    if (resVal )
     {
-        CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
-    }
-    CLog(@"***********Result****************");
-    CLog(@"sdhfsdhfushdfushu");
-    NSString *errorid = [[resDic objectForKey:@"errorid"] copy];
-    CLog(@"sdfsdsdf:%@", errorid);
-    if (errorid.intValue == 0)
-    {
-        NSDictionary *tDic = [resDic objectForKey:@"teacherInfo"];
-        tObj = [Teacher setTeacherProperty:tDic];
-        
-        [self initUI];
-    }
-    else
-    {
-        NSString *errorMsg = [resDic objectForKey:@"message"];
-        [self showAlertWithTitle:@"提示"
-                             tag:0
-                         message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
-                        delegate:self
-               otherButtonTitles:@"确定",nil];
-        
-        //重复登录
-        if (errorid.intValue==2)
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
+        NSArray      *keysArr  = [resDic allKeys];
+        NSArray      *valsArr  = [resDic allValues];
+        CLog(@"***********Result****************");
+        for (int i=0; i<keysArr.count; i++)
         {
-            //清除sessid,清除登录状态,回到地图页
-            [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
-            [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
-            [AppDelegate popToMainViewController];
+            CLog(@"%@=%@", [keysArr objectAtIndex:i], [valsArr objectAtIndex:i]);
+        }
+        CLog(@"***********Result****************");
+        CLog(@"sdhfsdhfushdfushu");
+        NSString *errorid = [[resDic objectForKey:@"errorid"] copy];
+        CLog(@"sdfsdsdf:%@", errorid);
+        if (errorid.intValue == 0)
+        {
+            NSDictionary *tDic = [resDic objectForKey:@"teacherInfo"];
+            tObj = [Teacher setTeacherProperty:tDic];
+            
+            [self initUI];
+        }
+        else
+        {
+            NSString *errorMsg = [resDic objectForKey:@"message"];
+            [self showAlertWithTitle:@"提示"
+                                 tag:0
+                             message:[NSString stringWithFormat:@"错误码%@,%@",errorid,errorMsg]
+                            delegate:self
+                   otherButtonTitles:@"确定",nil];
+            
+            //重复登录
+            if (errorid.intValue==2)
+            {
+                //清除sessid,清除登录状态,回到地图页
+                [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:SSID];
+                [[NSUserDefaults standardUserDefaults] setBool:NO forKey:LOGINE_SUCCESS];
+                [AppDelegate popToMainViewController];
+            }
         }
     }
 }

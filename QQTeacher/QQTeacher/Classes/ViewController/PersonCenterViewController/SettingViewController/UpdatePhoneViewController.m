@@ -188,7 +188,7 @@
         return NO;
     }
     
-    BOOL isPhone = [txtFld.text isMatchedByRegex:@"^(13[0-9]|15[0-9]|18[0-9])\\d{8}$"];
+    BOOL isPhone = [NSString validateMobile:txtFld.text];//[txtFld.text isMatchedByRegex:@"^(13[0-9]|15[0-9]|18[0-9])\\d{8}$"];
     if (!isPhone)
     {
         [self showAlertWithTitle:@"提示"

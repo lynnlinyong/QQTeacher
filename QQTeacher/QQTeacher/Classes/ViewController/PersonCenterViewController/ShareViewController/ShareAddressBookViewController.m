@@ -116,7 +116,7 @@
     }
     else
     {
-        tmpAddressBook = ABAddressBookCreate();
+        tmpAddressBook = ABAddressBookCreateWithOptions(NULL, NULL);//ABAddressBookCreate();
     }
     
     //取得本地所有联系人记录
@@ -314,7 +314,8 @@
             controller.recipients = phoneArray;
             controller.body = content;
             controller.messageComposeDelegate = self;
-            [self presentModalViewController:controller animated:YES];
+            [self presentViewController:controller animated:YES completion:^{
+            }];
 //            [[[[controller viewControllers] lastObject] navigationItem] setTitle:@"测试短信"];//修改短信界面标题
         }else
         {
@@ -330,7 +331,8 @@
 
 - (void)messageComposeViewController:(MFMessageComposeViewController *)controller didFinishWithResult:(MessageComposeResult)result
 {
-    [controller dismissModalViewControllerAnimated:NO];
+    [controller dismissViewControllerAnimated:NO completion:^{
+    }];
     switch ( result )
     {
         case MessageComposeResultCancelled:

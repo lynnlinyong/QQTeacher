@@ -73,7 +73,6 @@
     self.inputFieldBack = nil;
     self.textView       = nil;
     self.sendButton     = nil;
-    [super dealloc];
 }
 
 - (BOOL)resignFirstResponder

@@ -77,8 +77,10 @@
     [self.dismissivePanGestureRecognizer removeTarget:self action:@selector(panning:)];
     self.dismissivePanGestureRecognizer = nil;
     self.keyboardDelegate = nil;
+}
 
-    [super dealloc];
+- (void) panning:(UIGestureRecognizer *)reg
+{
 }
 
 #pragma mark - Setters

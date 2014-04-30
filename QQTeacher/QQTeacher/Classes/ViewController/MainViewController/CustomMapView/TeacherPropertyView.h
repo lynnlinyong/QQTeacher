@@ -15,19 +15,11 @@
 
 @end
 
-@interface TeacherPropertyView : UIView<TTImageViewDelegate>
+@interface TeacherPropertyView : UIView
 {
     UILabel           *introLab;
     UILabel           *nameLab;
-//    UIStartsImageView *sImgView;
-    TTImageView       *headImgView;
-    
-//    UIImageView       *goodImgView;
-//    UIImageView       *badImgView;
-//    UIImageView       *idImageView;
-//    UILabel *goodLab;
-//    UILabel *badLab;
-//    UILabel *orgNameLab;
+    UIImageView       *headImgView;
 }
 
 @property (nonatomic, copy)   Student *student;
@@ -35,7 +27,7 @@
 //@property (nonatomic, retain) UILabel *tsLab;
 //@property (nonatomic, retain) UIStartsImageView *sImgView;
 @property (nonatomic, retain) UILabel *nameLab;
-@property (nonatomic, retain) TTImageView *headImgView;
+@property (nonatomic, retain) UIImageView *headImgView;
 @property (nonatomic, assign) id<TeacherPropertyViewDelegate> delegate;
 
 //@property (nonatomic, retain) UIImageView *goodImgView;

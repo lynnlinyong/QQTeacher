@@ -15,7 +15,7 @@
 
 @end
 
-@interface LatlyViewCell : UITableViewCell<TTImageViewDelegate>
+@interface LatlyViewCell : UITableViewCell
 {
     UIButton *headBtn;
     UILabel *timeLab;

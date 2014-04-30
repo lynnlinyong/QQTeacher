@@ -188,7 +188,7 @@
         return NO;
     }
     
-    BOOL isEmailType = [txtFld.text isMatchedByRegex:@"\\b([a-zA-Z0-9%_.+\\-]+)@([a-zA-Z0-9.\\-]+?\\.[a-zA-Z]{2,6})\\b"];
+    BOOL isEmailType = [NSString validateEmail:txtFld.text];
     if (!isEmailType)
     {
         [self showAlertWithTitle:@"提示"

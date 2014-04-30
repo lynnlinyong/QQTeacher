@@ -63,10 +63,9 @@
         NSArray *imgViewArray = scrollView.subviews;
         for (UIView *imgView in imgViewArray)
         {
-            if ([imgView isKindOfClass:[TTImageView class]])
+            if ([imgView isKindOfClass:[UIImageView class]])
             {
                 [imgView removeFromSuperview];
-                imgView = nil;
             }
         }
     }
@@ -78,15 +77,13 @@
         NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
         NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd, [certyImgPathArray objectAtIndex:i]];
         
-        TTImageView *imgView = [[TTImageView alloc]init];
-        imgView.delegate = self;
-        imgView.defaultImage = [UIImage imageNamed:@"s_boy"];
-        imgView.URL = url;
+        UIImageView *imgView = [[UIImageView alloc]init];
+        [imgView setImageWithURL:[NSURL URLWithString:url]
+                placeholderImage:[UIImage imageNamed:@"s_boy"]];
         imgView.frame = CGRectMake(320*i+160-320/2,
                                    scrollView.frame.size.height-320,
                                    320, 320);
         [scrollView addSubview:imgView];
-        [imgView release];
     }
     
     indexLab.text = [NSString stringWithFormat:@"%d/%d", certyImgPathArray.count,certyImgPathArray.count];
@@ -354,23 +351,37 @@
     NSArray *paramsArr = [NSArray arrayWithObjects:@"action",@"edittime",@"uptype",@"sessid",UPLOAD_FILE, nil];
     NSArray *valuesArr = [NSArray arrayWithObjects:@"uploadfile",
                           timeSp,@"image",ssid,[NSDictionary dictionaryWithObjectsAndKeys:headPath,@"file", nil],nil];
-    NSDictionary *pDic = [NSDictionary dictionaryWithObjects:valuesArr
-                                                     forKeys:paramsArr];
+
     NSString *webAdd = [[NSUserDefaults standardUserDefaults] objectForKey:WEBADDRESS];
     NSString *url    = [NSString stringWithFormat:@"%@%@", webAdd,TEACHER];
-    
-    ServerRequest *request = [ServerRequest sharedServerRequest];
-    request.delegate = self;
-    NSData *resVal = [request requestSyncWith:kServerPostRequest
-                                     paramDic:pDic
-                                       urlStr:url];
+    ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:url]];
+    [request setDelegate:self];
+    for (int i=0; i<paramsArr.count; i++)
+    {
+        if ([[paramsArr objectAtIndex:i] isEqual:UPLOAD_FILE])
+        {
+            NSDictionary *fileDic = [valuesArr objectAtIndex:i];
+            NSString *fileParam   = [[fileDic allKeys] objectAtIndex:0];
+            NSString *filePath    = [[fileDic allValues]objectAtIndex:0];
+            [request setFile:filePath forKey:fileParam];
+            continue;
+        }
+        
+        [request setPostValue:[valuesArr objectAtIndex:i]
+                       forKey:[paramsArr objectAtIndex:i]];
+    }
+    [request setDefaultResponseEncoding:NSUTF8StringEncoding];
+    [request addRequestHeader:@"Content-Type"
+                        value:@"text/xml; charset=utf-8"];
+    [request startSynchronous];
+    NSData *resVal = [request responseData];
     assert(resVal);
     NSString *curHeadUrl = @"";
-    if (resVal)
+    if (resVal )
     {
-        NSString *resStr = [[[NSString alloc]initWithData:resVal
-                                                 encoding:NSUTF8StringEncoding]autorelease];
-        NSDictionary *resDic  = [resStr JSONValue];
+        NSDictionary *resDic   = [NSJSONSerialization JSONObjectWithData:resVal
+                                                                 options:NSJSONReadingMutableLeaves
+                                                                   error:nil];
         CLog(@"resDic;%@", resDic);
         NSString *action = [resDic objectForKey:@"action"];
         if ([action isEqualToString:@"uploadfile"])
@@ -379,7 +390,6 @@
             if (errorid.intValue==0)
             {
                 curHeadUrl = [resDic objectForKey:@"filepath"];
-//                curHeadUrl = [NSString stringWithFormat:@"%@%@", webAdd, curHeadUrl];
             }
             else
             {

@@ -81,8 +81,7 @@
     [self.view addSubview:bgImgView];
 
     
-    shareImgView = [[TTImageView alloc]init];
-
+    shareImgView = [[UIImageView alloc]init];
     [self.view addSubview:shareImgView];
     
     shareContentFld = [[UITextView alloc]init];
@@ -148,7 +147,7 @@
     {
         NSDictionary *studentDic = [shareDic objectForKey:@"teacher"];
         shareContentFld.text     = [studentDic objectForKey:@"text"];
-        shareImgView.URL         = [studentDic objectForKey:@"image"];
+        [shareImgView setImageWithURL:[NSURL URLWithString:[studentDic objectForKey:@"image"]]];
         CLog(@"URL:%@", [studentDic objectForKey:@"image"]);
     }
 }

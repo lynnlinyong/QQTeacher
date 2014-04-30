@@ -101,11 +101,8 @@ CGFloat const kJSAvatarSize = 50.0f;
 - (void)dealloc
 {
     self.text = nil;
-    [voiceImageView release];
     
     [[NSNotificationCenter defaultCenter] removeObserver:self];
-    
-    [super dealloc];
 }
 
 #pragma mark - Setters
@@ -280,9 +277,6 @@ CGFloat const kJSAvatarSize = 50.0f;
         [voiceImageView setAnimationRepeatCount:0];
         voiceImageView.frame = imgFrame;
         [self addSubview:voiceImageView];
-        
-        [flagImgView release];
-        [secondLab release];
     }
 }
 

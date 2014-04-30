@@ -15,9 +15,9 @@
 
 @end
 
-@interface AssistentCell : UITableViewCell<TTImageViewDelegate>
+@interface AssistentCell : UITableViewCell
 {
-    TTImageView *headImgView;
+    UIImageView *headImgView;
     UILabel *timeLab;
     UILabel *infoLab;
     UILabel *nameLab;
@@ -25,4 +25,5 @@
 
 @property (nonatomic, assign) id<AssistentCellDelegate> delegate;
 @property (nonatomic, copy) NSDictionary *applyDic;
+@property (nonatomic, retain) UIImageView *headImgView;
 @end

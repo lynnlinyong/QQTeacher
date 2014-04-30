@@ -47,7 +47,7 @@ typedef enum _tagPopInfoType {
                                                 UITableViewDataSource,
                                                 CustomNavigationDataSource,
                                                 TeacherPropertyViewDelegate,
-                                                ServerRequestDelegate,
+                                                ASIHTTPRequestDelegate,
                                                 AMapSearchDelegate,
                                                 MAMapViewDelegate>
 {

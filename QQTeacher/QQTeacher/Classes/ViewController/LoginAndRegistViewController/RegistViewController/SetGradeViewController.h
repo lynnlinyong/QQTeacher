@@ -11,7 +11,7 @@
 @class QRadioButton;
 @interface SetGradeViewController : UIViewController<
                                                     MBProgressHUDDelegate,
-                                                    ServerRequestDelegate,
+                                                    ASIHTTPRequestDelegate,
                                                     UIGridViewDelegate,
                                                     QRadioButtonDelegate>
 {

@@ -11,7 +11,7 @@
 @interface MyTeacherViewController : UITableViewController<
                                                     MBProgressHUDDelegate,
                                                     UIGestureRecognizerDelegate,
-                                                    ServerRequestDelegate,
+                                                    ASIHTTPRequestDelegate,
                                                     MyTeacherCellDelegate,
                                                     EGORefreshTableHeaderDelegate,
                                                     MFMessageComposeViewControllerDelegate>

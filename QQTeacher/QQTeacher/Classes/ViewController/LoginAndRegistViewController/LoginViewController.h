@@ -12,7 +12,7 @@
                                                 MBProgressHUDDelegate,
                                                 UIAlertViewDelegate,
                                                 UITextFieldDelegate,
-                                                ServerRequestDelegate>
+                                                ASIHTTPRequestDelegate>
 {
     UITextField *userNameFld;
     UITextField *phoneFld;
