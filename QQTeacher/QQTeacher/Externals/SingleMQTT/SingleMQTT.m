@@ -99,19 +99,26 @@ static SingleMQTT *sessionInstance = nil;
         return;
     }
     
-    NSString *pushAddress = [[NSUserDefaults standardUserDefaults] objectForKey:PUSHADDRESS];
-    NSString *port = [[NSUserDefaults standardUserDefaults] objectForKey:PORT];
-    if (pushAddress && port)
-    {
-        CLog(@"push:%@", pushAddress);
-        CLog(@"push:%@", port);
-        SingleMQTT *session = [SingleMQTT shareInstance];
-        [session.session connectToHost:pushAddress
-                                  port:port.intValue];
-        [session.session subscribeTopic:[SingleMQTT getCurrentDevTopic]];
-        [session.session subscribeTopic:@"adtopic"];
-        [session.session subscribeTopic:@"ggtopic"];
-        CLog(@"Topic:%@", [SingleMQTT getCurrentDevTopic]);
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        
+        NSString *pushAddress = [[NSUserDefaults standardUserDefaults] objectForKey:PUSHADDRESS];
+        NSString *port = [[NSUserDefaults standardUserDefaults] objectForKey:PORT];
+        if (pushAddress && port)
+        {
+            CLog(@"push:%@", pushAddress);
+            CLog(@"push:%@", port);
+            SingleMQTT *session = [SingleMQTT shareInstance];
+            [session.session connectToHost:pushAddress
+                                      port:port.intValue];
+            [session.session subscribeTopic:[SingleMQTT getCurrentDevTopic]];
+            [session.session subscribeTopic:@"adtopic"];
+            [session.session subscribeTopic:@"ggtopic"];
+            CLog(@"Topic:%@", [SingleMQTT getCurrentDevTopic]);
+        }
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+        });
+    });
+
     }
-}
 @end

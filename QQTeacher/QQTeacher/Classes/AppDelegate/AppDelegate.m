@@ -152,8 +152,15 @@ void cauchchException(NSException *exception)
     // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
 
-    //离线更新
-    [self updateLoginStatus:0];
+
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        
+        //离线更新
+        [self updateLoginStatus:0];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+        });
+    });
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 
@@ -467,7 +474,6 @@ void cauchchException(NSException *exception)
 
 + (BOOL) isConnectionAvailable:(BOOL) animated withGesture:(BOOL) isCan
 {
-    
     BOOL isExistenceNetwork = YES;
     Reachability *reach = [Reachability reachabilityWithHostName:@"www.baidu.com"];
     switch ([reach currentReachabilityStatus]) {

@@ -1233,6 +1233,7 @@ static NSMutableArray  *timerArray= nil;
 //    NSString *pushAdd = [[NSUserDefaults standardUserDefaults] objectForKey:PUSHADDRESS];
 //    if (!webAdd||!pushAdd)
 //    {
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
         NSArray *paramsArr = [NSArray arrayWithObjects:@"action", nil];
         NSArray *valuesArr = [NSArray arrayWithObjects:@"lb", nil];
         ASIFormDataRequest *request = [ASIFormDataRequest requestWithURL:[NSURL URLWithString:ServerAddress]];
@@ -1283,15 +1284,19 @@ static NSMutableArray  *timerArray= nil;
         }
         else
         {
-            AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
-            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
-            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
-            hud.delegate  = appDelegate;
-            hud.labelText = @"链接服务器失败";
-            hud.square = YES;
-            [hud show:YES];
-            [hud hide:YES afterDelay:3];
+//            AppDelegate *appDelegate = (AppDelegate *)[[UIApplication sharedApplication] delegate];
+//            CustomNavigationViewController *nav = [MainViewController getNavigationViewController];
+//            MBProgressHUD *hud = [MBProgressHUD showHUDAddedTo:nav.view animated:YES];
+//            hud.delegate  = appDelegate;
+//            hud.labelText = @"链接服务器失败";
+//            hud.square = YES;
+//            [hud show:YES];
+//            [hud hide:YES afterDelay:3];
         }
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+        });
+    });
 }
 
 + (NSString *) getPushAddress:(NSString *) str
